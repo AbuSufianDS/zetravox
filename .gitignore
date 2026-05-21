@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+.env
+.flaskenv
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (keep folders, not files)
+app/static/uploads/
+!app/static/uploads/.gitkeep
+app/static/uploads/profiles/
+!app/static/uploads/profiles/.gitkeep
+app/static/uploads/stories/
+!app/static/uploads/stories/.gitkeep
+
+# Migrations (keep only __init__.py)
+migrations/versions/*.py
+!migrations/versions/__init__.py
+migrations/alembic.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.code-workspace
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Secret keys
+*.pem
+*.key
+config_local.py
+
+# Spam model (can be regenerated)
+spam_service/models/
+!spam_service/models/.gitkeep
+
+# AI Keys (sensitive)
+GEMINI_API_KEY
+OPENROUTER_API_KEY
+
+# Database backups
+*.backup
+*.bak

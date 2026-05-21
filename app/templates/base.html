@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if title %}
+    <title>{{ title }} - Microblog</title>
+    {% else %}
+    <title>{{ _('Microblog - Connect with the world') }}</title>
+    {% endif %}
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">
+          <i class="fas fa-comment-dots me-2"></i>Microblog
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('main.index') }}">
+                <i class="fas fa-home me-1"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('main.explore') }}">
+                <i class="fas fa-compass me-1"></i> Explore
+              </a>
+            </li>
+            {% if current_user.is_authenticated and current_user.is_admin %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('main.moderation') }}">
+                <i class="fas fa-shield-alt me-1"></i> Moderate
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+
+          {% if g.search_form %}
+          <form class="d-flex me-3" method="get" action="{{ url_for('main.search') }}">
+            <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ g.search_form.q.data or '' }}">
+              <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+          {% endif %}
+
+          <ul class="navbar-nav">
+            {% if current_user.is_anonymous %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.login') }}">
+                <i class="fas fa-sign-in-alt me-1"></i> Login
+              </a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link position-relative" href="{{ url_for('main.messages') }}">
+                <i class="fas fa-envelope"></i>
+                {% set unread_count = current_user.unread_message_count() %}
+                {% if unread_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {{ unread_count }}
+                </span>
+                {% endif %}
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link position-relative" href="{{ url_for('main.notifications_page') }}">
+                <i class="fas fa-bell"></i>
+                <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px; display: none;">
+                  0
+                </span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('main.conversations') }}">
+                <i class="fas fa-comments"></i>
+              </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                <img src="{{ current_user.avatar(32) }}" class="rounded-circle me-1" style="width: 32px; height: 32px;">
+                <span>{{ current_user.username[:15] }}</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}">
+                  <i class="fas fa-user me-2"></i>Profile
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.saved_posts') }}">
+                  <i class="fas fa-bookmark me-2"></i>Saved
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">
+                  <i class="fas fa-edit me-2"></i>Edit Profile
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                  <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </a></li>
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'info-circle' if category == 'info' else 'exclamation-triangle' }} me-2"></i>
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- Scripts -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous">
+    </script>
+    {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
+
+    <script>
+      // Auto-hide alerts after 5 seconds
+      setTimeout(function() {
+        let alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+          let bsAlert = new bootstrap.Alert(alert);
+          bsAlert.close();
+        });
+      }, 5000);
+
+      // Function to handle reactions
+      function reactPost(postId, reaction) {
+        fetch(`/react_post/${postId}/${reaction}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.reaction_set) {
+              location.reload();
+            }
+          });
+      }
+
+      // Function to save post
+      function savePost(postId) {
+        fetch(`/save_post/${postId}`)
+          .then(response => response.json())
+          .then(data => {
+            let btn = document.getElementById(`saveBtn${postId}`);
+            if (btn) {
+              if (data.saved) {
+                btn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                btn.classList.add('active');
+              } else {
+                btn.innerHTML = '<i class="far fa-bookmark"></i> Save';
+                btn.classList.remove('active');
+              }
+            }
+          });
+      }
+
+      // Function to share post
+      function sharePost(postId) {
+        fetch(`/share_post/${postId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          }
+        });
+      }
+
+      // ========== NOTIFICATION SYSTEM ==========
+      let lastNotificationTime = 0;
+      let notificationCheckInterval = null;
+
+      function getNotificationIcon(type) {
+        const icons = {
+          'like': '<i class="fas fa-heart text-danger"></i>',
+          'comment': '<i class="fas fa-comment text-primary"></i>',
+          'follow': '<i class="fas fa-user-plus text-success"></i>',
+          'share': '<i class="fas fa-share text-info"></i>'
+        };
+        return icons[type] || '<i class="fas fa-bell text-secondary"></i>';
+      }
+
+      function formatNotificationTime(timestamp) {
+        const date = new Date(timestamp * 1000);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+        return date.toLocaleDateString();
+      }
+
+      function showNotificationToast(notification) {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+          toastContainer = document.createElement('div');
+          toastContainer.id = 'toast-container';
+          toastContainer.style.position = 'fixed';
+          toastContainer.style.bottom = '20px';
+          toastContainer.style.right = '20px';
+          toastContainer.style.zIndex = '1050';
+          document.body.appendChild(toastContainer);
+        }
+
+        const toastHtml = `
+          <div class="toast show" role="alert" style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 10px; min-width: 280px;">
+            <div class="toast-header">
+              ${getNotificationIcon(notification.name)}
+              <strong class="me-auto ms-2">New ${notification.name}</strong>
+              <small>${formatNotificationTime(notification.timestamp)}</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+              ${notification.data?.message || 'You have a new notification'}
+            </div>
+          </div>
+        `;
+
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toastElement = toastContainer.lastElementChild;
+        setTimeout(() => toastElement.remove(), 5000);
+      }
+
+      function updateNotificationBadge(count) {
+        const badge = document.getElementById('notification-count');
+        if (badge) {
+          if (count > 0) {
+            badge.style.display = 'inline-block';
+            badge.innerText = count > 99 ? '99+' : count;
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      }
+
+      function checkNewNotifications() {
+        fetch(`/notifications?since=${lastNotificationTime}`)
+          .then(response => response.json())
+          .then(notifications => {
+            if (notifications && notifications.length > 0) {
+              lastNotificationTime = notifications[notifications.length - 1].timestamp;
+
+              const unreadCount = notifications.filter(n => !n.read).length;
+              updateNotificationBadge(unreadCount);
+
+              notifications.forEach(notification => {
+                showNotificationToast(notification);
+              });
+            }
+          })
+          .catch(error => console.error('Notification check failed:', error));
+      }
+
+      // Start checking for notifications every 10 seconds
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          if (notificationCheckInterval) clearInterval(notificationCheckInterval);
+          notificationCheckInterval = setInterval(checkNewNotifications, 10000);
+          checkNewNotifications();
+        });
+      } else {
+        if (notificationCheckInterval) clearInterval(notificationCheckInterval);
+        notificationCheckInterval = setInterval(checkNewNotifications, 10000);
+        checkNewNotifications();
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="card">
+        <div class="card-header">
+            <h5>💬 Messages</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for conv in conversations %}
+                <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="list-group-item list-group-item-action">
+                    <div class="d-flex">
+                        <img src="{{ conv.user.avatar(40) }}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
+                        <div class="flex-grow-1">
+                            <strong>{{ conv.user.username }}</strong>
+                            {% if conv.unread_count > 0 %}
+                                <span class="badge bg-danger rounded-pill">{{ conv.unread_count }}</span>
+                            {% endif %}
+                            <div class="text-muted small">
+                                {{ conv.last_message.message[:50] if conv.last_message else 'No messages' }}
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            {{ moment(conv.last_message.timestamp).fromNow() if conv.last_message else '' }}
+                        </small>
+                    </div>
+                </a>
+            {% else %}
+                <div class="text-center text-muted p-5">
+                    No conversations yet. Start chatting with someone!
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

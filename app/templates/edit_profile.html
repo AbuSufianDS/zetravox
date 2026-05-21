@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Edit Profile</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if current_user.profile_pic and current_user.profile_pic != 'default.jpg' and current_user.profile_pic != 'None' %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
+                                 class="rounded-circle mb-3"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                            <img src="{{ current_user.avatar(120) }}"
+                                 class="rounded-circle mb-3"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        {% endif %}
+                        {% if current_user.is_verified %}
+                            <span class="badge bg-primary">✓ Verified</span>
+                        {% endif %}
+                    </div>
+
+                    <form action="" method="post" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control") }}
+                            {% for error in form.username.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.about_me.label(class="form-label") }}
+                            {{ form.about_me(class="form-control", rows=4) }}
+                            {% for error in form.about_me.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.profile_pic.label(class="form-label") }}
+                            {{ form.profile_pic(class="form-control", accept="image/*") }}
+                            <small class="text-muted">JPG, PNG, GIF (Max 5MB)</small>
+                            {% for error in form.profile_pic.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.is_private.label(class="form-label") }}
+                            {{ form.is_private(class="form-select") }}
+                        </div>
+
+                        <div id="imagePreview" style="display:none;" class="mb-3">
+                            <img id="previewImg" class="img-fluid rounded" style="max-height: 200px;">
+                        </div>
+
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('main.user', username=current_user.username) }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('profile_pic').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            previewImg.src = event.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        preview.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

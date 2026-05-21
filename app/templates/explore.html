@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h1 class="mb-4">Explore</h1>
+            
+            {% for post in posts %}
+                {% include '_post.html' %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center text-muted">
+                        No posts to explore yet.
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <nav aria-label="Post navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ prev_url or '#' }}">← Newer</a>
+                    </li>
+                    <li class="page-item{% if not next_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ next_url or '#' }}">Older →</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

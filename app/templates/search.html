@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Search Results for "{{ query }}"
+                    </h4>
+                </div>
+            </div>
+
+            <!-- Users Results -->
+            {% if users %}
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-users me-2"></i>Users ({{ users|length }})
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for user in users %}
+                    <a href="{{ url_for('main.user', username=user.username) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ user.avatar(40) }}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
+                            <div>
+                                <strong>{{ user.username }}</strong>
+                                {% if user.is_verified %}
+                                <i class="fas fa-check-circle text-primary ms-1"></i>
+                                {% endif %}
+                                <br>
+                                <small class="text-muted">{{ user.about_me[:60] if user.about_me else 'No bio yet' }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Posts Results -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-newspaper me-2"></i>Posts ({{ posts|length }})
+                </div>
+                <div class="card-body p-0">
+                    {% for post in posts %}
+                        {% include '_post.html' %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No posts found matching "{{ query }}"</p>
+                            <small class="text-muted">Try different keywords or check your spelling</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if next_url or prev_url %}
+            <nav class="mt-3">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ prev_url or '#' }}">
+                            <i class="fas fa-arrow-left me-1"></i>Previous
+                        </a>
+                    </li>
+                    <li class="page-item{% if not next_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ next_url or '#' }}">
+                            Next<i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

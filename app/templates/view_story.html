@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ story.author.avatar(40) }}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                        <div>
+                            <strong>{{ story.author.username }}</strong>
+                            <br>
+                            <small class="text-muted">{{ moment(story.timestamp).fromNow() }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body text-center">
+                    {% if story.media_type == 'image' %}
+                        <img src="{{ url_for('static', filename='uploads/stories/' + story.media_url) }}" 
+                             class="img-fluid rounded" 
+                             style="max-height: 500px; width: auto;">
+                    {% elif story.media_type == 'video' %}
+                        <video controls class="w-100 rounded" style="max-height: 500px;">
+                            <source src="{{ url_for('static', filename='uploads/stories/' + story.media_url) }}" 
+                                    type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    {% endif %}
+                    
+                    {% if story.caption %}
+                        <p class="mt-3">{{ story.caption }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Feed</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

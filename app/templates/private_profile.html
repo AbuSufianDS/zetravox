@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <img src="{{ user.avatar(100) }}" class="rounded-circle mb-3" style="width: 100px; height: 100px;">
+                    <h4>{{ user.username }}</h4>
+                    <p class="text-muted">This account is private.</p>
+                    <p>Follow to see their posts.</p>
+                    
+                    {% if not current_user.is_following(user) and user != current_user %}
+                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
+                            {{ form.hidden_tag() }}
+                            <button type="submit" class="btn btn-primary">Follow</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

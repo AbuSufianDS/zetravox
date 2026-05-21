@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <h1>📊 Analytics Dashboard</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Users</h5>
+                    <h2>{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Active Today</h5>
+                    <h2>{{ active_today }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>New Users (Week)</h5>
+                    <h2>{{ new_users_week }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5>Total Posts</h5>
+                    <h2>{{ total_posts }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Posts Today</div>
+                <div class="card-body text-center">
+                    <h3>{{ posts_today }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Spam Posts</div>
+                <div class="card-body text-center">
+                    <h3>{{ spam_posts }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Total Likes</div>
+                <div class="card-body text-center">
+                    <h3>{{ total_likes }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">🏆 Top Users</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for user in top_users %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                {{ user[0] }}
+                                <span class="badge bg-primary">{{ user[1] }} posts</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">📈 Daily Activity</div>
+                <div class="card-body">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('activityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [{% for day in daily_activity %}'{{ day.date }}',{% endfor %}],
+        datasets: [{
+            label: 'Posts',
+            data: [{% for day in daily_activity %}{{ day.posts }},{% endfor %}],
+            borderColor: 'rgb(59, 130, 246)',
+            tension: 0.1
+        }]
+    }
+});
+</script>
+{% endblock %}

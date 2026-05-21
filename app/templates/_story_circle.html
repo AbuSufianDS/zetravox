@@ -1,0 +1,20 @@
+{% if stories_by_user is defined and stories_by_user %}
+<div class="d-flex overflow-auto">
+    {% for user_id, user_stories in stories_by_user.items() %}
+        {% set story_user = user_stories[0].author %}
+        <div class="text-center me-3">
+            <div class="story-ring" style="border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #f09433, #d62976, #962fbf);">
+                <img src="{{ story_user.avatar(60) }}"
+                     class="rounded-circle"
+                     style="width: 60px; height: 60px; object-fit: cover; border: 3px solid white; cursor: pointer;"
+                     onclick="window.location.href='{{ url_for('main.view_story', story_id=user_stories[0].id) }}'">
+            </div>
+            <small class="text-muted">{{ story_user.username[:10] }}</small>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center text-muted small py-2">
+    No stories to show
+</div>
+{% endif %}

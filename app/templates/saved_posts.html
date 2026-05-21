@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">💾 Saved Posts</h4>
+                </div>
+            </div>
+            
+            {% for post in posts %}
+                {% include '_post.html' %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center text-muted">
+                        You haven't saved any posts yet. Click the save button on posts to add them here.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

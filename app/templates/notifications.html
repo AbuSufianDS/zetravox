@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h4>
+                </div>
+                <div class="card-body p-0" id="notifications-container">
+                    <div class="text-center py-5" id="loading">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Loading notifications...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function formatNotificationMessage(notification) {
+    const type = notification.name;
+    const data = notification.data;
+
+    console.log("Notification:", notification); // Debug log
+
+    switch(type) {
+        case 'like':
+            return `<strong>${escapeHtml(data.username)}</strong> liked your post: "${escapeHtml(data.post_preview || '')}"`;
+        case 'comment':
+            return `<strong>${escapeHtml(data.username)}</strong> commented: "${escapeHtml(data.comment_preview || '')}"`;
+        case 'follow':
+            return `<strong>${escapeHtml(data.username)}</strong> started following you`;
+        case 'share':
+            return `<strong>${escapeHtml(data.username)}</strong> shared your post`;
+        case 'test':
+            return `<strong>System</strong> ${escapeHtml(data.message || 'Test notification')}`;
+        default:
+            return data.message || `New ${type} notification`;
+    }
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        'like': '<i class="fas fa-heart text-danger" style="font-size: 24px;"></i>',
+        'comment': '<i class="fas fa-comment text-primary" style="font-size: 24px;"></i>',
+        'follow': '<i class="fas fa-user-plus text-success" style="font-size: 24px;"></i>',
+        'share': '<i class="fas fa-share text-info" style="font-size: 24px;"></i>',
+        'test': '<i class="fas fa-bell text-warning" style="font-size: 24px;"></i>'
+    };
+    return icons[type] || '<i class="fas fa-bell text-secondary" style="font-size: 24px;"></i>';
+}
+
+function getTimeAgo(timestamp) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+    return new Date(timestamp * 1000).toLocaleDateString();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function loadNotifications() {
+    fetch('/notifications?since=0')
+        .then(response => response.json())
+        .then(notifications => {
+            const container = document.getElementById('notifications-container');
+            const loading = document.getElementById('loading');
+
+            if (loading) loading.remove();
+
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No notifications yet</p>
+                        <small class="text-muted">When someone likes, comments, or follows you, it will appear here</small>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group notifications by date
+            const today = [];
+            const yesterday = [];
+            const older = [];
+            const now = Math.floor(Date.now() / 1000);
+            const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+            const yesterdayStart = todayStart - 86400;
+
+            notifications.forEach(notification => {
+                if (notification.timestamp >= todayStart) {
+                    today.push(notification);
+                } else if (notification.timestamp >= yesterdayStart) {
+                    yesterday.push(notification);
+                } else {
+                    older.push(notification);
+                }
+            });
+
+            let html = '';
+
+            if (today.length > 0) {
+                html += `<div class="notification-group"><div class="bg-light px-3 py-2 border-bottom"><small class="text-muted fw-bold">TODAY</small></div>`;
+                today.forEach(n => {
+                    html += `
+                        <div class="notification-item p-3 border-bottom" data-notification-id="${n.id || ''}">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3" style="min-width: 45px;">
+                                    ${getNotificationIcon(n.name)}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">${formatNotificationMessage(n)}</p>
+                                    <small class="text-muted">${getTimeAgo(n.timestamp)}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            if (yesterday.length > 0) {
+                html += `<div class="notification-group"><div class="bg-light px-3 py-2 border-bottom"><small class="text-muted fw-bold">YESTERDAY</small></div>`;
+                yesterday.forEach(n => {
+                    html += `
+                        <div class="notification-item p-3 border-bottom" data-notification-id="${n.id || ''}">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3" style="min-width: 45px;">
+                                    ${getNotificationIcon(n.name)}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">${formatNotificationMessage(n)}</p>
+                                    <small class="text-muted">${getTimeAgo(n.timestamp)}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            if (older.length > 0) {
+                html += `<div class="notification-group"><div class="bg-light px-3 py-2 border-bottom"><small class="text-muted fw-bold">OLDER</small></div>`;
+                older.forEach(n => {
+                    html += `
+                        <div class="notification-item p-3 border-bottom" data-notification-id="${n.id || ''}">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3" style="min-width: 45px;">
+                                    ${getNotificationIcon(n.name)}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1">${formatNotificationMessage(n)}</p>
+                                    <small class="text-muted">${getTimeAgo(n.timestamp)}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const container = document.getElementById('notifications-container');
+            const loading = document.getElementById('loading');
+            if (loading) loading.remove();
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <p class="text-danger">Failed to load notifications</p>
+                    <button class="btn btn-primary btn-sm mt-2" onclick="loadNotifications()">Try Again</button>
+                </div>
+            `;
+        });
+}
+
+// Auto-refresh every 30 seconds
+loadNotifications();
+setInterval(loadNotifications, 30000);
+</script>
+
+<style>
+.notification-item {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+.notification-group {
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}
