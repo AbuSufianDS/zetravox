@@ -4,7 +4,6 @@ import json
 from datetime import datetime, timezone
 
 def create_notification(user_id, notification_type, data):
-    """Create a notification for a user"""
     try:
         notification = Notification(
             name=notification_type,
@@ -14,15 +13,14 @@ def create_notification(user_id, notification_type, data):
         )
         db.session.add(notification)
         db.session.commit()
-        print(f"✅ NOTIFICATION CREATED: {notification_type} for user {user_id}")
+        print(f" NOTIFICATION CREATED: {notification_type} for user {user_id}")
         print(f"   Data: {data}")
         return notification
     except Exception as e:
-        print(f"❌ Error creating notification: {e}")
+        print(f" Error creating notification: {e}")
         return None
 
 def send_like_notification(post_author_id, liker_username, post_id, post_preview):
-    """Send notification when someone likes a post"""
     if post_author_id != liker_username:
         print(f"📨 Creating like notification from {liker_username} to user {post_author_id}")
         create_notification(post_author_id, 'like', {
@@ -34,7 +32,6 @@ def send_like_notification(post_author_id, liker_username, post_id, post_preview
         })
 
 def send_comment_notification(post_author_id, commenter_username, post_id, comment_preview):
-    """Send notification when someone comments on a post"""
     if post_author_id != commenter_username:
         print(f"📨 Creating comment notification from {commenter_username} to user {post_author_id}")
         create_notification(post_author_id, 'comment', {
@@ -46,7 +43,6 @@ def send_comment_notification(post_author_id, commenter_username, post_id, comme
         })
 
 def send_follow_notification(user_id, follower_username):
-    """Send notification when someone follows you"""
     print(f"📨 Creating follow notification to user {user_id} from {follower_username}")
     create_notification(user_id, 'follow', {
         'type': 'follow',
@@ -55,7 +51,6 @@ def send_follow_notification(user_id, follower_username):
     })
 
 def send_share_notification(post_author_id, sharer_username, post_id):
-    """Send notification when someone shares your post"""
     if post_author_id != sharer_username:
         print(f"📨 Creating share notification from {sharer_username} to user {post_author_id}")
         create_notification(post_author_id, 'share', {

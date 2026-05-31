@@ -10,14 +10,14 @@ class OpenRouterAI:
 
     def set_api_key(self, api_key):
         self.api_key = api_key
-        print(f"✅ API Key set: {api_key[:20]}...")
+        print(f" API Key set: {api_key[:20]}...")
         return self
 
     def chat(self, message, system_prompt=None):
-        print(f"🤖 Sending message: {message[:50]}...")
+        print(f" Sending message: {message[:50]}...")
 
         if not self.api_key:
-            print("❌ No API key set!")
+            print(" No API key set!")
             return "Error: API key not configured. Please add OPENROUTER_API_KEY to .env file."
 
         try:
@@ -70,5 +70,4 @@ class OpenRouterAI:
         return self.chat(prompt)
 
 
-# Create global instance
 ai = OpenRouterAI()

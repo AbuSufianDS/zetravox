@@ -1,4 +1,4 @@
-/* Modern Social Media Platform CSS */
+
 :root {
     --primary-color: #1877f2;
     --primary-dark: #0c63e4;
@@ -61,7 +61,6 @@ body {
     color: var(--primary-color) !important;
 }
 
-/* Card Styling */
 .card {
     border: none;
     border-radius: var(--border-radius);
@@ -147,7 +146,6 @@ body {
     background: #000;
 }
 
-/* Post Actions */
 .post-actions {
     padding: 0.5rem 1rem;
     border-top: 1px solid #e4e6eb;
@@ -179,7 +177,6 @@ body {
     color: var(--primary-color);
 }
 
-/* Form Styling */
 .form-control, .form-select {
     border-radius: 8px;
     border: 1px solid #e4e6eb;
@@ -209,7 +206,6 @@ body {
     transform: translateY(-1px);
 }
 
-/* Comments Section */
 .comments-section {
     background: var(--light);
     border-radius: var(--border-radius);
@@ -247,7 +243,6 @@ body {
     margin: 0;
 }
 
-/* Story Circle */
 .story-container {
     display: flex;
     gap: 1rem;
@@ -283,7 +278,6 @@ body {
     margin-top: 0.25rem;
 }
 
-/* Sidebar */
 .sidebar-card {
     background: var(--white);
     border-radius: var(--border-radius);
@@ -298,7 +292,6 @@ body {
     border-bottom: 2px solid var(--primary-color);
 }
 
-/* Trending Hashtags */
 .trending-item {
     display: flex;
     justify-content: space-between;
@@ -318,7 +311,6 @@ body {
     font-size: 0.75rem;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .story-ring {
         width: 60px;
@@ -336,7 +328,6 @@ body {
     }
 }
 
-/* Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -352,7 +343,6 @@ body {
     animation: fadeIn 0.5s ease;
 }
 
-/* Loading Spinner */
 .spinner {
     width: 40px;
     height: 40px;
@@ -368,7 +358,6 @@ body {
     }
 }
 
-/* Toast Notifications */
 .toast-custom {
     position: fixed;
     bottom: 20px;
@@ -388,7 +377,6 @@ body {
     }
 }
 
-/* Profile Page */
 .profile-header {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     border-radius: var(--border-radius);
@@ -427,7 +415,6 @@ body {
     opacity: 0.8;
 }
 
-/* Modal Styling */
 .modal-content {
     border-radius: var(--border-radius);
     border: none;
@@ -443,7 +430,6 @@ body {
     padding: 1rem;
 }
 
-/* Reaction Picker */
 .reaction-picker {
     display: flex;
     gap: 0.5rem;

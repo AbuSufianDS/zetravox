@@ -52,16 +52,13 @@ class AIChatbot:
             return f"AI Error: {str(e)}"
 
     def suggest_post(self, topic, tone='casual'):
-        """Generate a post suggestion"""
         prompt = f"Write a {tone} social media post about: {topic}. Keep it under 280 characters."
         return self.chat(prompt)
 
     def moderate_comment(self, comment):
-        """Check if a comment is appropriate"""
         prompt = f"Analyze this comment for spam, hate speech, or inappropriate content. Respond with only 'safe' or 'flag': {comment}"
         result = self.chat(prompt)
         return result.lower().strip() == 'safe'
 
 
-# Create global instance
 ai_chatbot = AIChatbot()

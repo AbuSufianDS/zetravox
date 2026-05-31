@@ -317,7 +317,6 @@ def like_post(post_id):
         post.author.points += 1
         liked = True
 
-        # Send notification - FIXED
         if post.author.id != current_user.id:
             print(f"Sending like notification - Author: {post.author.id}, Liker: {current_user.id}")
             send_like_notification(post.author.id, current_user.username, post.id, post.body)
@@ -345,7 +344,6 @@ def add_comment(post_id):
         db.session.add(comment)
         db.session.commit()
 
-        # Send notification - FIXED
         if post.author.id != current_user.id:
             print(f"Sending comment notification - Author: {post.author.id}, Commenter: {current_user.id}")
             send_comment_notification(post.author.id, current_user.username, post.id, body)
@@ -475,7 +473,6 @@ def report_post(post_id):
     return render_template('report_post.html', title='Report Post', form=form, post=post)
 
 
-# CHAT SYSTEM - Renamed to avoid conflict with 'messages'
 @bp.route('/chat/<username>')
 @login_required
 def chat(username):
@@ -693,7 +690,6 @@ def follow(username):
         current_user.follow(user)
         db.session.commit()
 
-        # Send notification - FIXED
         print(f"Sending follow notification - Author: {user.id}, Follower: {current_user.id}")
         send_follow_notification(user.id, current_user.username)
 
@@ -880,7 +876,6 @@ def analytics():
 def test_notification():
     from app.notification_helper import create_notification
 
-    # Create a test notification
     create_notification(current_user.id, 'test', {
         'type': 'test',
         'message': 'This is a test notification',
