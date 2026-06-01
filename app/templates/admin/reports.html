@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-flag me-2"></i>User Reports
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p>All reports submitted by users.</p>
+                </div>
+            </div>
+
+            {% if not reports.items %}
+                <div class="card mt-3">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h5>No Reports</h5>
+                        <p class="text-muted">No user reports to review.</p>
+                    </div>
+                </div>
+            {% else %}
+                {% for report in reports.items %}
+                <div class="card mt-3">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>Report #{{ report.id }}</strong>
+                                <span class="text-muted ms-2">
+                                    {{ moment(report.timestamp).fromNow() }}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="badge bg-warning text-dark">Pending Review</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Reported by:</strong>
+                                <div class="mt-1">
+                                    <img src="{{ report.reporter.avatar(30) }}" class="rounded-circle me-2">
+                                    {{ report.reporter.username }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Reason:</strong>
+                                <p class="mt-1">{{ report.reason }}</p>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <strong>Reported Post:</strong>
+                        <div class="card mt-2 bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ report.post.author.username }}</strong>
+                                    <small class="text-muted">{{ moment(report.post.timestamp).fromNow() }}</small>
+                                </div>
+                                <p class="mt-2">{{ report.post.body }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('main.approve_post', post_id=report.post_id) }}" 
+                           class="btn btn-success btn-sm">
+                            <i class="fas fa-check me-1"></i> Keep Post
+                        </a>
+                        <a href="{{ url_for('main.reject_post', post_id=report.post_id) }}" 
+                           class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i> Delete Post
+                        </a>
+                        <form action="{{ url_for('main.dismiss_report', report_id=report.id) }}" 
+                              method="post" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i> Dismiss Report
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% if reports.has_prev or reports.has_next %}
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if reports.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.view_reports', page=reports.prev_num) }}">← Previous</a>
+                        </li>
+                        {% endif %}
+                        {% if reports.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.view_reports', page=reports.next_num) }}">Next →</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

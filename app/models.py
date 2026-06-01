@@ -37,6 +37,7 @@ class SearchableMixin:
             'delete': list(session.deleted)
         }
 
+
     @classmethod
     def after_commit(cls, session):
         for obj in session._changes['add']:
@@ -133,7 +134,19 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         foreign_keys='BlockedUser.blocker_id', back_populates='blocker')
     blocked_by: so.WriteOnlyMapped['BlockedUser'] = so.relationship(
         foreign_keys='BlockedUser.blocked_id', back_populates='blocked')
+    # Add this field to User class
+    last_active: so.Mapped[Optional[datetime]] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
 
+    @property
+    def is_online(self):
+        if self.last_active:
+            now = datetime.now(timezone.utc)
+            if self.last_active.tzinfo is None:
+                last_active = self.last_active.replace(tzinfo=timezone.utc)
+            else:
+                last_active = self.last_active
+            return (now - last_active).total_seconds() < 300
+        return False
     def avatar(self, size):
         if self.profile_pic and self.profile_pic != 'default.jpg' and self.profile_pic != 'None':
             try:

@@ -2,56 +2,97 @@
 
 {% block content %}
 <div class="container mt-3">
-    <h1>Moderation Queue</h1>
-    <p>Posts flagged as potential spam awaiting review</p>
-    
-    {% if posts %}
-        {% for post in posts %}
-        <div class="card mb-3 border-warning">
-            <div class="card-header bg-warning bg-opacity-25">
-                <strong>{{ post.author.username }}</strong>
-                <span class="text-muted">
-                    posted {{ moment(post.timestamp).fromNow() }}
-                </span>
-                <span class="badge bg-danger float-end">
-                    Spam Confidence: {{ "%.0f"|format(post.spam_confidence * 100) }}%
-                </span>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-flag me-2"></i>Moderation Queue
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p>Posts flagged by users or detected as spam awaiting review.</p>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="card-text">{{ post.body }}</p>
-            </div>
-            <div class="card-footer">
-                <a href="{{ url_for('main.approve_post', post_id=post.id) }}" 
-                   class="btn btn-success btn-sm">
-                    ✓ Approve
-                </a>
-                <a href="{{ url_for('main.reject_post', post_id=post.id) }}" 
-                   class="btn btn-danger btn-sm"
-                   onclick="return confirm('Are you sure you want to delete this post?')">
-                    ✗ Reject & Delete
-                </a>
-            </div>
+
+            {% if not posts %}
+                <div class="card mt-3">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h5>All Clear!</h5>
+                        <p class="text-muted">No posts pending moderation.</p>
+                    </div>
+                </div>
+            {% else %}
+                {% for post in posts %}
+                <div class="card mt-3 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    {{ post.author.username }}
+                                </strong>
+                                <span class="text-muted ms-2">
+                                    posted {{ moment(post.timestamp).fromNow() }}
+                                </span>
+                            </div>
+                            <div>
+                                {% set report_count = report_counts.get(post.id, 0) %}
+                                {% if report_count > 0 %}
+                                <span class="badge bg-danger me-2">
+                                    <i class="fas fa-flag me-1"></i>{{ report_count }} report{% if report_count != 1 %}s{% endif %}
+                                </span>
+                                {% endif %}
+                                {% if post.is_spam %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-robot me-1"></i>AI Detected
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ post.body }}</p>
+                        {% if post.media_url %}
+                            {% if post.media_type == 'image' %}
+                                <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}"
+                                     class="img-fluid rounded mt-2" style="max-height: 200px;">
+                            {% elif post.media_type == 'video' %}
+                                <video controls class="mt-2" style="max-height: 200px;">
+                                    <source src="{{ url_for('static', filename='uploads/' + post.media_url) }}">
+                                </video>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if report_counts.get(post.id, 0) > 0 %}
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>
+                                This post has been reported by users
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('main.approve_post', post_id=post.id) }}"
+                           class="btn btn-success btn-sm">
+                            <i class="fas fa-check me-1"></i> Approve
+                        </a>
+                        <a href="{{ url_for('main.reject_post', post_id=post.id) }}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Delete this post?')">
+                            <i class="fas fa-trash me-1"></i> Reject & Delete
+                        </a>
+                        <a href="{{ url_for('main.user', username=post.author.username) }}"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-user me-1"></i> View User
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
-        {% endfor %}
-        
-        <nav aria-label="Post navigation">
-            <ul class="pagination">
-                <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                    <a class="page-link" href="{{ prev_url or '#' }}">
-                        ← Newer posts
-                    </a>
-                </li>
-                <li class="page-item{% if not next_url %} disabled{% endif %}">
-                    <a class="page-link" href="{{ next_url or '#' }}">
-                        Older posts →
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    {% else %}
-        <div class="alert alert-success">
-            <p>No posts pending moderation. Everything is clean!</p>
-        </div>
-    {% endif %}
+    </div>
 </div>
 {% endblock %}

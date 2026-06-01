@@ -19,7 +19,258 @@ from app.profile_helpers import save_profile_picture, delete_profile_picture
 from app.notification_helper import send_like_notification
 from app.notification_helper import send_comment_notification
 from app.notification_helper import send_like_notification, send_comment_notification, send_follow_notification, send_share_notification
+from app.services.recommendation_service import recommendation_engine
+from app.services.report_service import report_service
+from flask import send_file
 
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+@bp.route('/admin/reports/csv/users')
+@login_required
+@admin_required
+def download_users_report():
+    filepath, filename = report_service.generate_users_report()
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='text/csv'
+    )
+
+@bp.route('/admin/reports/csv/posts')
+@login_required
+@admin_required
+def download_posts_report():
+    filepath, filename = report_service.generate_posts_report()
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='text/csv'
+    )
+
+@bp.route('/admin/reports/csv/reports')
+@login_required
+@admin_required
+def download_reports_summary():
+    filepath, filename = report_service.generate_reports_summary()
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='text/csv'
+    )
+
+@bp.route('/admin/reports/csv/engagement')
+@login_required
+@admin_required
+def download_engagement_report():
+    filepath, filename = report_service.generate_engagement_report()
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='text/csv'
+    )
+
+@bp.route('/admin/reports')
+@login_required
+@admin_required
+def report_dashboard():
+    reports = report_service.get_all_reports()
+    return render_template('admin/report_dashboard.html', title='Reports', reports=reports)
+
+@bp.route('/admin/reports')
+@login_required
+@admin_required
+def view_reports():
+    page = request.args.get('page', 1, type=int)
+
+    reports = db.session.query(SpamReport).filter(
+        SpamReport.reviewed == False
+    ).order_by(SpamReport.timestamp.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+
+    return render_template('admin/reports.html',
+                           title='User Reports',
+                           reports=reports)
+@bp.route('/admin/dismiss_report/<int:report_id>', methods=['POST'])
+@login_required
+@admin_required
+def dismiss_report(report_id):
+    report = db.session.get(SpamReport, report_id)
+    if report:
+        report.reviewed = True
+        db.session.commit()
+        flash('Report dismissed.', 'success')
+    return redirect(url_for('main.view_reports'))
+@bp.route('/for-you')
+@login_required
+def for_you():
+    page = request.args.get('page', 1, type=int)
+    limit = current_app.config.get('POSTS_PER_PAGE', 25)
+
+    from app.services.recommendation_service import recommendation_engine
+
+    recommended_post_ids = recommendation_engine.get_personalized_feed(current_user.id, limit=100)
+
+    if not recommended_post_ids:
+        query = sa.select(Post).where(
+            Post.privacy == 'public',
+            Post.scheduled_for == None
+        ).order_by(Post.timestamp.desc())
+        pagination = db.paginate(query, page=page, per_page=limit, error_out=False)
+        posts = pagination.items
+        next_url = url_for('main.for_you', page=page + 1) if pagination.has_next else None
+        prev_url = url_for('main.for_you', page=page - 1) if pagination.has_prev else None
+        is_personalized = False
+    else:
+        order = {post_id: idx for idx, post_id in enumerate(recommended_post_ids)}
+        query = sa.select(Post).where(Post.id.in_(recommended_post_ids))
+        posts_list = db.session.scalars(query).all()
+        posts_list.sort(key=lambda p: order.get(p.id, 999))
+
+        start = (page - 1) * limit
+        end = start + limit
+        posts = posts_list[start:end]
+
+        next_url = url_for('main.for_you', page=page + 1) if len(posts) == limit else None
+        prev_url = url_for('main.for_you', page=page - 1) if page > 1 else None
+        is_personalized = True
+
+    return render_template('for_you.html',
+                           title='For You',
+                           posts=posts,
+                           is_personalized=is_personalized,
+                           next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/discover')
+@login_required
+def discover():
+    page = request.args.get('page', 1, type=int)
+    limit = current_app.config.get('POSTS_PER_PAGE', 25)
+
+    following = db.session.query(User.following).filter(User.id == current_user.id).first()
+    following_ids = [f.id for f in following[0]] if following and following[0] else []
+    following_ids.append(current_user.id)
+
+    query = sa.select(Post).where(
+        Post.user_id.notin_(following_ids),
+        Post.privacy == 'public',
+        Post.scheduled_for == None
+    ).order_by(Post.timestamp.desc())
+
+    pagination = db.paginate(query, page=page, per_page=limit, error_out=False)
+    posts = pagination.items
+
+    suggested = db.session.query(User).filter(
+        User.id.notin_(following_ids)
+    ).limit(10).all()
+
+    next_url = url_for('main.discover', page=page + 1) if pagination.has_next else None
+    prev_url = url_for('main.discover', page=page - 1) if pagination.has_prev else None
+
+    return render_template('discover.html',
+                           title='Discover',
+                           posts=posts,
+                           suggested_users=suggested,
+                           next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/trending')
+@login_required
+def trending_feed():
+    page = request.args.get('page', 1, type=int)
+    limit = current_app.config.get('POSTS_PER_PAGE', 25)
+
+    from datetime import datetime, timedelta
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+
+    query = sa.select(Post).where(
+        Post.timestamp > week_ago,
+        Post.privacy == 'public',
+        Post.scheduled_for == None
+    ).order_by(Post.timestamp.desc())
+
+    pagination = db.paginate(query, page=page, per_page=limit, error_out=False)
+    posts = pagination.items
+
+    next_url = url_for('main.trending_feed', page=page + 1) if pagination.has_next else None
+    prev_url = url_for('main.trending_feed', page=page - 1) if pagination.has_prev else None
+
+    return render_template('trending_feed.html',
+                           title='Trending',
+                           posts=posts,
+                           next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/following')
+@login_required
+def following_feed():
+    page = request.args.get('page', 1, type=int)
+    limit = current_app.config.get('POSTS_PER_PAGE', 25)
+
+    pagination = db.paginate(current_user.following_posts(), page=page,
+                             per_page=limit, error_out=False)
+    posts = pagination.items
+
+    next_url = url_for('main.following_feed', page=page + 1) if pagination.has_next else None
+    prev_url = url_for('main.following_feed', page=page - 1) if pagination.has_prev else None
+
+    return render_template('following_feed.html',
+                           title='Following',
+                           posts=posts,
+                           next_url=next_url,
+                           prev_url=prev_url)
+
+@bp.route('/api/recommendations/feed')
+@login_required
+def recommended_feed():
+    page = request.args.get('page', 1, type=int)
+    limit = current_app.config.get('POSTS_PER_PAGE', 25)
+    recommended_post_ids = recommendation_engine.get_personalized_feed(
+        current_user.id,
+        limit=100
+    )
+
+    if not recommended_post_ids:
+        posts = db.paginate(current_user.following_posts(), page=page, per_page=limit)
+    else:
+        order = {post_id: idx for idx, post_id in enumerate(recommended_post_ids)}
+        query = sa.select(Post).where(Post.id.in_(recommended_post_ids))
+        posts_list = db.session.scalars(query).all()
+        posts_list.sort(key=lambda p: order.get(p.id, 999))
+        start = (page - 1) * limit
+        end = start + limit
+        posts = posts_list[start:end]
+
+    return render_template('recommended_feed.html',
+                           title='For You',
+                           posts=posts,
+                           recommendation=True)
+
+
+@bp.route('/api/recommendations/users')
+@login_required
+def recommended_users():
+    recommended_user_ids = recommendation_engine.get_user_recommendations(current_user.id, limit=20)
+    users = db.session.get(User, recommended_user_ids) if recommended_user_ids else []
+
+    return render_template('suggested_users.html',
+                           title='Suggested Users',
+                           users=users)
 
 def admin_required(f):
     @wraps(f)
@@ -35,6 +286,7 @@ def admin_required(f):
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.now(timezone.utc)
+        current_user.last_active = datetime.now(timezone.utc)  # Add this line
         db.session.commit()
         g.search_form = SearchForm()
     g.locale = str(get_locale())
@@ -227,7 +479,7 @@ def share_post(post_id):
     original_post.share_count += 1
 
     share_post = Post(
-        body=f"🔁 Shared a post from @{original_post.author.username}",
+        body=f" Shared a post from @{original_post.author.username}",
         author=current_user,
         privacy='public'
     )
@@ -459,6 +711,15 @@ def report_post(post_id):
 
     form = ReportForm()
     if form.validate_on_submit():
+        existing_report = SpamReport.query.filter_by(
+            post_id=post_id,
+            reporter_id=current_user.id
+        ).first()
+
+        if existing_report:
+            flash('You have already reported this post.', 'warning')
+            return redirect(url_for('main.index'))
+
         report = SpamReport(
             post_id=post_id,
             reporter_id=current_user.id,
@@ -467,7 +728,12 @@ def report_post(post_id):
         )
         db.session.add(report)
         db.session.commit()
-        flash('Thank you for your report.', 'info')
+        from app.services.report_service import report_service
+        report_service.generate_reports_summary()
+        report_service.generate_users_report()
+        report_service.generate_posts_report()
+
+        flash('Thank you for your report. An admin will review it.', 'success')
         return redirect(url_for('main.index'))
 
     return render_template('report_post.html', title='Report Post', form=form, post=post)
@@ -513,7 +779,9 @@ def send_chat_message():
     chat_message = ChatMessage(
         sender_id=current_user.id,
         recipient_id=recipient_id,
-        message=message
+        message=message,
+        is_read=False,
+        timestamp=datetime.now(timezone.utc)
     )
     db.session.add(chat_message)
     db.session.commit()
@@ -545,7 +813,6 @@ def get_chat_messages(other_user_id):
         'timestamp': m.timestamp.timestamp(),
         'is_mine': m.sender_id == current_user.id
     } for m in messages])
-
 
 @bp.route('/conversations')
 @login_required
@@ -795,13 +1062,47 @@ def export_posts():
 @admin_required
 def moderation():
     page = request.args.get('page', 1, type=int)
-    query = sa.select(Post).where(Post.is_spam == True, Post.reviewed == False).order_by(Post.timestamp.desc())
-    posts = db.paginate(query, page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
-    next_url = url_for('main.moderation', page=posts.next_num) if posts.has_next else None
-    prev_url = url_for('main.moderation', page=posts.prev_num) if posts.has_prev else None
-    return render_template('admin/moderation.html', title='Moderation Queue', posts=posts.items, next_url=next_url,
-                           prev_url=prev_url)
 
+    reported_posts = db.session.query(Post).join(
+        SpamReport, SpamReport.post_id == Post.id
+    ).filter(
+        Post.reviewed == False,
+        SpamReport.reviewed == False
+    ).group_by(Post.id).order_by(
+        db.func.count(SpamReport.id).desc(),
+        Post.timestamp.desc()
+    ).paginate(page=page, per_page=20, error_out=False)
+
+    spam_posts = Post.query.filter(
+        Post.is_spam == True,
+        Post.reviewed == False
+    ).order_by(Post.timestamp.desc()).all()
+
+    all_post_ids = set()
+    all_posts = []
+
+    for post in reported_posts.items:
+        if post.id not in all_post_ids:
+            all_post_ids.add(post.id)
+            all_posts.append(post)
+
+    for post in spam_posts:
+        if post.id not in all_post_ids:
+            all_post_ids.add(post.id)
+            all_posts.append(post)
+
+    all_posts.sort(key=lambda x: x.timestamp, reverse=True)
+
+    report_counts = {}
+    for post in all_posts:
+        count = SpamReport.query.filter_by(post_id=post.id, reviewed=False).count()
+        report_counts[post.id] = count
+
+    return render_template('admin/moderation.html',
+                           title='Moderation Queue',
+                           posts=all_posts,
+                           report_counts=report_counts,
+                           pagination=reported_posts)
 
 @bp.route('/admin/approve/<int:post_id>')
 @login_required

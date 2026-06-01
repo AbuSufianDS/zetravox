@@ -1,43 +1,100 @@
 {% extends "base.html" %}
-
+{% for msg in messages %}
+    <div class="mb-3 d-flex {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+        <div class="message-bubble {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-white text-dark{% endif %}"
+             style="max-width: 70%; padding: 10px 15px; border-radius: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+            <div class="message-text">{{ msg.message }}</div>
+            <div class="message-time">
+                <small class="{% if msg.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %} message-timestamp"
+                       data-timestamp="{{ msg.timestamp.timestamp() }}" style="font-size: 10px;">
+                    {{ moment(msg.timestamp).fromNow() }}
+                </small>
+            </div>
+        </div>
+        <span class="message-id" data-message-id="{{ msg.id }}" style="display: none;"></span>
+    </div>
+{% endfor %}
 {% block content %}
 <div class="container mt-3">
-    <div class="card">
-        <div class="card-header">
-            <h5>💬 Chat with {{ other_user.username }}</h5>
-            <a href="{{ url_for('main.conversations') }}" class="btn btn-sm btn-secondary">← Back</a>
-        </div>
-        <div class="card-body" id="chatMessages" style="height: 400px; overflow-y: auto;">
-            {% for msg in messages %}
-                <div class="mb-2 {% if msg.sender_id == current_user.id %}text-end{% endif %}">
-                    <div class="d-inline-block p-2 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}">
-                        <strong>{{ msg.sender.username if msg.sender_id != current_user.id else 'You' }}:</strong>
-                        {{ msg.message }}
-                        <br>
-                        <small class="{% if msg.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}">
-                            {{ moment(msg.timestamp).fromNow() }}
-                        </small>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ other_user.avatar(40) }}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                        <div>
+                            <h5 class="mb-0">Chat with {{ other_user.username }}</h5>
+                            <small class="text-white-50">
+                                {% if other_user.is_online %}
+                                <i class="fas fa-circle text-success" style="font-size: 8px;"></i> Online
+                                {% else %}
+                                <i class="fas fa-circle text-secondary" style="font-size: 8px;"></i> Offline
+                                {% endif %}
+                            </small>
+                        </div>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-        <div class="card-footer">
-            <form id="messageForm">
-                <input type="hidden" id="recipient_id" value="{{ other_user.id }}">
-                <div class="input-group">
-                    <input type="text" id="messageInput" class="form-control" placeholder="Type a message..." required>
-                    <button type="submit" class="btn btn-primary">Send</button>
+
+                <div class="card-body" id="chat-messages" style="height: 400px; overflow-y: auto; background: #f8f9fa;">
+                    {% for msg in messages %}
+                        <div class="mb-3 d-flex {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+                            <div class="message-bubble {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-white text-dark{% endif %}"
+                                 style="max-width: 70%; padding: 10px 15px; border-radius: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                <div class="message-text">{{ msg.message }}</div>
+                                <div class="message-time">
+                                    <small class="{% if msg.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}" style="font-size: 10px;">
+                                        {{ moment(msg.timestamp).fromNow() }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-comments fa-3x mb-3"></i>
+                            <p>No messages yet. Start a conversation!</p>
+                        </div>
+                    {% endfor %}
                 </div>
-            </form>
+
+                <div class="card-footer bg-white">
+                    <form id="messageForm" class="d-flex">
+                        <input type="hidden" id="recipient_id" value="{{ other_user.id }}">
+                        <input type="text" id="messageInput" class="form-control me-2"
+                               placeholder="Type a message..." autocomplete="off">
+                        <button type="submit" id="sendBtn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-const chatMessages = document.getElementById('chatMessages');
+const chatMessages = document.getElementById('chat-messages');
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
 const recipientId = document.getElementById('recipient_id').value;
+const sendBtn = document.getElementById('sendBtn');
+
+let displayedMessageIds = new Set();
+
+let lastMessageTimestamp = 0;
+
+document.querySelectorAll('.message-id').forEach(el => {
+    displayedMessageIds.add(el.dataset.messageId);
+});
+
+const existingTimestamps = document.querySelectorAll('.message-timestamp');
+if (existingTimestamps.length > 0) {
+    let maxTimestamp = 0;
+    existingTimestamps.forEach(el => {
+        let ts = parseFloat(el.dataset.timestamp);
+        if (ts > maxTimestamp) maxTimestamp = ts;
+    });
+    lastMessageTimestamp = maxTimestamp;
+}
 
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -45,49 +102,156 @@ function scrollToBottom() {
 
 scrollToBottom();
 
-messageForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const message = messageInput.value.trim();
-    if (!message) return;
-    
-    const response = await fetch('/send_message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ recipient_id: recipientId, message: message })
-    });
-    
-    if (response.ok) {
-        messageInput.value = '';
-        fetchMessages();
+function addMessageToChat(message, isMine, timestamp, messageId) {
+    if (displayedMessageIds.has(messageId)) {
+        return;
     }
-});
 
-async function fetchMessages() {
-    const since = document.querySelectorAll('.chat-message-time').length > 0 
-        ? document.querySelector('.chat-message-time:last-child')?.dataset?.timestamp || 0 
-        : 0;
-    
-    const response = await fetch(`/get_messages/${recipientId}?since=${since}`);
-    const messages = await response.json();
-    
-    for (const msg of messages) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `mb-2 ${msg.is_mine ? 'text-end' : ''}`;
-        msgDiv.innerHTML = `
-            <div class="d-inline-block p-2 rounded ${msg.is_mine ? 'bg-primary text-white' : 'bg-light'}">
-                <strong>${msg.is_mine ? 'You' : '{{ other_user.username }}'}:</strong>
-                ${msg.message}
-                <br>
-                <small class="${msg.is_mine ? 'text-white-50' : 'text-muted'} chat-message-time" data-timestamp="${msg.timestamp}">
-                    ${new Date(msg.timestamp * 1000).toLocaleTimeString()}
+    displayedMessageIds.add(messageId);
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `mb-3 d-flex ${isMine ? 'justify-content-end' : 'justify-content-start'}`;
+    messageDiv.innerHTML = `
+        <div class="message-bubble ${isMine ? 'bg-primary text-white' : 'bg-white text-dark'}"
+             style="max-width: 70%; padding: 10px 15px; border-radius: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+            <div class="message-text">${escapeHtml(message)}</div>
+            <div class="message-time">
+                <small class="${isMine ? 'text-white-50' : 'text-muted'} message-timestamp" data-timestamp="${timestamp}" style="font-size: 10px;">
+                    ${getTimeAgo(timestamp)}
                 </small>
             </div>
-        `;
-        chatMessages.appendChild(msgDiv);
-    }
+        </div>
+        <span class="message-id" data-message-id="${messageId}" style="display: none;"></span>
+    `;
+    chatMessages.appendChild(messageDiv);
     scrollToBottom();
 }
 
-setInterval(fetchMessages, 3000);
+function getTimeAgo(timestamp) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
+function removePlaceholder() {
+    const placeholder = document.querySelector('.text-center.text-muted.py-5');
+    if (placeholder) {
+        placeholder.remove();
+    }
+}
+
+messageForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = messageInput.value.trim();
+
+    if (!message) return;
+
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    try {
+        const response = await fetch('/send_chat_message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                recipient_id: recipientId,
+                message: message
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            messageInput.value = '';
+
+            await fetchNewMessages(true);
+            removePlaceholder();
+        } else {
+            alert('Failed to send message: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to send message. Please check your connection.');
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+    }
+})
+
+async function fetchNewMessages(forceRefresh = false) {
+    try {
+        const url = `/get_chat_messages/${recipientId}?since=${lastMessageTimestamp}`;
+        const response = await fetch(url);
+        const newMessages = await response.json();
+
+        if (newMessages && newMessages.length > 0) {
+            removePlaceholder();
+
+            let newMaxTimestamp = lastMessageTimestamp;
+
+            for (const msg of newMessages) {
+                if (msg.timestamp > lastMessageTimestamp || forceRefresh) {
+                    addMessageToChat(msg.message, msg.is_mine, msg.timestamp, msg.id);
+                    if (msg.timestamp > newMaxTimestamp) {
+                        newMaxTimestamp = msg.timestamp;
+                    }
+                }
+            }
+
+            lastMessageTimestamp = newMaxTimestamp;
+        }
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+    }
+}
+
+let fetchInterval = setInterval(fetchNewMessages, 3000);
+
+messageInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        messageForm.dispatchEvent(new Event('submit'));
+    }
+});
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+window.addEventListener('beforeunload', function() {
+    if (fetchInterval) {
+        clearInterval(fetchInterval);
+    }
+});
+
+// Initial fetch
+fetchNewMessages();
 </script>
+
+<style>
+.message-bubble {
+    word-wrap: break-word;
+    transition: all 0.2s ease;
+}
+.message-bubble:hover {
+    transform: scale(1.02);
+}
+#chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+#chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+#chat-messages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+</style>
 {% endblock %}

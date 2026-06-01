@@ -29,7 +29,7 @@ class Config:
     MAX_IMAGE_SIZE = 5 * 1024 * 1024
     MAX_VIDEO_SIZE = 50 * 1024 * 1024
     AI_API_TYPE = os.environ.get('AI_API_TYPE', 'gemini')
-    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')  # FIXED - now reads from env
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
     DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
     OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
