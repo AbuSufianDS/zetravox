@@ -18,7 +18,6 @@ from app.profile_helpers import save_profile_picture, save_cover_picture, delete
 from app.notification_helper import send_like_notification, send_comment_notification, send_follow_notification, send_share_notification
 from app.services.recommendation_service import recommendation_engine
 from app.services.report_service import report_service
-from app.ai_helper import ai
 from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
                         PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment)
 
@@ -30,15 +29,6 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
-
-
-def get_ai():
-    if not ai.api_key:
-        api_key = current_app.config.get('OPENROUTER_API_KEY')
-        if api_key:
-            ai.set_api_key(api_key)
-    return ai
-
 
 @bp.before_app_request
 def before_request():
@@ -189,7 +179,6 @@ def index():
 
     upcoming_birthdays.sort(key=lambda x: x['days_until'])
 
-    # Get active contacts (online friends)
     active_contacts = current_user.get_active_friends_online()
 
     page = request.args.get('page', 1, type=int)
@@ -205,6 +194,7 @@ def index():
                            posts=posts.items, next_url=next_url, prev_url=prev_url,
                            upcoming_birthdays=upcoming_birthdays,
                            active_contacts=active_contacts)
+
 @bp.route('/add_story', methods=['POST'])
 @login_required
 def add_story():
@@ -417,46 +407,6 @@ def explore():
     prev_url = url_for('main.explore', page=posts.prev_num) if posts.has_prev else None
     return render_template('explore.html', title='Explore',
                            posts=posts.items, next_url=next_url, prev_url=prev_url)
-
-
-@bp.route('/ai-chat')
-@login_required
-def ai_chat_page():
-    return render_template('ai_chat.html', title='AI Assistant')
-
-
-@bp.route('/ai/chat', methods=['POST'])
-@login_required
-def ai_chat():
-    user_message = request.form.get('message', '')
-    if not user_message:
-        return jsonify({'error': 'No message provided'}), 400
-    response = get_ai().chat(user_message)
-    return jsonify({'response': response})
-
-
-@bp.route('/ai/generate-post', methods=['POST'])
-@login_required
-def ai_generate_post():
-    data = request.get_json()
-    topic = data.get('topic', '')
-    tone = data.get('tone', 'casual')
-    if not topic:
-        return jsonify({'error': 'No topic provided'}), 400
-    post = get_ai().generate_post(topic, tone)
-    return jsonify({'post': post})
-
-
-@bp.route('/ai/improve', methods=['POST'])
-@login_required
-def ai_improve_text():
-    data = request.get_json()
-    text = data.get('text', '')
-    instruction = data.get('instruction', 'improve this text')
-    if not text:
-        return jsonify({'error': 'No text provided'}), 400
-    improved = get_ai().improve_text(text, instruction)
-    return jsonify({'improved': improved})
 
 
 @bp.route('/user/<username>')

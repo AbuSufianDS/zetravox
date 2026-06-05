@@ -299,11 +299,9 @@
     <!-- Left Sidebar -->
     <div class="col-lg-3 d-none d-lg-block">
         <div class="left-sidebar">
-            <!-- Stories Section -->
             <div class="sidebar-card mb-3">
                 <div class="section-title">Stories</div>
                 <div class="story-circles">
-                    <!-- Add Story Button -->
                     <div class="story-circle" data-bs-toggle="modal" data-bs-target="#storyModal">
                         <div class="story-avatar">
                             <img src="{{ current_user.avatar(70) }}" class="rounded-circle">
@@ -313,7 +311,7 @@
                         </div>
                         <div class="story-name">Your Story</div>
                     </div>
-                    <!-- Stories from friends -->
+
                     {% for story in stories_data %}
                     <div class="story-circle" onclick="openStoryViewer({{ story.id }})">
                         <div class="story-avatar">
@@ -384,9 +382,7 @@
         </div>
     </div>
 
-    <!-- Center Feed -->
     <div class="col-lg-6">
-        <!-- Create Post Card -->
         <div class="create-post-card" data-bs-toggle="modal" data-bs-target="#createPostModal">
             <div class="d-flex gap-3">
                 <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
@@ -407,7 +403,6 @@
             </div>
         </div>
 
-        <!-- Posts Feed -->
         {% for post in posts %}
             {% include '_post.html' %}
         {% else %}
@@ -474,7 +469,6 @@
 
             <div class="sidebar-divider"></div>
 
-            <!-- Sponsored -->
             <div class="px-2 mb-3">
                 <div class="fw-semibold small text-muted mb-2">Sponsored</div>
                 <div class="bg-light rounded p-2 mb-2">
@@ -490,7 +484,6 @@
 
             <div class="sidebar-divider"></div>
 
-            <!-- Active Contacts -->
             <div class="d-flex justify-content-between align-items-center px-2 mb-2">
                 <span class="fw-semibold small text-muted">Active Contacts ({{ active_contacts|length }})</span>
                 <i class="fas fa-search small text-muted"></i>
@@ -518,7 +511,6 @@
     </div>
 </div>
 
-<!-- Create Post Modal -->
 <div class="modal fade create-post-modal" id="createPostModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
