@@ -29,7 +29,7 @@
     <div class="col-lg-6">
         <div class="card">
             <div class="card-body">
-                <form action="{{ url_for('main.index') }}" method="post" enctype="multipart/form-data" id="postForm">
+                <form action="{{ url_for('main.index') }}" method="post" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
                     <div class="d-flex gap-3 mb-3">
                         <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
@@ -90,7 +90,7 @@
 
     <div class="col-lg-3 d-none d-lg-block">
         <div class="sidebar-card">
-            <div class="sidebar-title">🔥 Trending</div>
+            <div class="sidebar-title">Trending</div>
             <div id="trending-hashtags">
                 <div class="text-center py-3">
                     <div class="spinner-border spinner-border-sm text-primary"></div>
@@ -102,7 +102,7 @@
         </div>
 
         <div class="sidebar-card">
-            <div class="sidebar-title">💬 Quick Links</div>
+            <div class="sidebar-title">Quick Links</div>
             <div class="list-group list-group-flush">
                 <a href="{{ url_for('main.saved_posts') }}" class="list-group-item list-group-item-action bg-transparent px-0">
                     <i class="fas fa-bookmark me-2 text-primary"></i>Saved Posts
@@ -214,15 +214,19 @@ function useGeneratedPost() {
     bootstrap.Modal.getInstance(document.getElementById('aiComposerModal')).hide();
 }
 
-fetch('/trending')
-    .then(response => response.text())
-    .then(html => {
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-        const hashtags = temp.querySelectorAll('.trending-item');
+fetch('/trending-hashtags')
+    .then(response => response.json())
+    .then(hashtags => {
         const container = document.getElementById('trending-hashtags');
-        if (hashtags.length > 0) {
-            container.innerHTML = Array.from(hashtags).slice(0, 5).map(h => h.outerHTML).join('');
+        if (hashtags && hashtags.length > 0) {
+            container.innerHTML = hashtags.slice(0, 5).map(h => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <a href="/hashtag/${h.name}" class="text-decoration-none">
+                        <i class="fas fa-hashtag text-info"></i> ${h.name}
+                    </a>
+                    <span class="badge bg-secondary">${h.post_count} posts</span>
+                </div>
+            `).join('');
         } else {
             container.innerHTML = '<p class="text-muted text-center">No trending hashtags</p>';
         }

@@ -55,23 +55,7 @@ def index():
     comment_form = CommentForm()
     story_form = StoryForm()
 
-    if story_form.validate_on_submit() and story_form.media.data:
-        media_filename, media_type = save_media(story_form.media.data, 'stories')
-        if media_filename:
-            story = Story(
-                user_id=current_user.id,
-                media_url=media_filename,
-                media_type=media_type,
-                caption=story_form.caption.data,
-                timestamp=datetime.now(timezone.utc),
-                expires_at=datetime.now(timezone.utc) + timedelta(hours=24)
-            )
-            db.session.add(story)
-            db.session.commit()
-            flash('Story added! It will disappear in 24 hours.', 'success')
-        return redirect(url_for('main.index'))
-
-    if form.validate_on_submit():
+    if request.method == 'POST' and 'submit_post' in request.form and form.validate_on_submit():
         media_filename = None
         media_type = None
         if form.media.data and form.media.data.filename:
@@ -152,7 +136,6 @@ def index():
     return render_template('index.html', title='Home', form=form, comment_form=comment_form,
                            story_form=story_form, stories_by_user=stories_by_user,
                            posts=posts.items, next_url=next_url, prev_url=prev_url)
-
 
 @bp.route('/add_story', methods=['POST'])
 @login_required
