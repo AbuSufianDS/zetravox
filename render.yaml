@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: microblog
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn microblog:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: microblog_db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: microblog_redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+databases:
+  - name: microblog_db
+    plan: free
+
+redis:
+  - name: microblog_redis
+    plan: free
