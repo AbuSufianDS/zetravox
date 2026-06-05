@@ -6,7 +6,7 @@
     {% if title %}
     <title>{{ title }} - Microblog</title>
     {% else %}
-    <title>{{ _('Microblog - Connect with the world') }}</title>
+    <title>Microblog - Connect with the world</title>
     {% endif %}
 
     <link
@@ -63,10 +63,10 @@
             </li>
 
             <li class="nav-item">
-  <a class="nav-link" href="{{ url_for('main.explore') }}">
-    <i class="fas fa-compass me-1"></i> Explore
-  </a>
-</li>
+              <a class="nav-link" href="{{ url_for('main.explore') }}">
+                <i class="fas fa-compass me-1"></i> Explore
+              </a>
+            </li>
 
           {% if current_user.is_authenticated and current_user.is_admin %}
 <li class="nav-item dropdown">
@@ -134,7 +134,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link position-relative" href="{{ url_for('main.notifications_page') }}">
+              <a class="nav-link position-relative" href="{{ url_for('main.notifications_page') }}" id="notification-bell">
                 <i class="fas fa-bell"></i>
                 <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px; display: none;">0</span>
               </a>
@@ -211,59 +211,9 @@
     {{ moment.lang(g.locale) }}
 
     <script>
-      // Auto-hide alerts after 5 seconds
-      setTimeout(function() {
-        let alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-          let bsAlert = bootstrap.Alert.getInstance(alert);
-          if (bsAlert) bsAlert.close();
-        });
-      }, 5000);
-
-      // Function to handle reactions
-      function reactPost(postId, reaction) {
-        fetch(`/react_post/${postId}/${reaction}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.reaction_set) {
-              location.reload();
-            }
-          });
-      }
-
-      function savePost(postId) {
-        fetch(`/save_post/${postId}`)
-          .then(response => response.json())
-          .then(data => {
-            let btn = document.getElementById(`saveBtn${postId}`);
-            if (btn) {
-              if (data.saved) {
-                btn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
-                btn.classList.add('active');
-              } else {
-                btn.innerHTML = '<i class="far fa-bookmark"></i> Save';
-                btn.classList.remove('active');
-              }
-            }
-          });
-      }
-
-      function sharePost(postId) {
-        fetch(`/share_post/${postId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-        .then(response => {
-          if (response.ok) {
-            location.reload();
-          }
-        });
-      }
-
       let lastNotificationTime = 0;
       let notificationCheckInterval = null;
+      let displayedNotificationIds = new Set();
 
       function getNotificationIcon(type) {
         const icons = {
@@ -335,30 +285,87 @@
           .then(response => response.json())
           .then(notifications => {
             if (notifications && notifications.length > 0) {
-              lastNotificationTime = notifications[notifications.length - 1].timestamp;
+              const newNotifs = notifications.filter(n => !displayedNotificationIds.has(n.id));
 
-              const unreadCount = notifications.filter(n => !n.read).length;
-              updateNotificationBadge(unreadCount);
-
-              notifications.forEach(notification => {
-                showNotificationToast(notification);
-              });
+              if (newNotifs.length > 0) {
+                newNotifs.forEach(n => displayedNotificationIds.add(n.id));
+                lastNotificationTime = notifications[notifications.length - 1].timestamp;
+                const unreadCount = newNotifs.filter(n => !n.read).length;
+                updateNotificationBadge(unreadCount);
+                newNotifs.forEach(notification => {
+                  showNotificationToast(notification);
+                });
+              }
             }
           })
           .catch(error => console.error('Notification check failed:', error));
       }
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-          if (notificationCheckInterval) clearInterval(notificationCheckInterval);
-          notificationCheckInterval = setInterval(checkNewNotifications, 10000);
-          checkNewNotifications();
+      function reactPost(postId, reaction) {
+        fetch(`/react_post/${postId}/${reaction}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.reaction_set) {
+              location.reload();
+            }
+          });
+      }
+
+      function savePost(postId) {
+        fetch(`/save_post/${postId}`)
+          .then(response => response.json())
+          .then(data => {
+            let btn = document.getElementById(`saveBtn${postId}`);
+            if (btn) {
+              if (data.saved) {
+                btn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                btn.classList.add('active');
+              } else {
+                btn.innerHTML = '<i class="far fa-bookmark"></i> Save';
+                btn.classList.remove('active');
+              }
+            }
+          });
+      }
+
+      function sharePost(postId) {
+        fetch(`/share_post/${postId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          }
         });
-      } else {
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const notificationBell = document.getElementById('notification-bell');
+        if (notificationBell) {
+          notificationBell.addEventListener('click', function() {
+            const badge = document.getElementById('notification-count');
+            if (badge) {
+              badge.style.display = 'none';
+              badge.innerText = '0';
+            }
+          });
+        }
+
         if (notificationCheckInterval) clearInterval(notificationCheckInterval);
         notificationCheckInterval = setInterval(checkNewNotifications, 10000);
         checkNewNotifications();
-      }
+      });
+
+      setTimeout(function() {
+        let alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+          let bsAlert = bootstrap.Alert.getInstance(alert);
+          if (bsAlert) bsAlert.close();
+        });
+      }, 5000);
     </script>
   </body>
 </html>
