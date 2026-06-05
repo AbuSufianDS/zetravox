@@ -37,4 +37,4 @@ click==8.4.1
 markupsafe==3.0.3
 itsdangerous==2.2.0
 blinker==1.9.0
-Flask-Migrate==4.0.5
+Flask-Migrate==4.1.0
