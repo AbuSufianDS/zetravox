@@ -134,7 +134,6 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         foreign_keys='BlockedUser.blocker_id', back_populates='blocker')
     blocked_by: so.WriteOnlyMapped['BlockedUser'] = so.relationship(
         foreign_keys='BlockedUser.blocked_id', back_populates='blocked')
-    # Add this field to User class
     last_active: so.Mapped[Optional[datetime]] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
 
     @property
@@ -475,6 +474,39 @@ class Post(SearchableMixin, db.Model):
                 sa.select(Like).where(Like.user_id == user.id, Like.post_id == self.id)
             ) is not None
         return False
+
+    def trending_score(self, refresh=False):
+
+        from datetime import datetime, timezone
+
+        if not refresh and self.trending_score_cache > 0:
+            return self.trending_score_cache
+
+        likes = self.like_count() or 0
+        comments = self.comment_count() or 0
+        reactions = sum(self.get_reaction_counts().values()) or 0
+        shares = self.share_count or 0
+
+        now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+        post_time = self.timestamp.replace(tzinfo=None) if self.timestamp else now_naive
+
+        age_hours = (now_naive - post_time).total_seconds() / 3600
+        if age_hours < 1:
+            age_hours = 1
+
+        score = (
+                        (likes * 1.5) +
+                        (comments * 2.5) +
+                        (reactions * 1.2) +
+                        (shares * 3.0)
+                ) / (age_hours ** 0.8)
+
+        rounded_score = round(score, 2)
+
+        self.trending_score_cache = rounded_score
+        db.session.commit()
+
+        return rounded_score
 
     def comment_count(self):
         return db.session.scalar(sa.select(sa.func.count()).select_from(

@@ -32,6 +32,40 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+@bp.route('/trending-feed')
+@login_required
+def trending_feed_smart():
+    page = request.args.get('page', 1, type=int)
+    limit = current_app.config.get('POSTS_PER_PAGE', 25)
+
+    from datetime import datetime, timedelta
+
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+
+    posts = db.session.query(Post).filter(
+        Post.timestamp > week_ago,
+        Post.privacy == 'public',
+        Post.scheduled_for == None
+    ).all()
+
+    for post in posts:
+        post.trending_score()
+
+    posts.sort(key=lambda p: p.trending_score_cache, reverse=True)
+
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_posts = posts[start:end]
+
+    next_url = url_for('main.trending_feed_smart', page=page + 1) if len(posts) > end else None
+    prev_url = url_for('main.trending_feed_smart', page=page - 1) if page > 1 else None
+
+    return render_template('trending_feed.html',
+                           title='Trending (Smart)',
+                           posts=paginated_posts,
+                           next_url=next_url,
+                           prev_url=prev_url)
 @bp.route('/admin/reports/csv/users')
 @login_required
 @admin_required
