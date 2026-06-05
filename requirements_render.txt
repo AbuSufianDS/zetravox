@@ -21,14 +21,6 @@ sqlalchemy==2.0.48
 greenlet==3.3.2
 alembic==1.18.4
 elasticsearch==9.4.0
-scikit-learn==1.8.0
-pandas==3.0.3
-numpy==2.4.6
-joblib==1.5.3
-nltk==3.9.4
-moviepy==2.2.1
-google-generativeai==0.8.6
-openai==2.37.0
 PyJWT==2.12.1
 WTForms==3.2.1
 Werkzeug==3.1.7
