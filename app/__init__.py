@@ -12,6 +12,12 @@ from elasticsearch import Elasticsearch
 from redis import Redis
 import rq
 from config import Config
+import os
+
+IS_RENDER = os.environ.get('RENDER', 'False').lower() == 'true'
+if IS_RENDER:
+    os.environ['ENABLE_AI'] = 'false'
+    os.environ['USE_SIMPLE_SPAM'] = 'true'
 
 
 
