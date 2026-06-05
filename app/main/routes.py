@@ -18,7 +18,6 @@ from app.notification_helper import send_like_notification, send_comment_notific
 from app.services.recommendation_service import recommendation_engine
 from app.services.report_service import report_service
 from app.ai_helper import ai
-from flask import current_app
 
 
 def admin_required(f):
@@ -125,7 +124,7 @@ def index():
         if should_warn:
             flash('Warning: Your post has been flagged for review.', 'warning')
         else:
-            flash('Your post is now live!', 'success')
+            flash('Your post is now live!')
         return redirect(url_for('main.index'))
 
     following_ids = [f.id for f in db.session.scalars(current_user.following.select())]
@@ -153,6 +152,37 @@ def index():
     return render_template('index.html', title='Home', form=form, comment_form=comment_form,
                            story_form=story_form, stories_by_user=stories_by_user,
                            posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+
+@bp.route('/add_story', methods=['POST'])
+@login_required
+def add_story():
+    media = request.files.get('media')
+    caption = request.form.get('caption', '')
+
+    if not media or not media.filename:
+        flash('Please select a file.', 'warning')
+        return redirect(url_for('main.index'))
+
+    media_filename, media_type = save_media(media, 'stories')
+
+    if not media_filename:
+        flash('Failed to upload media. Please check file format and size.', 'danger')
+        return redirect(url_for('main.index'))
+
+    story = Story(
+        user_id=current_user.id,
+        media_url=media_filename,
+        media_type=media_type,
+        caption=caption,
+        timestamp=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=24)
+    )
+    db.session.add(story)
+    db.session.commit()
+
+    flash('Story added! It will disappear in 24 hours.', 'success')
+    return redirect(url_for('main.index'))
 
 
 @bp.route('/for-you')
@@ -338,8 +368,6 @@ def explore():
                            posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 
-# ==================== AI ROUTES ====================
-
 @bp.route('/ai-chat')
 @login_required
 def ai_chat_page():
@@ -379,8 +407,6 @@ def ai_improve_text():
     improved = get_ai().improve_text(text, instruction)
     return jsonify({'improved': improved})
 
-
-# ==================== USER ROUTES ====================
 
 @bp.route('/user/<username>')
 @login_required
@@ -437,8 +463,6 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
 
-# ==================== FOLLOW ROUTES ====================
-
 @bp.route('/follow/<username>', methods=['POST'])
 @login_required
 def follow(username):
@@ -478,8 +502,6 @@ def unfollow(username):
     return redirect(url_for('main.index'))
 
 
-# ==================== POST INTERACTION ROUTES ====================
-
 @bp.route('/like/<int:post_id>')
 @login_required
 def like_post(post_id):
@@ -505,6 +527,17 @@ def like_post(post_id):
     db.session.commit()
     like_count = post.like_count()
     return jsonify({'liked': liked, 'count': like_count})
+
+
+@bp.route('/post/<int:post_id>')
+@login_required
+def view_post(post_id):
+    post = db.session.get(Post, post_id)
+    if post is None:
+        flash('Post not found.')
+        return redirect(url_for('main.index'))
+
+    return render_template('post_detail.html', title='Post', post=post)
 
 
 @bp.route('/add_comment/<int:post_id>', methods=['POST'])
@@ -680,8 +713,6 @@ def edit_post(post_id):
     return render_template('edit_post.html', title='Edit Post', form=form, post=post)
 
 
-# ==================== CHAT ROUTES ====================
-
 @bp.route('/chat/<username>')
 @login_required
 def chat(username):
@@ -801,8 +832,6 @@ def conversations():
     return render_template('conversations.html', title='Conversations', conversations=conversations)
 
 
-# ==================== MESSAGES ROUTES ====================
-
 @bp.route('/send_message/<recipient>', methods=['GET', 'POST'])
 @login_required
 def send_message(recipient):
@@ -832,8 +861,6 @@ def messages():
     return render_template('messages.html', messages=messages.items, next_url=next_url, prev_url=prev_url)
 
 
-# ==================== STORY ROUTES ====================
-
 @bp.route('/view_story/<int:story_id>')
 @login_required
 def view_story(story_id):
@@ -860,8 +887,6 @@ def view_story(story_id):
 
     return render_template('view_story.html', title='Story', story=story)
 
-
-# ==================== NOTIFICATION ROUTES ====================
 
 @bp.route('/notifications')
 @login_required
@@ -891,8 +916,6 @@ def test_notification():
     flash('Test notification created!', 'success')
     return redirect(url_for('main.notifications_page'))
 
-
-# ==================== REPORT ROUTES ====================
 
 @bp.route('/report_post/<int:post_id>', methods=['GET', 'POST'])
 @login_required
@@ -989,8 +1012,6 @@ def report_dashboard():
     reports = report_service.get_all_reports()
     return render_template('admin/report_dashboard.html', title='Reports', reports=reports)
 
-
-# ==================== ADMIN MODERATION ROUTES ====================
 
 @bp.route('/admin/moderation')
 @login_required
@@ -1108,8 +1129,6 @@ def analytics():
                            total_posts=total_posts, spam_posts=spam_posts)
 
 
-# ==================== SAVED POSTS ROUTES ====================
-
 @bp.route('/saved')
 @login_required
 def saved_posts():
@@ -1119,8 +1138,6 @@ def saved_posts():
     posts = [s.post for s in saved]
     return render_template('saved_posts.html', title='Saved Posts', posts=posts)
 
-
-# ==================== HASHTAG ROUTES ====================
 
 @bp.route('/hashtag/<tag>')
 def hashtag_posts(tag):
@@ -1146,8 +1163,6 @@ def trending_hashtags():
     ).all()
     return jsonify([{'name': h.name, 'post_count': h.post_count} for h in trending_hashtags])
 
-
-# ==================== BLOCK USER ROUTES ====================
 
 @bp.route('/block_user/<int:user_id>')
 @login_required
@@ -1193,16 +1208,12 @@ def unblock_user(user_id):
     return redirect(url_for('main.user', username=current_user.username))
 
 
-# ==================== TRANSLATE ====================
-
 @bp.route('/translate', methods=['POST'])
 @login_required
 def translate_text():
     data = request.get_json()
     return {'text': translate(data['text'], data['source_language'], data['dest_language'])}
 
-
-# ==================== EXPORT POSTS ====================
 
 @bp.route('/export_posts')
 @login_required
