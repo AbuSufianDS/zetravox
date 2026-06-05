@@ -1,34 +1,43 @@
 import joblib
 import os
 import re
-from pathlib import Path
+import numpy as np
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
 
 
 class SpamDetector:
     def __init__(self, model_path=None, vectorizer_path=None):
-        if model_path is None:
-            model_path = 'spam_service/models/spam_model.pkl'
-        if vectorizer_path is None:
-            vectorizer_path = 'spam_service/models/vectorizer.pkl'
-
-        self.model_path = model_path
-        self.vectorizer_path = vectorizer_path
         self.model = None
-        self.vectorizer = None
+        self.tokenizer = None
         self.enabled = False
-        if os.path.exists(model_path) and os.path.exists(vectorizer_path):
-            self._load_model()
-        else:
-            print("⚠️ Spam detection model not found. Will create during training.")
+        self.device = torch.device("cpu")
+        self._load_transformer_model()
 
-    def _load_model(self):
+    def _load_transformer_model(self):
         try:
-            self.model = joblib.load(self.model_path)
-            self.vectorizer = joblib.load(self.vectorizer_path)
+            model_name = "mrm8488/bert-tiny-finetuned-sms-spam-detection"
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+            self.model.to(self.device)
+            self.model.eval()
             self.enabled = True
-            print(" Spam detector loaded successfully")
+            print("Transformer spam detector loaded successfully")
         except Exception as e:
-            print(f" Failed to load spam detector: {e}")
+            print(f"Transformer model failed: {e}")
+            self._load_fallback()
+
+    def _load_fallback(self):
+        try:
+            model_path = 'spam_service/models/spam_model.pkl'
+            vectorizer_path = 'spam_service/models/vectorizer.pkl'
+            if os.path.exists(model_path) and os.path.exists(vectorizer_path):
+                self.model = joblib.load(model_path)
+                self.vectorizer = joblib.load(vectorizer_path)
+                self.enabled = True
+                print("Fallback spam detector loaded")
+        except Exception as e:
+            print(f"No spam detector available: {e}")
             self.enabled = False
 
     def predict(self, text):
@@ -36,40 +45,39 @@ class SpamDetector:
             return False, 0.0
 
         try:
-            cleaned = self._clean_text(text)
-            text_vectorized = self.vectorizer.transform([cleaned])
-            prediction = self.model.predict(text_vectorized)[0]
-            probabilities = self.model.predict_proba(text_vectorized)[0]
-
-            confidence = float(max(probabilities))
-            is_spam = bool(prediction)
-
-            return is_spam, confidence
-
+            if hasattr(self, 'tokenizer') and self.tokenizer:
+                return self._predict_transformer(text)
+            else:
+                return self._predict_fallback(text)
         except Exception as e:
             print(f"Prediction error: {e}")
             return False, 0.0
 
+    def _predict_transformer(self, text):
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+        probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+        spam_prob = probs[0][1].item()
+        is_spam = spam_prob > 0.5
+        return is_spam, spam_prob
+
+    def _predict_fallback(self, text):
+        cleaned = re.sub(r'[^a-zA-Z\s]', '', text.lower())
+        cleaned = ' '.join(cleaned.split())
+        vec = self.vectorizer.transform([cleaned])
+        proba = self.model.predict_proba(vec)[0]
+        spam_idx = 0 if self.model.classes_[0] == 'spam' else 1
+        confidence = proba[spam_idx]
+        is_spam = confidence > 0.5
+        return is_spam, confidence
+
     def keyword_filter(self, text, spam_keywords=None):
         if spam_keywords is None:
-            spam_keywords = [
-                'free money', 'click here', 'winner', 'congratulations',
-                'bitcoin', 'casino', 'viagra', 'earn money', 'lottery',
-                'make money', 'fast cash', 'work from home', 'investment',
-                'crypto', 'discount', 'offer', 'limited time', 'urgent',
-                'prize', 'lottery winner', 'get rich', 'no cost'
-            ]
-
+            spam_keywords = ['free money', 'click here', 'winner', 'bitcoin', 'casino']
         text_lower = text.lower()
         for keyword in spam_keywords:
             if keyword in text_lower:
                 return True, 0.9
         return False, 0.0
-
-    def _clean_text(self, text):
-        text = text.lower()
-        text = re.sub(r'[^a-zA-Z\s]', '', text)
-
-        text = ' '.join(text.split())
-
-        return text

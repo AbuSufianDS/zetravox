@@ -10,17 +10,12 @@ class SafeSpamChecker:
 
     def _initialize(self):
         try:
-            model_path = 'spam_service/models/spam_model.pkl'
-            vectorizer_path = 'spam_service/models/vectorizer.pkl'
-
-            if os.path.exists(model_path) and os.path.exists(vectorizer_path):
-                self.detector = SpamDetector(model_path, vectorizer_path)
-                self.enabled = True
-                print(" Spam detection is ACTIVE")
-            else:
-                print(" Spam detection INACTIVE (run python spam_service/train.py first)")
+            self.detector = SpamDetector()
+            self.enabled = self.detector.enabled
+            if self.enabled:
+                print("Spam detection is ACTIVE")
         except Exception as e:
-            print(f" Spam detection disabled: {e}")
+            print(f"Spam detection disabled: {e}")
             self.enabled = False
 
     def check_post(self, content):
@@ -30,13 +25,16 @@ class SafeSpamChecker:
         try:
             is_spam_ml, confidence = self.detector.predict(content)
             is_keyword_spam, keyword_confidence = self.detector.keyword_filter(content)
-            is_spam = is_spam_ml or is_keyword_spam
+
             final_confidence = max(confidence, keyword_confidence)
-            should_warn = is_spam and final_confidence > 0.9
+            is_spam = final_confidence > 0.5
+            should_warn = final_confidence > 0.85
 
             return is_spam, final_confidence, should_warn
 
         except Exception as e:
             print(f"Error checking spam: {e}")
             return False, 0.0, False
+
+
 spam_checker = SafeSpamChecker()

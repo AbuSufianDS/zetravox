@@ -3,91 +3,82 @@ import joblib
 import urllib.request
 import os
 import re
+import nltk
+from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.naive_bayes import MultinomialNB, ComplementNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import VotingClassifier, RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+nltk.download('stopwords', quiet=True)
+STOPWORDS = set(stopwords.words('english'))
 
 
 def download_dataset():
     url = "https://raw.githubusercontent.com/justmarkham/pydata-dc-2016-tutorial/master/sms.tsv"
     filename = "sms_dataset.csv"
-
     if not os.path.exists(filename):
-        print(" Downloading training dataset...")
+        print("Downloading dataset...")
         urllib.request.urlretrieve(url, filename)
-        print(" Download complete!")
     return filename
 
 
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'[^a-zA-Z\s]', '', text)
-    text = ' '.join(text.split())
-    return text
+    words = text.split()
+    words = [w for w in words if w not in STOPWORDS]
+    return ' '.join(words)
 
 
 def train_model():
-    dataset_file = download_dataset()
-    df = pd.read_csv(dataset_file, sep='\t', header=None, names=['label', 'message'])
+    print("=" * 50)
+    print("Training Improved Spam Detection Model")
+    print("=" * 50)
 
-    print(f"\n Dataset loaded:")
-    print(f"   Total messages: {len(df)}")
-    print(f"   Spam: {(df['label'] == 'spam').sum()} messages")
-    print(f"   Ham: {(df['label'] == 'ham').sum()} messages")
-    print("\n Cleaning messages...")
+    df = pd.read_csv(download_dataset(), sep='\t', header=None, names=['label', 'message'])
+    print(f"Total: {len(df)} (Spam: {(df['label'] == 'spam').sum()}, Ham: {(df['label'] == 'ham').sum()})")
+
     df['cleaned'] = df['message'].apply(clean_text)
+
     X_train, X_test, y_train, y_test = train_test_split(
-        df['cleaned'], df['label'], test_size=0.2, random_state=42
+        df['cleaned'], df['label'], test_size=0.2, random_state=42, stratify=df['label']
     )
-    print(" Creating text features...")
+
     vectorizer = TfidfVectorizer(
-        max_features=5000,
+        max_features=7000,
         ngram_range=(1, 2),
-        stop_words='english'
+        stop_words='english',
+        sublinear_tf=True
     )
 
-    X_train_vectorized = vectorizer.fit_transform(X_train)
-    X_test_vectorized = vectorizer.transform(X_test)
-    print(" Training classifier...")
-    classifier = MultinomialNB()
-    classifier.fit(X_train_vectorized, y_train)
-    y_pred = classifier.predict(X_test_vectorized)
-    accuracy = accuracy_score(y_test, y_pred)
+    X_train_vec = vectorizer.fit_transform(X_train)
+    X_test_vec = vectorizer.transform(X_test)
 
-    print(f"\n Model Performance:")
-    print(f"   Accuracy: {accuracy:.4f}")
-    print(f"\n{classification_report(y_test, y_pred)}")
+    clf1 = LogisticRegression(C=1.0, max_iter=1000)
+    clf2 = MultinomialNB(alpha=0.5)
+    clf3 = ComplementNB(alpha=0.5)
+
+    ensemble = VotingClassifier(
+        estimators=[('lr', clf1), ('nb', clf2), ('cnb', clf3)],
+        voting='soft'
+    )
+
+    ensemble.fit(X_train_vec, y_train)
+    y_pred = ensemble.predict(X_test_vec)
+
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"\nAccuracy: {accuracy:.4f}")
+    print(classification_report(y_test, y_pred))
+
     os.makedirs('spam_service/models', exist_ok=True)
-    joblib.dump(classifier, 'spam_service/models/spam_model.pkl')
+    joblib.dump(ensemble, 'spam_service/models/spam_model.pkl')
     joblib.dump(vectorizer, 'spam_service/models/vectorizer.pkl')
 
-    print("\n Model saved to:")
-    print("   - spam_service/models/spam_model.pkl")
-    print("   - spam_service/models/vectorizer.pkl")
-    print("\n Testing on sample messages:")
-    test_messages = [
-        "Free money!!! Click here to win $1000",
-        "Hello, how are you doing today?",
-        "CONGRATULATIONS! You've won a free iPhone",
-        "Meeting at 3pm tomorrow?",
-        "Buy cheap viagra online now",
-        "Thanks for the meeting yesterday"
-    ]
-
-    for msg in test_messages:
-        cleaned = clean_text(msg)
-        vectorized = vectorizer.transform([cleaned])
-        pred = classifier.predict(vectorized)[0]
-        prob = classifier.predict_proba(vectorized)[0]
-        confidence = max(prob)
-        status = " SPAM" if pred == "spam" else " HAM"
-        print(f"   {status}: '{msg[:40]}' (confidence: {confidence:.2f})")
-
-    print("\n Training complete!")
-    print(" Spam detection is ready. Restart your Flask app.")
-
-    return classifier, vectorizer
+    print("\nModel saved! Restart Flask to activate.")
+    return ensemble, vectorizer
 
 
 if __name__ == "__main__":
