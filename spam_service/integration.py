@@ -1,9 +1,6 @@
 from spam_service.detector import SpamDetector
 import os
 
-from .simple_detector import spam_checker
-
-__all__ = ['spam_checker']
 class SafeSpamChecker:
     def __init__(self):
         self.detector = None
