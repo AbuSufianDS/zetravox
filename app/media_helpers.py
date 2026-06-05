@@ -31,12 +31,15 @@ def save_media(file, subfolder=''):
         return None, None
 
     if not allowed_file(file.filename):
+        print(f"File not allowed: {file.filename}")
         return None, None
 
     size = get_file_size(file)
     if is_image(file.filename) and size > current_app.config['MAX_IMAGE_SIZE']:
+        print(f"Image too large: {size} bytes")
         return None, None
     if is_video(file.filename) and size > current_app.config['MAX_VIDEO_SIZE']:
+        print(f"Video too large: {size} bytes")
         return None, None
 
     media_type = 'image' if is_image(file.filename) else 'video' if is_video(file.filename) else None
@@ -53,6 +56,7 @@ def save_media(file, subfolder=''):
 
     filepath = os.path.join(upload_folder, filename)
     file.save(filepath)
+    print(f"File saved: {filepath}")
 
     if media_type == 'image':
         create_thumbnail(filepath, upload_folder, filename)
