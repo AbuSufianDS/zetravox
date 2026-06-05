@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-user-friends me-2 text-primary"></i>Friends</h4>
+                <a href="{{ url_for('main.friend_requests_page') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-user-plus"></i> Requests
+                </a>
+            </div>
+            <div class="card-body">
+                {% if friends %}
+                    <div class="row g-3">
+                        {% for friend in friends %}
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ friend.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <div>
+                                        <a href="{{ url_for('main.user', username=friend.username) }}" class="fw-semibold text-decoration-none">
+                                            {{ friend.username }}
+                                        </a>
+                                        <div class="small text-muted">
+                                            {% if friend.is_online %}
+                                            <span class="text-success"><i class="fas fa-circle fa-fw" style="font-size: 8px;"></i> Online</span>
+                                            {% else %}
+                                            <i class="far fa-clock"></i> {{ moment(friend.last_seen).fromNow() if friend.last_seen else 'Offline' }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('main.chat', username=friend.username) }}" class="btn btn-sm btn-outline-primary me-1" title="Message">
+                                        <i class="fas fa-comment"></i>
+                                    </a>
+                                    <form action="{{ url_for('main.remove_friend', user_id=friend.id) }}" method="post" class="d-inline">
+                                        {{ form.hidden_tag() if form else '' }}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Friend" onclick="return confirm('Remove this friend?')">
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if has_next or has_prev %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if has_prev %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('main.friends', page=page-1) }}">Previous</a></li>
+                            {% endif %}
+                            {% if has_next %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('main.friends', page=page+1) }}">Next</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-3">No friends yet.</p>
+                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Discover People
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

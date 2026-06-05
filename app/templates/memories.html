@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-3">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="fas fa-history me-2 text-warning"></i>Memories</h4>
+                <small class="text-muted">Your posts from this day in past years</small>
+            </div>
+        </div>
+        
+        {% if posts %}
+            {% for post in posts %}
+                {% include '_post.html' %}
+            {% endfor %}
+        {% else %}
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">No memories from this day yet</p>
+                    <small class="text-muted">Come back tomorrow for new memories!</small>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

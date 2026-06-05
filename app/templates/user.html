@@ -51,25 +51,78 @@
                         </div>
                         <div class="mt-2">
                             {% if user != current_user %}
+                                <!-- Follow Button -->
                                 {% if not current_user.is_following(user) %}
                                     <form action="{{ url_for('main.follow', username=user.username) }}" method="post" class="d-inline">
                                         {{ form.hidden_tag() }}
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-primary btn-sm">
                                             <i class="fas fa-user-plus me-1"></i>Follow
                                         </button>
                                     </form>
                                 {% else %}
                                     <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post" class="d-inline">
                                         {{ form.hidden_tag() }}
-                                        <button type="submit" class="btn btn-secondary">
+                                        <button type="submit" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-user-minus me-1"></i>Unfollow
                                         </button>
                                     </form>
                                 {% endif %}
-                                <a href="{{ url_for('main.chat', username=user.username) }}" class="btn btn-outline-primary">
+
+                                <!-- Friend Request Button -->
+                                {% set is_friend = current_user.is_friend_with(user) %}
+                                {% set pending_sent = current_user.has_friend_request_pending(user) %}
+                                {% set pending_received = user.has_friend_request_pending(current_user) %}
+
+                                {% if not is_friend %}
+                                    {% if not pending_sent and not pending_received %}
+                                        <form action="{{ url_for('main.send_friend_request', user_id=user.id) }}" method="post" class="d-inline">
+                                            {{ form.hidden_tag() }}
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-user-friends me-1"></i>Add Friend
+                                            </button>
+                                        </form>
+                                    {% elif pending_sent %}
+                                        <button class="btn btn-outline-secondary btn-sm" disabled>
+                                            <i class="fas fa-clock me-1"></i>Request Sent
+                                        </button>
+                                    {% elif pending_received %}
+                                        <div class="btn-group btn-group-sm">
+                                            <form action="{{ url_for('main.accept_friend_request', request_id=pending_received.id) }}" method="post" class="d-inline">
+                                                {{ form.hidden_tag() }}
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-check me-1"></i>Accept
+                                                </button>
+                                            </form>
+                                            <form action="{{ url_for('main.reject_friend_request', request_id=pending_received.id) }}" method="post" class="d-inline">
+                                                {{ form.hidden_tag() }}
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-times me-1"></i>Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="dropdown d-inline">
+                                        <button class="btn btn-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                            <i class="fas fa-check me-1"></i>Friends
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form action="{{ url_for('main.remove_friend', user_id=user.id) }}" method="post">
+                                                    {{ form.hidden_tag() }}
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="fas fa-user-minus me-2"></i>Remove Friend
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                <a href="{{ url_for('main.chat', username=user.username) }}" class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-comment me-1"></i>Message
                                 </a>
-                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#blockModal">
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#blockModal">
                                     <i class="fas fa-ban me-1"></i>Block
                                 </button>
                             {% endif %}
@@ -92,6 +145,12 @@
                         <div class="text-center">
                             <h5 class="mb-0">{{ user.following_count() }}</h5>
                             <small class="text-muted">Following</small>
+                        </div>
+                        <div class="text-center">
+                            <a href="{{ url_for('main.friends') }}" class="text-decoration-none">
+                                <h5 class="mb-0">{{ user.get_friend_count() }}</h5>
+                                <small class="text-muted">Friends</small>
+                            </a>
                         </div>
                         <div class="text-center">
                             <h5 class="mb-0">{{ user.points }}</h5>
@@ -318,6 +377,10 @@
 .btn {
     border-radius: 8px;
     font-weight: 500;
+}
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
 }
 </style>
 {% endblock %}

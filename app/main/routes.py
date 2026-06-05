@@ -8,12 +8,13 @@ from functools import wraps
 from langdetect import detect, LangDetectException
 from app import db
 from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, MessageForm, CommentForm, ReportForm, StoryForm
-from app.models import User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser, PostReaction, Story, StoryView, ChatMessage
+from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
+                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment, FriendRequest, friends)
 from app.translate import translate
 from app.main import bp
 from spam_service.integration import spam_checker
 from app.media_helpers import save_media, delete_media
-from app.profile_helpers import save_profile_picture, delete_profile_picture
+from app.profile_helpers import save_profile_picture, save_cover_picture, delete_profile_picture, delete_cover_picture
 from app.notification_helper import send_like_notification, send_comment_notification, send_follow_notification, send_share_notification
 from app.services.recommendation_service import recommendation_engine
 from app.services.report_service import report_service
@@ -167,6 +168,30 @@ def index():
             'reaction_count': reaction_count
         })
 
+    # Get upcoming birthdays from friends
+    upcoming_birthdays = []
+    for friend in current_user.get_friends():
+        if friend.birthday:
+            try:
+                birthday_date = datetime.strptime(friend.birthday, '%Y-%m-%d').date()
+                today = datetime.now().date()
+                birthday_this_year = birthday_date.replace(year=today.year)
+                if birthday_this_year < today:
+                    birthday_this_year = birthday_date.replace(year=today.year + 1)
+                days_until = (birthday_this_year - today).days
+                if days_until <= 7:
+                    upcoming_birthdays.append({
+                        'user': friend,
+                        'days_until': days_until
+                    })
+            except:
+                pass
+
+    upcoming_birthdays.sort(key=lambda x: x['days_until'])
+
+    # Get active contacts (online friends)
+    active_contacts = current_user.get_active_friends_online()
+
     page = request.args.get('page', 1, type=int)
     posts = db.paginate(current_user.following_posts(), page=page,
                         per_page=current_app.config['POSTS_PER_PAGE'],
@@ -177,8 +202,9 @@ def index():
     return render_template('index.html', title='Home', form=form, comment_form=comment_form,
                            story_form=story_form, stories_by_user=stories_by_user,
                            stories_data=stories_data,
-                           posts=posts.items, next_url=next_url, prev_url=prev_url)
-
+                           posts=posts.items, next_url=next_url, prev_url=prev_url,
+                           upcoming_birthdays=upcoming_birthdays,
+                           active_contacts=active_contacts)
 @bp.route('/add_story', methods=['POST'])
 @login_required
 def add_story():
@@ -1366,3 +1392,264 @@ def get_story_comments(story_id):
         'message': c.message,
         'time_ago': time_ago(c.timestamp)
     } for c in comments])
+
+@bp.route('/send-friend-request/<int:user_id>', methods=['POST'])
+@login_required
+def send_friend_request(user_id):
+    user = db.session.get(User, user_id)
+    if user and user != current_user:
+        if current_user.send_friend_request(user):
+            # Send notification to the recipient
+            user.add_notification('friend_request', {
+                'from_user': current_user.username,
+                'user_id': current_user.id,
+                'message': f'{current_user.username} sent you a friend request'
+            })
+            flash(f'Friend request sent to {user.username}', 'success')
+        else:
+            flash('Friend request already sent or pending', 'warning')
+    return redirect(url_for('main.user', username=user.username))
+
+@bp.route('/accept-friend-request/<int:request_id>', methods=['POST'])
+@login_required
+def accept_friend_request(request_id):
+    friend_request = db.session.get(FriendRequest, request_id)
+    if friend_request and friend_request.to_user_id == current_user.id:
+        current_user.accept_friend_request(friend_request)
+        friend_request.from_user.add_notification('friend_accepted', {
+            'from_user': current_user.username,
+            'user_id': current_user.id,
+            'message': f'{current_user.username} accepted your friend request'
+        })
+        flash('Friend request accepted!', 'success')
+    return redirect(url_for('main.friend_requests'))
+
+@bp.route('/reject-friend-request/<int:request_id>', methods=['POST'])
+@login_required
+def reject_friend_request(request_id):
+    friend_request = db.session.get(FriendRequest, request_id)
+    if friend_request and friend_request.to_user_id == current_user.id:
+        current_user.reject_friend_request(friend_request)
+        flash('Friend request rejected', 'info')
+    return redirect(url_for('main.friend_requests'))
+
+@bp.route('/remove-friend/<int:user_id>', methods=['POST'])
+@login_required
+def remove_friend(user_id):
+    user = db.session.get(User, user_id)
+    if user and current_user.is_friend_with(user):
+        current_user.friends.remove(user)
+        user.friends.remove(current_user)
+        db.session.commit()
+        flash(f'Removed {user.username} from friends', 'success')
+    return redirect(url_for('main.friends'))
+
+
+@bp.route('/friends')
+@login_required
+def friends():
+    page = request.args.get('page', 1, type=int)
+    friends_list = current_user.get_friends()
+
+    # Manual pagination
+    per_page = 20
+    total = len(friends_list)
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_friends = friends_list[start:end]
+
+    has_next = total > end
+    has_prev = page > 1
+
+    form = EmptyForm()
+
+    return render_template('friends.html', title='Friends',
+                           friends=paginated_friends,
+                           form=form,
+                           page=page,
+                           has_next=has_next,
+                           has_prev=has_prev)
+
+@bp.route('/friend-requests')
+@login_required
+def friend_requests_page():
+    pending_requests = current_user.get_pending_friend_requests()
+    return render_template('friend_requests.html', title='Friend Requests', requests=pending_requests)
+@bp.route('/feeds')
+@login_required
+def feeds():
+    page = request.args.get('page', 1, type=int)
+    friends_ids = [f.id for f in current_user.get_friends()]
+    posts_query = sa.select(Post).where(
+        Post.user_id.in_(friends_ids),
+        Post.is_spam == False,
+        Post.approved == True
+    ).order_by(Post.timestamp.desc())
+    posts = db.paginate(posts_query, page=page, per_page=20, error_out=False)
+    return render_template('feeds.html', title='Friends Feed', posts=posts)
+
+
+@bp.route('/memories')
+@login_required
+def memories():
+    from datetime import datetime
+    today = datetime.utcnow().date()
+
+    posts = db.session.scalars(
+        sa.select(Post).where(
+            Post.user_id == current_user.id,
+            sa.extract('day', Post.timestamp) == today.day,
+            sa.extract('month', Post.timestamp) == today.month
+        ).order_by(Post.timestamp.desc())
+    ).all()
+
+    return render_template('memories.html', title='Memories', posts=posts)
+
+
+@bp.route('/active-contacts')
+@login_required
+def get_active_contacts():
+    active_friends = current_user.get_active_friends_online()
+    contacts_data = [{
+        'id': f.id,
+        'username': f.username,
+        'avatar': f.avatar(32),
+        'last_seen': f.last_seen.isoformat() if f.last_seen else None
+    } for f in active_friends]
+    return jsonify(contacts_data)
+
+
+@bp.route('/groups')
+@login_required
+def groups():
+    return render_template('groups.html', title='Groups')
+
+
+@bp.route('/events')
+@login_required
+def events():
+    return render_template('events.html', title='Events')
+
+
+@bp.route('/reels')
+@login_required
+def reels():
+    return render_template('reels.html', title='Reels')
+
+
+@bp.route('/gaming')
+@login_required
+def gaming():
+    return render_template('gaming.html', title='Gaming Video')
+
+
+@bp.route('/ads-manager')
+@login_required
+def ads_manager():
+    return render_template('ads_manager.html', title='Ads Manager')
+
+
+@bp.route('/birthdays')
+@login_required
+def birthdays():
+    from datetime import datetime, timedelta
+
+    # Get users who have birthdays today or within the next 7 days
+    today = datetime.now(timezone.utc).date()
+    next_week = today + timedelta(days=7)
+
+    # Find users with birthdays in this period
+    all_users = db.session.execute(
+        sa.select(User).where(User.id != current_user.id)
+    ).scalars().all()
+
+    upcoming_birthdays = []
+    for user in all_users:
+        if user.birthday:
+            try:
+                birthday_date = datetime.strptime(user.birthday, '%Y-%m-%d').date()
+                birthday_this_year = birthday_date.replace(year=today.year)
+                if birthday_this_year < today:
+                    birthday_this_year = birthday_date.replace(year=today.year + 1)
+
+                days_until = (birthday_this_year - today).days
+                if 0 <= days_until <= 7:
+                    upcoming_birthdays.append({
+                        'user': user,
+                        'days_until': days_until,
+                        'birthday': birthday_date
+                    })
+            except:
+                pass
+
+    upcoming_birthdays.sort(key=lambda x: x['days_until'])
+
+    return render_template('birthdays.html', title='Birthdays', birthdays=upcoming_birthdays)
+
+
+@bp.route('/share-post-to-story/<int:post_id>', methods=['POST'])
+@login_required
+def share_post_to_story(post_id):
+    post = db.session.get(Post, post_id)
+    if not post:
+        flash('Post not found.', 'danger')
+        return redirect(url_for('main.index'))
+
+    caption = request.form.get('caption', '')
+    bg_color = request.form.get('bg_color', 'gradient-purple')
+
+    story_caption = f"📌 Shared @{post.author.username}'s post\n\n"
+    story_caption += f'"{post.body[:150]}"'
+    if caption:
+        story_caption += f"\n\n💭 {caption}"
+
+    story = Story(
+        user_id=current_user.id,
+        media_url='',
+        media_type='text',
+        caption=story_caption,
+        bg_color=bg_color,
+        shared_post_id=post_id,
+        timestamp=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=24)
+    )
+
+    db.session.add(story)
+    db.session.commit()
+
+    flash('Post shared to your story!', 'success')
+    return redirect(url_for('main.index'))
+
+
+@bp.route('/story-data/<int:story_id>')
+@login_required
+def get_story_data(story_id):
+    story = db.session.get(Story, story_id)
+    if not story:
+        return jsonify({'error': 'Story not found'}), 404
+
+    def time_ago(dt):
+        now = datetime.now(timezone.utc)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        diff = now - dt
+        if diff.days > 0:
+            return f'{diff.days}d ago'
+        if diff.seconds > 3600:
+            return f'{diff.seconds // 3600}h ago'
+        if diff.seconds > 60:
+            return f'{diff.seconds // 60}m ago'
+        return 'Just now'
+
+    return jsonify({
+        'id': story.id,
+        'media_url': story.media_url,
+        'media_type': story.media_type,
+        'caption': story.caption or '',
+        'author_name': story.author.username,
+        'author_avatar': story.author.avatar(48),
+        'time_ago': time_ago(story.timestamp),
+        'reaction_count': db.session.query(StoryReaction).filter_by(story_id=story.id).count(),
+        'bg_color': getattr(story, 'bg_color', 'gradient-purple'),
+        'shared_post_id': getattr(story, 'shared_post_id', None)
+    })

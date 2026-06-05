@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="fas fa-birthday-cake me-2 text-pink"></i>Birthdays</h4>
+                <small class="text-muted">Upcoming birthdays from your network</small>
+            </div>
+            <div class="card-body">
+                {% if birthdays %}
+                    <div class="row g-3">
+                        {% for b in birthdays %}
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ b.user.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <div>
+                                        <a href="{{ url_for('main.user', username=b.user.username) }}" class="fw-semibold text-decoration-none">
+                                            {{ b.user.username }}
+                                        </a>
+                                        <div class="small">
+                                            {% if b.days_until == 0 %}
+                                            <span class="text-success fw-bold"><i class="fas fa-gift"></i> Today!</span>
+                                            {% elif b.days_until == 1 %}
+                                            <span class="text-primary">Tomorrow</span>
+                                            {% else %}
+                                            <span class="text-muted">In {{ b.days_until }} days</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="small text-muted">
+                                            {{ b.birthday.strftime('%B %d') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('main.user', username=b.user.username) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-gift"></i> Wish
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-birthday-cake fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-3">No upcoming birthdays in the next 7 days.</p>
+                        <p class="small text-muted">Make sure your friends have added their birthdays to their profiles!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

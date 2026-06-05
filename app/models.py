@@ -93,6 +93,11 @@ followers = sa.Table(
     sa.Column('followed_id', sa.Integer, sa.ForeignKey('user.id'),
               primary_key=True)
 )
+friends = db.Table('friends',
+                   db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                   db.Column('friend_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                   db.Column('created_at', db.DateTime, default=datetime.utcnow)
+                   )
 
 
 class User(PaginatedAPIMixin, UserMixin, db.Model):
@@ -144,17 +149,45 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     blocked_by: so.WriteOnlyMapped['BlockedUser'] = so.relationship(
         foreign_keys='BlockedUser.blocked_id', back_populates='blocked')
     last_active: so.Mapped[Optional[datetime]] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+    friends = db.relationship(
+        'User', secondary='friends',
+        primaryjoin=(id == friends.c.user_id),
+        secondaryjoin=(id == friends.c.friend_id),
+        lazy='dynamic'
+    )
 
-    @property
-    def is_online(self):
-        if self.last_active:
-            now = datetime.now(timezone.utc)
-            if self.last_active.tzinfo is None:
-                last_active = self.last_active.replace(tzinfo=timezone.utc)
-            else:
-                last_active = self.last_active
-            return (now - last_active).total_seconds() < 300
+    # Friend requests sent
+    friend_requests_sent = db.relationship(
+        'FriendRequest',
+        foreign_keys='FriendRequest.from_user_id',
+        backref='sender', lazy='dynamic'
+    )
+
+    # Friend requests received
+    friend_requests_received = db.relationship(
+        'FriendRequest',
+        foreign_keys='FriendRequest.to_user_id',
+        backref='receiver', lazy='dynamic'
+    )
+
+    def get_friends(self):
+        return self.friends.all()
+
+    def get_friend_count(self):
+        return self.friends.count()
+
+    def send_friend_request(self, user):
+        if not self.has_friend_request_pending(user) and user != self:
+            request = FriendRequest(from_user_id=self.id, to_user_id=user.id)
+            db.session.add(request)
+            db.session.commit()
+            return True
         return False
+
+    def has_friend_request_pending(self, user):
+        return FriendRequest.query.filter_by(
+            from_user_id=self.id, to_user_id=user.id, status='pending'
+        ).first() is not None
 
     def avatar(self, size):
         if self.profile_pic and self.profile_pic not in ['default.jpg', 'None']:
@@ -165,6 +198,17 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
 
+    @property
+    def is_online(self):
+        if self.last_seen:
+            now = datetime.now(timezone.utc)
+            if self.last_seen.tzinfo is None:
+                last_seen = self.last_seen.replace(tzinfo=timezone.utc)
+            else:
+                last_seen = self.last_seen
+            return (now - last_seen).total_seconds() < 300
+        return False
+
     def cover_photo(self):
         if self.cover_pic and self.cover_pic not in ['default_cover.jpg', 'None']:
             try:
@@ -172,6 +216,32 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             except:
                 pass
         return None
+
+    def from_dict(self, data, new_user=False):
+        for field in ['username', 'email', 'about_me']:
+            if field in data:
+                setattr(self, field, data[field])
+        if new_user and 'password' in data:
+            self.set_password(data['password'])
+
+    def following_posts(self):
+        from datetime import datetime, timezone
+        Author = so.aliased(User)
+        Follower = so.aliased(User)
+        return (
+            sa.select(Post)
+            .join(Post.author.of_type(Author))
+            .outerjoin(Author.followers.of_type(Follower))
+            .where(
+                sa.or_(
+                    Author.id == self.id,
+                    Follower.id == self.id
+                )
+            )
+            .where(Post.scheduled_for.is_(None))
+            .where(Post.privacy.in_(['public', 'followers']))
+            .order_by(Post.timestamp.desc())
+        )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -200,39 +270,6 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         query = sa.select(sa.func.count()).select_from(
             self.following.select().subquery())
         return db.session.scalar(query)
-
-    def following_posts(self):
-        from datetime import datetime, timezone
-        Author = so.aliased(User)
-        Follower = so.aliased(User)
-        return (
-            sa.select(Post)
-            .join(Post.author.of_type(Author))
-            .outerjoin(Author.followers.of_type(Follower))
-            .where(
-                sa.or_(
-                    Author.id == self.id,
-                    Follower.id == self.id
-                )
-            )
-            .where(Post.scheduled_for.is_(None))
-            .where(Post.privacy.in_(['public', 'followers']))
-            .order_by(Post.timestamp.desc())
-        )
-
-    def get_reset_password_token(self, expires_in=600):
-        return jwt.encode(
-            {'reset_password': self.id, 'exp': time() + expires_in},
-            current_app.config['SECRET_KEY'], algorithm='HS256')
-
-    @staticmethod
-    def verify_reset_password_token(token):
-        try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])['reset_password']
-        except Exception:
-            return
-        return db.session.get(User, id)
 
     def unread_message_count(self):
         last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
@@ -265,17 +302,26 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                                           Task.complete == False)
         return db.session.scalar(query)
 
-    def posts_count(self):
-        query = sa.select(sa.func.count()).select_from(
-            self.posts.select().subquery())
-        return db.session.scalar(query)
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'], algorithm='HS256')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+        except Exception:
+            return
+        return db.session.get(User, id)
 
     def to_dict(self, include_email=False):
         data = {
             'id': self.id,
             'username': self.username,
             'last_seen': self.last_seen.replace(
-                tzinfo=timezone.utc).isoformat(),
+                tzinfo=timezone.utc).isoformat() if self.last_seen else None,
             'about_me': self.about_me,
             'post_count': self.posts_count(),
             'follower_count': self.followers_count(),
@@ -293,16 +339,9 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             data['email'] = self.email
         return data
 
-    def from_dict(self, data, new_user=False):
-        for field in ['username', 'email', 'about_me']:
-            if field in data:
-                setattr(self, field, data[field])
-        if new_user and 'password' in data:
-            self.set_password(data['password'])
-
     def get_token(self, expires_in=3600):
         now = datetime.now(timezone.utc)
-        if self.token and self.token_expiration.replace(
+        if self.token and self.token_expiration and self.token_expiration.replace(
                 tzinfo=timezone.utc) > now + timedelta(seconds=60):
             return self.token
         self.token = secrets.token_hex(16)
@@ -316,7 +355,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     @staticmethod
     def check_token(token):
         user = db.session.scalar(sa.select(User).where(User.token == token))
-        if user is None or user.token_expiration.replace(
+        if user is None or user.token_expiration and user.token_expiration.replace(
                 tzinfo=timezone.utc) < datetime.now(timezone.utc):
             return None
         return user
@@ -331,11 +370,56 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             ) is not None
         return False
 
+    def posts_count(self):
+        query = sa.select(sa.func.count()).select_from(
+            self.posts.select().subquery())
+        return db.session.scalar(query)
 
-@login.user_loader
-def load_user(id):
-    return db.session.get(User, int(id))
 
+    def accept_friend_request(self, request):
+        if request.to_user_id == self.id:
+            request.status = 'accepted'
+            self.friends.append(request.from_user)
+            request.from_user.friends.append(self)
+            db.session.commit()
+            return True
+        return False
+
+    def reject_friend_request(self, request):
+        if request.to_user_id == self.id:
+            db.session.delete(request)
+            db.session.commit()
+            return True
+        return False
+
+    def is_friend_with(self, user):
+        return self.friends.filter(friends.c.friend_id == user.id).count() > 0
+
+    def get_pending_friend_requests(self):
+        return self.friend_requests_received.filter_by(status='pending').all()
+
+    def get_active_friends_online(self):
+        from datetime import datetime, timedelta
+        five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+        return [f for f in self.friends if f.last_seen and f.last_seen > five_minutes_ago]
+
+class FriendRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    to_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('from_user_id', 'to_user_id', name='unique_friend_request'),)
+
+    @property
+    def from_user(self):
+        return db.session.get(User, self.from_user_id)
+
+    @property
+    def to_user(self):
+        return db.session.get(User, self.to_user_id)
 
 class PostReaction(db.Model):
     __tablename__ = 'post_reaction'
@@ -425,15 +509,16 @@ class Story(db.Model):
     __tablename__ = 'story'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
-    media_url: so.Mapped[str] = so.mapped_column(sa.String(500))
-    media_type: so.Mapped[str] = so.mapped_column(sa.String(10))
-    caption: so.Mapped[Optional[str]] = so.mapped_column(sa.String(200))
+    media_url: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
+    media_type: so.Mapped[str] = so.mapped_column(sa.String(20), default='image')
+    caption: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
+    bg_color: so.Mapped[Optional[str]] = so.mapped_column(sa.String(50), default='gradient-purple')
+    shared_post_id: so.Mapped[Optional[int]] = so.mapped_column(sa.Integer, nullable=True)
     timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
     expires_at: so.Mapped[datetime] = so.mapped_column(
         default=lambda: datetime.now(timezone.utc) + timedelta(hours=24))
 
     author: so.Mapped[User] = so.relationship(foreign_keys=[user_id])
-
 
 class StoryView(db.Model):
     __tablename__ = 'story_view'
@@ -650,3 +735,9 @@ class StoryComment(db.Model):
     timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
 
     author: so.Mapped[User] = so.relationship(foreign_keys=[user_id])
+
+@login.user_loader
+def load_user(id):
+    return db.session.get(User, int(id))
+
+

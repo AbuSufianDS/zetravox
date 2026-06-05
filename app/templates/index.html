@@ -1,66 +1,413 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
+<style>
+    .create-post-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .create-post-card:hover {
+        background: #f8f9fa;
+        transform: translateY(-1px);
+    }
+
+    .create-post-input {
+        background: #f0f2f5;
+        border: none;
+        border-radius: 40px;
+        padding: 12px 16px;
+        width: 100%;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .create-post-input:hover {
+        background: #e4e6eb;
+    }
+
+    .post-actions-bar {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid #e4e6eb;
+    }
+
+    .post-action-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #65676b;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .post-action-btn:hover {
+        background: #f0f2f5;
+    }
+
+    .post-action-btn i {
+        font-size: 20px;
+    }
+
+    .live-icon { color: #e41e3f; }
+    .photo-icon { color: #45bd62; }
+    .feeling-icon { color: #f7b928; }
+
+    .story-circles {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 8px 0;
+    }
+
+    .story-circle {
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .story-avatar {
+        position: relative;
+        width: 70px;
+        height: 70px;
+    }
+
+    .story-avatar img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e4e6eb;
+        padding: 2px;
+    }
+
+    .story-avatar .story-text-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: #667eea;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
+        border: 2px solid white;
+    }
+
+    .story-name {
+        font-size: 11px;
+        color: #65676b;
+        margin-top: 4px;
+        max-width: 70px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .left-sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .left-sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        color: #1a1a2e;
+        text-decoration: none;
+    }
+
+    .left-sidebar-item:hover {
+        background: #f0f2f5;
+        text-decoration: none;
+        color: #1a1a2e;
+    }
+
+    .left-sidebar-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 20px;
+    }
+
+    .left-sidebar-text {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .sidebar-divider {
+        margin: 12px 0;
+        border-top: 1px solid #e4e6eb;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #65676b;
+        margin: 16px 0 8px 12px;
+    }
+
+    .birthday-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+
+    .birthday-icon {
+        width: 36px;
+        height: 36px;
+        background: #e4e6eb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #e41e3f;
+        font-size: 18px;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .contact-item:hover {
+        background: #f0f2f5;
+    }
+
+    .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+
+    .contact-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .contact-name {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .online-dot {
+        width: 10px;
+        height: 10px;
+        background: #31a24c;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        border: 2px solid white;
+    }
+
+    .create-post-modal .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+
+    .create-post-modal .modal-header {
+        border-bottom: 1px solid #e4e6eb;
+        padding: 16px;
+    }
+
+    .create-post-textarea {
+        border: none;
+        font-size: 20px;
+        resize: none;
+        padding: 16px;
+    }
+
+    .create-post-textarea:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .media-buttons {
+        display: flex;
+        gap: 16px;
+        padding: 12px 16px;
+        border-top: 1px solid #e4e6eb;
+        border-bottom: 1px solid #e4e6eb;
+    }
+
+    .media-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .media-btn:hover {
+        background: #f0f2f5;
+    }
+
+    .media-btn.live { color: #e41e3f; }
+    .media-btn.photo { color: #45bd62; }
+    .media-btn.feeling { color: #f7b928; }
+
+    @media (max-width: 992px) {
+        .left-sidebar, .right-sidebar {
+            display: none;
+        }
+    }
+</style>
+
+<div class="row g-4">
+    <!-- Left Sidebar -->
     <div class="col-lg-3 d-none d-lg-block">
-        <div class="sidebar-card">
-            <div class="sidebar-title">Stories</div>
-            {% include '_story_circle.html' %}
-        </div>
-
-        <div class="sidebar-card">
-            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#storyModal">
-                <i class="fas fa-plus-circle me-2"></i>Add to Story
-            </button>
-        </div>
-
-        <div class="sidebar-card">
-            <div class="sidebar-title">Your Stats</div>
-            <div class="d-flex justify-content-between mb-2">
-                <span><i class="fas fa-star text-warning me-2"></i>Points</span>
-                <strong>{{ current_user.points }}</strong>
+        <div class="left-sidebar">
+            <!-- Stories Section -->
+            <div class="sidebar-card mb-3">
+                <div class="section-title">Stories</div>
+                <div class="story-circles">
+                    <!-- Add Story Button -->
+                    <div class="story-circle" data-bs-toggle="modal" data-bs-target="#storyModal">
+                        <div class="story-avatar">
+                            <img src="{{ current_user.avatar(70) }}" class="rounded-circle">
+                            <div class="story-text-badge">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                        </div>
+                        <div class="story-name">Your Story</div>
+                    </div>
+                    <!-- Stories from friends -->
+                    {% for story in stories_data %}
+                    <div class="story-circle" onclick="openStoryViewer({{ story.id }})">
+                        <div class="story-avatar">
+                            <img src="{{ story.author_avatar }}" class="rounded-circle">
+                            {% if story.media_type == 'text' %}
+                            <div class="story-text-badge">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="story-name">{{ story.author_name[:10] }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% if current_user.is_verified %}
-            <span class="badge bg-primary"><i class="fas fa-check-circle me-1"></i>Verified Account</span>
-            {% endif %}
+
+            <a href="{{ url_for('main.user', username=current_user.username) }}" class="left-sidebar-item">
+                <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
+                <span class="left-sidebar-text fw-bold">{{ current_user.username }}</span>
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            <ul class="left-sidebar-menu">
+                <li><a href="{{ url_for('main.friends') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-user-friends"></i></div>
+                    <span class="left-sidebar-text">Friends</span>
+                </a></li>
+                <li><a href="{{ url_for('main.saved_posts') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-bookmark"></i></div>
+                    <span class="left-sidebar-text">Saved</span>
+                </a></li>
+                <li><a href="{{ url_for('main.feeds') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-rss"></i></div>
+                    <span class="left-sidebar-text">Feeds</span>
+                </a></li>
+                <li><a href="{{ url_for('main.memories') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-history"></i></div>
+                    <span class="left-sidebar-text">Memories</span>
+                </a></li>
+            </ul>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="section-title">Groups</div>
+            <ul class="left-sidebar-menu">
+                <li><a href="{{ url_for('main.reels') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-video"></i></div>
+                    <span class="left-sidebar-text">Reels</span>
+                </a></li>
+                <li><a href="{{ url_for('main.events') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <span class="left-sidebar-text">Events</span>
+                </a></li>
+                <li><a href="{{ url_for('main.ads_manager') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-chart-line"></i></div>
+                    <span class="left-sidebar-text">Ads Manager</span>
+                </a></li>
+                <li><a href="{{ url_for('main.birthdays') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-birthday-cake"></i></div>
+                    <span class="left-sidebar-text">Birthdays</span>
+                </a></li>
+                <li><a href="{{ url_for('main.gaming') }}" class="left-sidebar-item">
+                    <div class="left-sidebar-icon"><i class="fas fa-gamepad"></i></div>
+                    <span class="left-sidebar-text">Gaming Video</span>
+                </a></li>
+            </ul>
         </div>
     </div>
 
+    <!-- Center Feed -->
     <div class="col-lg-6">
-        <div class="card">
-            <div class="card-body">
-                <form action="{{ url_for('main.index') }}" method="post" enctype="multipart/form-data">
-                    {{ form.hidden_tag() }}
-                    <div class="d-flex gap-3 mb-3">
-                        <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
-                        <div class="flex-grow-1">
-                           {{ form.post(class="form-control", placeholder="What's on your mind, " + current_user.username + "?", rows=2) }}
-                        </div>
-                    </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-image"></i></span>
-                                {{ form.media(class="form-control", accept="image/*,video/*") }}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            {{ form.privacy(class="form-select") }}
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        {{ form.schedule_date(class="form-control", placeholder="Schedule for later (optional)") }}
-                    </div>
-
-                    <button type="submit" name="submit_post" class="btn btn-primary w-100">
-                        <i class="fas fa-paper-plane me-2"></i>Post to Feed
-                    </button>
-                </form>
+        <!-- Create Post Card -->
+        <div class="create-post-card" data-bs-toggle="modal" data-bs-target="#createPostModal">
+            <div class="d-flex gap-3">
+                <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
+                <div class="create-post-input">
+                    What's on your mind, {{ current_user.username }}?
+                </div>
+            </div>
+            <div class="post-actions-bar">
+                <button class="post-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                    <i class="fas fa-video live-icon"></i> Live
+                </button>
+                <button class="post-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                    <i class="fas fa-image photo-icon"></i> Photo/Video
+                </button>
+                <button class="post-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                    <i class="fas fa-smile feeling-icon"></i> Feeling
+                </button>
             </div>
         </div>
 
+        <!-- Posts Feed -->
         {% for post in posts %}
             {% include '_post.html' %}
         {% else %}
@@ -76,86 +423,155 @@
         <div class="d-flex justify-content-between mt-3">
             {% if prev_url %}
             <a href="{{ prev_url }}" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left me-2"></i>Newer
+                <i class="fas fa-arrow-left"></i>
             </a>
             {% endif %}
             {% if next_url %}
             <a href="{{ next_url }}" class="btn btn-outline-primary ms-auto">
-                Older<i class="fas fa-arrow-right ms-2"></i>
+                <i class="fas fa-arrow-right"></i>
             </a>
             {% endif %}
         </div>
         {% endif %}
     </div>
 
+    <!-- Right Sidebar -->
     <div class="col-lg-3 d-none d-lg-block">
-        <div class="sidebar-card">
-            <div class="sidebar-title">Trending</div>
-            <div id="trending-hashtags">
-                <div class="text-center py-3">
-                    <div class="spinner-border spinner-border-sm text-primary"></div>
+        <div class="right-sidebar">
+            <!-- Birthdays -->
+            {% if upcoming_birthdays %}
+                {% for birthday in upcoming_birthdays[:3] %}
+                <div class="birthday-item">
+                    <div class="birthday-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold small">Birthday</div>
+                        <div class="small text-muted">
+                            <a href="{{ url_for('main.user', username=birthday.user.username) }}" class="text-decoration-none">
+                                {{ birthday.user.username }}
+                            </a>
+                            {% if birthday.days_until == 0 %}
+                                is celebrating today! 🎂
+                            {% else %}
+                                in {{ birthday.days_until }} days
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="birthday-item">
+                    <div class="birthday-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold small">Birthdays</div>
+                        <div class="small text-muted">No upcoming birthdays</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Sponsored -->
+            <div class="px-2 mb-3">
+                <div class="fw-semibold small text-muted mb-2">Sponsored</div>
+                <div class="bg-light rounded p-2 mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fab fa-whatsapp fa-2x text-success"></i>
+                        <div>
+                            <div class="fw-semibold small">WhatsApp Business</div>
+                            <div class="small text-muted">Connect with customers</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <a href="{{ url_for('main.trending_feed_smart') }}" class="btn btn-sm btn-outline-primary w-100 mt-3">
-                View All <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
 
-        <div class="sidebar-card">
-            <div class="sidebar-title">Quick Links</div>
-            <div class="list-group list-group-flush">
-                <a href="{{ url_for('main.saved_posts') }}" class="list-group-item list-group-item-action bg-transparent px-0">
-                    <i class="fas fa-bookmark me-2 text-primary"></i>Saved Posts
-                </a>
-                <a href="{{ url_for('main.conversations') }}" class="list-group-item list-group-item-action bg-transparent px-0">
-                    <i class="fas fa-comments me-2 text-success"></i>Messages
-                </a>
+            <div class="sidebar-divider"></div>
+
+            <!-- Active Contacts -->
+            <div class="d-flex justify-content-between align-items-center px-2 mb-2">
+                <span class="fw-semibold small text-muted">Active Contacts ({{ active_contacts|length }})</span>
+                <i class="fas fa-search small text-muted"></i>
             </div>
+
+            {% if active_contacts %}
+                {% for contact in active_contacts[:10] %}
+                <div class="contact-item">
+                    <div class="contact-info position-relative">
+                        <img src="{{ contact.avatar(32) }}" class="contact-avatar">
+                        <span class="contact-name">{{ contact.username }}</span>
+                        <span class="online-dot"></span>
+                    </div>
+                    <a href="{{ url_for('main.chat', username=contact.username) }}" class="text-muted" title="Send message">
+                        <i class="fas fa-comment-dots fa-sm"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-muted small py-3">
+                    No active contacts online
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#aiComposerModal">
-    <i class="fas fa-magic"></i> Write with AI
-</button>
-
-<div class="modal fade" id="aiComposerModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Create Post Modal -->
+<div class="modal fade create-post-modal" id="createPostModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">AI Post Composer</h5>
+                <h5 class="modal-title">Create Post</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">What's your post about?</label>
-                    <input type="text" id="ai-topic" class="form-control" placeholder="e.g., Python programming, my vacation, new product">
+            <form action="{{ url_for('main.index') }}" method="post" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="modal-body p-0">
+                    <div class="d-flex gap-3 p-3">
+                        <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">{{ current_user.username }}</div>
+                            <div class="small text-muted">
+                                <select name="privacy" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                    <option value="public">🌍 Public</option>
+                                    <option value="followers">👥 Followers</option>
+                                    <option value="only_me">🔒 Only Me</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form.post(class="create-post-textarea", rows=4, placeholder="What's on your mind?", style="border: none; width: 100%; padding: 0 16px;") }}
+
+                    <div class="media-buttons">
+                        <button type="button" class="media-btn live" onclick="document.getElementById('postMedia').click()">
+                            <i class="fas fa-video"></i> Live Video
+                        </button>
+                        <button type="button" class="media-btn photo" onclick="document.getElementById('postMedia').click()">
+                            <i class="fas fa-image"></i> Photo/Video
+                        </button>
+                        <button type="button" class="media-btn feeling" onclick="insertEmoji()">
+                            <i class="fas fa-smile"></i> Feeling
+                        </button>
+                    </div>
+
+                    <div class="px-3 pb-3">
+                        {{ form.media(class="form-control d-none", id="postMedia", accept="image/*,video/*") }}
+                        {{ form.schedule_date(class="form-control mb-2", placeholder="Schedule for later (optional)") }}
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Tone</label>
-                    <select id="ai-tone" class="form-select">
-                        <option value="casual">Casual</option>
-                        <option value="professional">Professional</option>
-                        <option value="funny">Funny</option>
-                        <option value="inspirational">Inspirational</option>
-                    </select>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="submit_post" class="btn btn-primary">Post</button>
                 </div>
-                <button class="btn btn-primary w-100" onclick="generatePost()">
-                    <i class="fas fa-magic me-2"></i>Generate Post
-                </button>
-                <div id="ai-result" class="mt-3" style="display: none;">
-                    <hr>
-                    <label class="form-label">Generated Post:</label>
-                    <textarea id="generated-post" class="form-control" rows="4" readonly></textarea>
-                    <button class="btn btn-success btn-sm mt-2" onclick="useGeneratedPost()">
-                        Use This Post
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 
+<!-- Story Modal -->
 <div class="modal fade" id="storyModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -168,16 +584,16 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Photo or Video</label>
-                        <input type="file" name="media" class="form-control" accept="image/*,video/*" required>
+                        <input type="file" name="media" class="form-control" accept="image/*,video/*">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Caption (optional)</label>
-                        <textarea name="caption" class="form-control" rows="2"></textarea>
+                        <label class="form-label">Caption</label>
+                        <textarea name="caption" class="form-control" rows="2" placeholder="Add a caption..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Share to Story</button>
+                    <button type="submit" class="btn btn-primary">Share</button>
                 </div>
             </form>
         </div>
@@ -185,51 +601,37 @@
 </div>
 
 <script>
-function generatePost() {
-    const topic = document.getElementById('ai-topic').value;
-    const tone = document.getElementById('ai-tone').value;
+function insertEmoji() {
+    const textarea = document.querySelector('.create-post-textarea');
+    const emojis = ['😊', '😂', '❤️', '👍', '🎉', '😢', '😡', '🥰', '🤔', '🔥'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    textarea.value += randomEmoji;
+    textarea.focus();
+}
 
-    if (!topic) {
-        alert('Please enter a topic');
-        return;
+function openStoryViewer(storyId) {
+    window.location.href = '/view_story/' + storyId;
+}
+
+document.querySelector('.create-post-card').addEventListener('click', function(e) {
+    if (!e.target.closest('.post-action-btn')) {
+        const modal = new bootstrap.Modal(document.getElementById('createPostModal'));
+        modal.show();
     }
+});
 
-    document.getElementById('ai-result').style.display = 'block';
-    document.getElementById('generated-post').value = 'Generating...';
+document.querySelectorAll('.post-action-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const modal = new bootstrap.Modal(document.getElementById('createPostModal'));
+        modal.show();
 
-    fetch('/ai/generate-post', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({topic: topic, tone: tone})
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('generated-post').value = data.post;
-    });
-}
-
-function useGeneratedPost() {
-    const postText = document.getElementById('generated-post').value;
-    document.querySelector('#post').value = postText;
-    bootstrap.Modal.getInstance(document.getElementById('aiComposerModal')).hide();
-}
-
-fetch('/trending-hashtags')
-    .then(response => response.json())
-    .then(hashtags => {
-        const container = document.getElementById('trending-hashtags');
-        if (hashtags && hashtags.length > 0) {
-            container.innerHTML = hashtags.slice(0, 5).map(h => `
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <a href="/hashtag/${h.name}" class="text-decoration-none">
-                        <i class="fas fa-hashtag text-info"></i> ${h.name}
-                    </a>
-                    <span class="badge bg-secondary">${h.post_count} posts</span>
-                </div>
-            `).join('');
-        } else {
-            container.innerHTML = '<p class="text-muted text-center">No trending hashtags</p>';
+        if (this.classList.contains('photo')) {
+            document.getElementById('postMedia').click();
+        } else if (this.classList.contains('feeling')) {
+            setTimeout(() => insertEmoji(), 500);
         }
     });
+});
 </script>
 {% endblock %}

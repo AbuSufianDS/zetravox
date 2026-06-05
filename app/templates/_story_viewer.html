@@ -5,9 +5,26 @@
                 <i class="fas fa-times"></i>
             </button>
             <div class="story-viewer-content">
-                <div class="story-viewer-main">
+                <div class="story-viewer-main" id="storyViewerMain">
                     <img id="storyImage" class="story-media" style="display: none;">
                     <video id="storyVideo" class="story-media" controls style="display: none;"></video>
+                    <div id="storyTextContent" class="story-text-container" style="display: none;">
+                        <div class="story-text-content">
+                            <div class="story-author-info">
+                                <img id="storyTextAvatar" class="rounded-circle" style="width: 48px; height: 48px;">
+                                <div>
+                                    <div id="storyTextAuthor" class="fw-bold text-white"></div>
+                                    <div id="storyTextTime" class="small text-white-50"></div>
+                                </div>
+                            </div>
+                            <div id="storyTextBody" class="story-text-body"></div>
+                            <div id="storyOriginalPost" class="story-original-post mt-3" style="display: none;">
+                                <a id="storyOriginalPostLink" href="#" class="text-white text-decoration-none">
+                                    <i class="fas fa-eye me-2"></i>View Original Post
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="story-viewer-sidebar">
                     <div class="story-info">
@@ -50,7 +67,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="story-reaction-count" id="storyReactionCount"></div>
+                        <div class="story-reaction-count" id="storyReactionCount">0</div>
                     </div>
                     <div class="story-comments-section">
                         <div class="story-comments-list">
@@ -128,11 +145,46 @@
     align-items: center;
     justify-content: center;
     background: black;
+    position: relative;
 }
 .story-media {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+.story-text-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+.story-text-content {
+    text-align: center;
+    color: white;
+    max-width: 90%;
+}
+.story-author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+.story-author-info img {
+    width: 48px;
+    height: 48px;
+}
+.story-text-body {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+.story-original-post {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.2);
 }
 .story-viewer-sidebar {
     width: 320px;
@@ -296,6 +348,12 @@
 .story-nav-prev:hover, .story-nav-next:hover {
     background: rgba(0,0,0,0.8);
 }
+.no-comments {
+    text-align: center;
+    padding: 24px;
+    color: #65676b;
+    font-size: 13px;
+}
 </style>
 
 <script>
@@ -303,15 +361,16 @@ let currentStoryIndex = 0;
 let currentStories = [];
 let currentStoryId = null;
 
-function openStoryViewer(stories, index) {
-    currentStories = stories;
-    currentStoryIndex = index;
-    currentStoryId = stories[index].id;
-    const modal = document.getElementById('storyViewerModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        loadStory(currentStoryIndex);
-    }
+function openStoryViewer(storyId) {
+    fetch(`/story-data/${storyId}`)
+        .then(response => response.json())
+        .then(story => {
+            currentStories = [story];
+            currentStoryIndex = 0;
+            currentStoryId = story.id;
+            document.getElementById('storyViewerModal').style.display = 'flex';
+            loadStory(currentStoryIndex);
+        });
 }
 
 function loadStory(index) {
@@ -321,16 +380,32 @@ function loadStory(index) {
 
     const imgEl = document.getElementById('storyImage');
     const videoEl = document.getElementById('storyVideo');
+    const textEl = document.getElementById('storyTextContent');
 
     imgEl.style.display = 'none';
     videoEl.style.display = 'none';
+    textEl.style.display = 'none';
 
     if (story.media_type === 'image') {
         imgEl.src = `/static/uploads/stories/${story.media_url}`;
         imgEl.style.display = 'block';
-    } else {
+    } else if (story.media_type === 'video') {
         videoEl.src = `/static/uploads/stories/${story.media_url}`;
         videoEl.style.display = 'block';
+    } else if (story.media_type === 'text') {
+        textEl.style.display = 'flex';
+        textEl.style.background = story.bg_color ? getGradientBackground(story.bg_color) : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        document.getElementById('storyTextAvatar').src = story.author_avatar;
+        document.getElementById('storyTextAuthor').innerHTML = story.author_name;
+        document.getElementById('storyTextTime').innerHTML = story.time_ago;
+        document.getElementById('storyTextBody').innerHTML = story.caption.replace(/\n/g, '<br>');
+
+        if (story.shared_post_id) {
+            document.getElementById('storyOriginalPost').style.display = 'block';
+            document.getElementById('storyOriginalPostLink').href = `/post/${story.shared_post_id}`;
+        } else {
+            document.getElementById('storyOriginalPost').style.display = 'none';
+        }
     }
 
     document.getElementById('storyAuthorAvatar').src = story.author_avatar;
@@ -339,6 +414,18 @@ function loadStory(index) {
     document.getElementById('storyCaption').innerHTML = story.caption || '';
     document.getElementById('storyReactionCount').innerHTML = story.reaction_count || 0;
     loadStoryComments(story.id);
+}
+
+function getGradientBackground(bgColor) {
+    const gradients = {
+        'gradient-purple': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'gradient-pink': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'gradient-blue': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'gradient-green': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'gradient-orange': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'gradient-dark': 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
+    };
+    return gradients[bgColor] || gradients['gradient-purple'];
 }
 
 function prevStory() {
@@ -362,10 +449,7 @@ function closeStoryViewer() {
 function reactToStory(storyId, reaction) {
     fetch(`/react_story/${storyId}/${reaction}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-        }
+        headers: { 'Content-Type': 'application/json' }
     })
     .then(response => response.json())
     .then(data => {
@@ -388,7 +472,7 @@ function loadStoryComments(storyId) {
                 <div class="story-comment">
                     <img src="${c.author_avatar}" class="story-comment-avatar">
                     <div class="story-comment-bubble">
-                        <strong class="story-comment-author">${c.author_name}</strong>
+                        <strong class="story-comment-author">${escapeHtml(c.author_name)}</strong>
                         <p class="story-comment-text">${escapeHtml(c.message)}</p>
                         <small class="story-comment-time">${c.time_ago}</small>
                     </div>
@@ -403,10 +487,7 @@ function sendStoryComment(storyId) {
     if (!message) return;
     fetch('/send_story_comment', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ story_id: storyId, message: message })
     })
     .then(response => response.json())
@@ -425,7 +506,8 @@ function escapeHtml(text) {
 }
 
 document.addEventListener('keydown', function(e) {
-    if (document.getElementById('storyViewerModal').style.display === 'flex') {
+    const modal = document.getElementById('storyViewerModal');
+    if (modal && modal.style.display === 'flex') {
         if (e.key === 'ArrowLeft') prevStory();
         if (e.key === 'ArrowRight') nextStory();
         if (e.key === 'Escape') closeStoryViewer();
