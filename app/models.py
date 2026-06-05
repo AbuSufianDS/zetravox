@@ -156,14 +156,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         lazy='dynamic'
     )
 
-    # Friend requests sent
     friend_requests_sent = db.relationship(
         'FriendRequest',
         foreign_keys='FriendRequest.from_user_id',
         backref='sender', lazy='dynamic'
     )
 
-    # Friend requests received
     friend_requests_received = db.relationship(
         'FriendRequest',
         foreign_keys='FriendRequest.to_user_id',
