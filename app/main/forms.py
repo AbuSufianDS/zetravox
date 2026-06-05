@@ -16,10 +16,47 @@ class EditProfileForm(FlaskForm):
     profile_pic = FileField(_l('Profile Picture'), validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], _('Images only!'))
     ])
+    cover_pic = FileField(_l('Cover Photo'), validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], _('Images only!'))
+    ])
     is_private = SelectField(_l('Account Privacy'), choices=[
         ('False', 'Public'), ('True', 'Private')
     ], coerce=lambda x: x == 'True')
-    submit = SubmitField(_l('Submit'))
+
+    relationship_status = SelectField(_l('Relationship Status'), choices=[
+        ('', 'Select'),
+        ('single', 'Single'),
+        ('in_relationship', 'In a Relationship'),
+        ('engaged', 'Engaged'),
+        ('married', 'Married'),
+        ('divorced', 'Divorced'),
+        ('complicated', "It's Complicated")
+    ], validators=[Optional()])
+
+    work = StringField(_l('Work'), validators=[Length(max=100), Optional()])
+    education = StringField(_l('Education'), validators=[Length(max=100), Optional()])
+    location = StringField(_l('Location'), validators=[Length(max=100), Optional()])
+    website = StringField(_l('Website'), validators=[Length(max=200), Optional()])
+    birthday = StringField(_l('Birthday'), validators=[Length(max=20), Optional()],
+                           render_kw={"placeholder": "YYYY-MM-DD"})
+
+    gender = SelectField(_l('Gender'), choices=[
+        ('', 'Select'),
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('non_binary', 'Non-binary'),
+        ('prefer_not_to_say', 'Prefer not to say')
+    ], validators=[Optional()])
+
+    interested_in = SelectField(_l('Interested In'), choices=[
+        ('', 'Select'),
+        ('men', 'Men'),
+        ('women', 'Women'),
+        ('everyone', 'Everyone')
+    ], validators=[Optional()])
+
+    phone = StringField(_l('Phone'), validators=[Length(max=20), Optional()])
+    submit = SubmitField(_l('Save Changes'))
 
     def __init__(self, original_username, *args, **kwargs):
         super().__init__(*args, **kwargs)

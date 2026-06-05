@@ -101,6 +101,7 @@
             </div>
           </form>
           {% endif %}
+
           <ul class="navbar-nav">
             {% if current_user.is_anonymous %}
             <li class="nav-item">
@@ -114,7 +115,6 @@
               </a>
             </li>
             {% else %}
-
             <li class="nav-item">
               <a class="nav-link position-relative" href="{{ url_for('main.messages') }}">
                 <i class="fas fa-envelope"></i>
@@ -286,7 +286,6 @@
           .then(notifications => {
             if (notifications && notifications.length > 0) {
               const newNotifs = notifications.filter(n => !displayedNotificationIds.has(n.id));
-
               if (newNotifs.length > 0) {
                 newNotifs.forEach(n => displayedNotificationIds.add(n.id));
                 lastNotificationTime = notifications[notifications.length - 1].timestamp;
@@ -305,27 +304,43 @@
         fetch(`/react_post/${postId}/${reaction}`)
           .then(response => response.json())
           .then(data => {
-            if (data.reaction_set) {
-              location.reload();
-            }
-          });
-      }
+            if (data.reaction_set !== undefined) {
+              const trigger = document.getElementById(`reactionTrigger${postId}`);
+              if (trigger && data.reaction) {
+                const reactionMap = {
+                  'like': '👍',
+                  'love': '❤️',
+                  'haha': '😂',
+                  'wow': '😮',
+                  'sad': '😢',
+                  'angry': '😠'
+                };
+                trigger.innerHTML = `<i class="fas fa-${data.reaction === 'like' ? 'thumbs-up' : 'smile'}"></i> ${reactionMap[data.reaction] || 'React'}`;
+                trigger.classList.add('active');
+              } else if (trigger) {
+                trigger.innerHTML = `<i class="far fa-smile"></i> React`;
+                trigger.classList.remove('active');
+              }
 
-      function savePost(postId) {
-        fetch(`/save_post/${postId}`)
-          .then(response => response.json())
-          .then(data => {
-            let btn = document.getElementById(`saveBtn${postId}`);
-            if (btn) {
-              if (data.saved) {
-                btn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
-                btn.classList.add('active');
-              } else {
-                btn.innerHTML = '<i class="far fa-bookmark"></i> Save';
-                btn.classList.remove('active');
+              const reactionSummary = document.getElementById(`reactionSummary${postId}`);
+              if (reactionSummary && data.counts) {
+                const icons = [];
+                for (const [key, value] of Object.entries(data.counts)) {
+                  if (value > 0 && icons.length < 3) {
+                    if (key === 'like') icons.push('👍');
+                    else if (key === 'love') icons.push('❤️');
+                    else if (key === 'haha') icons.push('😂');
+                    else if (key === 'wow') icons.push('😮');
+                    else if (key === 'sad') icons.push('😢');
+                    else if (key === 'angry') icons.push('😠');
+                  }
+                }
+                const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
+                reactionSummary.innerHTML = `<div class="d-flex align-items-center gap-2"><div class="reaction-summary-icons">${icons.join(' ')}</div><small class="text-muted">${total}</small></div>`;
               }
             }
-          });
+          })
+          .catch(error => console.error('Error:', error));
       }
 
       function sharePost(postId) {
@@ -367,5 +382,6 @@
         });
       }, 5000);
     </script>
+  {% include '_story_viewer.html' %}
   </body>
 </html>

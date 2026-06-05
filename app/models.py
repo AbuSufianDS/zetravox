@@ -37,7 +37,6 @@ class SearchableMixin:
             'delete': list(session.deleted)
         }
 
-
     @classmethod
     def after_commit(cls, session):
         for obj in session._changes['add']:
@@ -109,9 +108,19 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     token_expiration: so.Mapped[Optional[datetime]]
     is_admin: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False)
     profile_pic: so.Mapped[Optional[str]] = so.mapped_column(sa.String(200), default='default.jpg')
+    cover_pic: so.Mapped[Optional[str]] = so.mapped_column(sa.String(200), default='default_cover.jpg')
     is_verified: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False)
     is_private: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False)
     points: so.Mapped[int] = so.mapped_column(sa.Integer, default=0)
+    relationship_status: so.Mapped[Optional[str]] = so.mapped_column(sa.String(50))
+    work: so.Mapped[Optional[str]] = so.mapped_column(sa.String(100))
+    education: so.Mapped[Optional[str]] = so.mapped_column(sa.String(100))
+    location: so.Mapped[Optional[str]] = so.mapped_column(sa.String(100))
+    website: so.Mapped[Optional[str]] = so.mapped_column(sa.String(200))
+    birthday: so.Mapped[Optional[str]] = so.mapped_column(sa.String(20))
+    gender: so.Mapped[Optional[str]] = so.mapped_column(sa.String(20))
+    interested_in: so.Mapped[Optional[str]] = so.mapped_column(sa.String(100))
+    phone: so.Mapped[Optional[str]] = so.mapped_column(sa.String(20))
 
     posts: so.WriteOnlyMapped['Post'] = so.relationship(back_populates='author')
     following: so.WriteOnlyMapped['User'] = so.relationship(
@@ -146,14 +155,23 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
                 last_active = self.last_active
             return (now - last_active).total_seconds() < 300
         return False
+
     def avatar(self, size):
-        if self.profile_pic and self.profile_pic != 'default.jpg' and self.profile_pic != 'None':
+        if self.profile_pic and self.profile_pic not in ['default.jpg', 'None']:
             try:
                 return url_for('static', filename=f'uploads/profiles/{self.profile_pic}')
             except:
                 pass
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
+
+    def cover_photo(self):
+        if self.cover_pic and self.cover_pic not in ['default_cover.jpg', 'None']:
+            try:
+                return url_for('static', filename=f'uploads/profiles/{self.cover_pic}')
+            except:
+                pass
+        return None
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -184,20 +202,21 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return db.session.scalar(query)
 
     def following_posts(self):
+        from datetime import datetime, timezone
         Author = so.aliased(User)
         Follower = so.aliased(User)
         return (
             sa.select(Post)
             .join(Post.author.of_type(Author))
-            .join(Author.followers.of_type(Follower), isouter=True)
-            .where(sa.or_(
-                Follower.id == self.id,
-                Author.id == self.id,
-            ))
+            .outerjoin(Author.followers.of_type(Follower))
+            .where(
+                sa.or_(
+                    Author.id == self.id,
+                    Follower.id == self.id
+                )
+            )
+            .where(Post.scheduled_for.is_(None))
             .where(Post.privacy.in_(['public', 'followers']))
-            .where(Post.scheduled_for == None)
-            .where(Post.scheduled_for <= datetime.now(timezone.utc))
-            .group_by(Post)
             .order_by(Post.timestamp.desc())
         )
 
@@ -323,7 +342,7 @@ class PostReaction(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
     post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('post.id', ondelete='CASCADE'), index=True)
-    reaction: so.Mapped[str] = so.mapped_column(sa.String(20))  # like, love, haha, wow, sad, angry
+    reaction: so.Mapped[str] = so.mapped_column(sa.String(20))
     timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (sa.UniqueConstraint('user_id', 'post_id', name='unique_reaction'),)
@@ -476,7 +495,6 @@ class Post(SearchableMixin, db.Model):
         return False
 
     def trending_score(self, refresh=False):
-
         from datetime import datetime, timezone
 
         if not refresh and self.trending_score_cache > 0:
@@ -494,13 +512,7 @@ class Post(SearchableMixin, db.Model):
         if age_hours < 1:
             age_hours = 1
 
-        score = (
-                        (likes * 1.5) +
-                        (comments * 2.5) +
-                        (reactions * 1.2) +
-                        (shares * 3.0)
-                ) / (age_hours ** 0.8)
-
+        score = ((likes * 1.5) + (comments * 2.5) + (reactions * 1.2) + (shares * 3.0)) / (age_hours ** 0.8)
         rounded_score = round(score, 2)
 
         self.trending_score_cache = rounded_score
@@ -616,3 +628,25 @@ class UserActivity(db.Model):
     activity_type: so.Mapped[str] = so.mapped_column(sa.String(50))
     target_id: so.Mapped[int] = so.mapped_column()
     timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+
+
+class StoryReaction(db.Model):
+    __tablename__ = 'story_reaction'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id))
+    story_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(Story.id, ondelete='CASCADE'))
+    reaction: so.Mapped[str] = so.mapped_column(sa.String(20))
+    timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (sa.UniqueConstraint('user_id', 'story_id', name='unique_story_reaction'),)
+
+
+class StoryComment(db.Model):
+    __tablename__ = 'story_comment'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    story_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(Story.id, ondelete='CASCADE'))
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id))
+    message: so.Mapped[str] = so.mapped_column(sa.String(500))
+    timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+
+    author: so.Mapped[User] = so.relationship(foreign_keys=[user_id])

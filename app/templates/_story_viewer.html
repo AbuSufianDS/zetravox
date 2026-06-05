@@ -1,0 +1,434 @@
+<div id="storyViewerModal" class="story-viewer-modal" style="display: none;">
+    <div class="story-viewer-overlay">
+        <div class="story-viewer-container">
+            <button class="story-close-btn" onclick="closeStoryViewer()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="story-viewer-content">
+                <div class="story-viewer-main">
+                    <img id="storyImage" class="story-media" style="display: none;">
+                    <video id="storyVideo" class="story-media" controls style="display: none;"></video>
+                </div>
+                <div class="story-viewer-sidebar">
+                    <div class="story-info">
+                        <img id="storyAuthorAvatar" class="story-author-avatar">
+                        <div class="story-author-details">
+                            <strong id="storyAuthorName"></strong>
+                            <small id="storyTime"></small>
+                        </div>
+                    </div>
+                    <div class="story-caption" id="storyCaption"></div>
+                    <div class="story-reactions">
+                        <div class="reaction-container story-reaction-container">
+                            <button class="story-react-btn" id="storyReactBtn">
+                                <i class="far fa-smile"></i> React
+                            </button>
+                            <div class="reaction-picker story-reaction-picker">
+                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'like')">
+                                    <span class="reaction-emoji">👍</span>
+                                    <span class="reaction-label">Like</span>
+                                </button>
+                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'love')">
+                                    <span class="reaction-emoji">❤️</span>
+                                    <span class="reaction-label">Love</span>
+                                </button>
+                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'haha')">
+                                    <span class="reaction-emoji">😂</span>
+                                    <span class="reaction-label">Haha</span>
+                                </button>
+                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'wow')">
+                                    <span class="reaction-emoji">😮</span>
+                                    <span class="reaction-label">Wow</span>
+                                </button>
+                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'sad')">
+                                    <span class="reaction-emoji">😢</span>
+                                    <span class="reaction-label">Sad</span>
+                                </button>
+                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'angry')">
+                                    <span class="reaction-emoji">😠</span>
+                                    <span class="reaction-label">Angry</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="story-reaction-count" id="storyReactionCount"></div>
+                    </div>
+                    <div class="story-comments-section">
+                        <div class="story-comments-list">
+                            <div class="story-comments-header">
+                                <i class="fas fa-comment-dots"></i> Comments
+                            </div>
+                            <div id="storyComments"></div>
+                        </div>
+                        <div class="story-comment-input">
+                            <input type="text" id="storyCommentInput" placeholder="Send a message..." class="story-comment-field">
+                            <button onclick="sendStoryComment(currentStoryId)" class="story-comment-send">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="story-nav-prev" onclick="prevStory()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="story-nav-next" onclick="nextStory()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.story-viewer-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    background: rgba(0,0,0,0.95);
+}
+.story-viewer-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.story-viewer-container {
+    position: relative;
+    width: 90%;
+    max-width: 1100px;
+    height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.story-close-btn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+}
+.story-viewer-content {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: black;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.story-viewer-main {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: black;
+}
+.story-media {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+.story-viewer-sidebar {
+    width: 320px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #e4e6eb;
+}
+.story-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid #e4e6eb;
+}
+.story-author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.story-author-details {
+    flex: 1;
+}
+.story-author-details strong {
+    display: block;
+    font-size: 15px;
+}
+.story-author-details small {
+    font-size: 11px;
+    color: #65676b;
+}
+.story-caption {
+    padding: 16px;
+    font-size: 14px;
+    color: #1a1a2e;
+    border-bottom: 1px solid #e4e6eb;
+}
+.story-reactions {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e4e6eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.story-react-btn {
+    background: #f0f2f5;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.story-react-btn:hover {
+    background: #e4e6eb;
+}
+.story-reaction-container {
+    position: relative;
+}
+.story-reaction-picker {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+}
+.story-reaction-count {
+    font-size: 13px;
+    color: #65676b;
+}
+.story-comments-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.story-comments-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+.story-comments-header {
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e4e6eb;
+}
+.story-comment {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.story-comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.story-comment-bubble {
+    flex: 1;
+    background: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 18px;
+}
+.story-comment-author {
+    font-weight: 600;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 2px;
+}
+.story-comment-text {
+    font-size: 13px;
+    margin: 0;
+    word-wrap: break-word;
+}
+.story-comment-time {
+    font-size: 10px;
+    color: #65676b;
+    margin-top: 4px;
+    display: block;
+}
+.story-comment-input {
+    padding: 12px 16px;
+    border-top: 1px solid #e4e6eb;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.story-comment-field {
+    flex: 1;
+    border: none;
+    background: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 20px;
+    outline: none;
+}
+.story-comment-send {
+    background: none;
+    border: none;
+    color: #1877f2;
+    cursor: pointer;
+    padding: 8px;
+}
+.story-nav-prev, .story-nav-next {
+    position: absolute;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.story-nav-prev {
+    left: -60px;
+}
+.story-nav-next {
+    right: -60px;
+}
+.story-nav-prev:hover, .story-nav-next:hover {
+    background: rgba(0,0,0,0.8);
+}
+</style>
+
+<script>
+let currentStoryIndex = 0;
+let currentStories = [];
+let currentStoryId = null;
+
+function openStoryViewer(stories, index) {
+    currentStories = stories;
+    currentStoryIndex = index;
+    currentStoryId = stories[index].id;
+    const modal = document.getElementById('storyViewerModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadStory(currentStoryIndex);
+    }
+}
+
+function loadStory(index) {
+    const story = currentStories[index];
+    if (!story) return;
+    currentStoryId = story.id;
+
+    const imgEl = document.getElementById('storyImage');
+    const videoEl = document.getElementById('storyVideo');
+
+    imgEl.style.display = 'none';
+    videoEl.style.display = 'none';
+
+    if (story.media_type === 'image') {
+        imgEl.src = `/static/uploads/stories/${story.media_url}`;
+        imgEl.style.display = 'block';
+    } else {
+        videoEl.src = `/static/uploads/stories/${story.media_url}`;
+        videoEl.style.display = 'block';
+    }
+
+    document.getElementById('storyAuthorAvatar').src = story.author_avatar;
+    document.getElementById('storyAuthorName').innerHTML = story.author_name;
+    document.getElementById('storyTime').innerHTML = story.time_ago;
+    document.getElementById('storyCaption').innerHTML = story.caption || '';
+    document.getElementById('storyReactionCount').innerHTML = story.reaction_count || 0;
+    loadStoryComments(story.id);
+}
+
+function prevStory() {
+    if (currentStoryIndex > 0) {
+        currentStoryIndex--;
+        loadStory(currentStoryIndex);
+    }
+}
+
+function nextStory() {
+    if (currentStoryIndex < currentStories.length - 1) {
+        currentStoryIndex++;
+        loadStory(currentStoryIndex);
+    }
+}
+
+function closeStoryViewer() {
+    document.getElementById('storyViewerModal').style.display = 'none';
+}
+
+function reactToStory(storyId, reaction) {
+    fetch(`/react_story/${storyId}/${reaction}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('storyReactionCount').innerHTML = data.reaction_count;
+        }
+    });
+}
+
+function loadStoryComments(storyId) {
+    fetch(`/get_story_comments/${storyId}`)
+        .then(response => response.json())
+        .then(comments => {
+            const container = document.getElementById('storyComments');
+            if (!comments || comments.length === 0) {
+                container.innerHTML = '<div class="no-comments">No comments yet. Send a message!</div>';
+                return;
+            }
+            container.innerHTML = comments.map(c => `
+                <div class="story-comment">
+                    <img src="${c.author_avatar}" class="story-comment-avatar">
+                    <div class="story-comment-bubble">
+                        <strong class="story-comment-author">${c.author_name}</strong>
+                        <p class="story-comment-text">${escapeHtml(c.message)}</p>
+                        <small class="story-comment-time">${c.time_ago}</small>
+                    </div>
+                </div>
+            `).join('');
+        });
+}
+
+function sendStoryComment(storyId) {
+    const input = document.getElementById('storyCommentInput');
+    const message = input.value.trim();
+    if (!message) return;
+    fetch('/send_story_comment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        },
+        body: JSON.stringify({ story_id: storyId, message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            input.value = '';
+            loadStoryComments(storyId);
+        }
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+document.addEventListener('keydown', function(e) {
+    if (document.getElementById('storyViewerModal').style.display === 'flex') {
+        if (e.key === 'ArrowLeft') prevStory();
+        if (e.key === 'ArrowRight') nextStory();
+        if (e.key === 'Escape') closeStoryViewer();
+    }
+});
+</script>

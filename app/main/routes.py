@@ -18,6 +18,8 @@ from app.notification_helper import send_like_notification, send_comment_notific
 from app.services.recommendation_service import recommendation_engine
 from app.services.report_service import report_service
 from app.ai_helper import ai
+from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
+                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment)
 
 
 def admin_required(f):
@@ -47,6 +49,9 @@ def before_request():
     g.locale = str(get_locale())
 
 
+from datetime import datetime, timezone
+
+
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 @login_required
@@ -55,37 +60,45 @@ def index():
     comment_form = CommentForm()
     story_form = StoryForm()
 
-    if request.method == 'POST' and 'submit_post' in request.form and form.validate_on_submit():
+    if request.method == 'POST' and 'submit_post' in request.form:
         media_filename = None
         media_type = None
-        if form.media.data and form.media.data.filename:
-            media_filename, media_type = save_media(form.media.data)
 
-        is_spam, spam_confidence, should_warn = spam_checker.check_post(form.post.data)
+        if 'media' in request.files and request.files['media'].filename:
+            file = request.files['media']
+            media_filename, media_type = save_media(file)
 
-        profanity_words = []
-        has_profanity = any(word in form.post.data.lower() for word in profanity_words)
+        post_content = request.form.get('post', '')
+        if not post_content:
+            flash('Post content cannot be empty.', 'warning')
+            return redirect(url_for('main.index'))
+
+        is_spam, spam_confidence, should_warn = spam_checker.check_post(post_content)
 
         try:
-            language = detect(form.post.data)
+            language = detect(post_content)
         except LangDetectException:
             language = ''
 
         scheduled_for = None
-        if form.schedule_date.data:
-            scheduled_for = form.schedule_date.data.replace(tzinfo=timezone.utc)
+        schedule_date = request.form.get('schedule_date', '')
+        if schedule_date:
+            try:
+                scheduled_for = datetime.strptime(schedule_date, '%Y-%m-%d %H:%M').replace(tzinfo=timezone.utc)
+            except ValueError:
+                pass
 
         post = Post(
-            body=form.post.data,
+            body=post_content,
             author=current_user,
             language=language,
-            is_spam=is_spam or has_profanity,
+            is_spam=is_spam,
             spam_confidence=spam_confidence,
             reviewed=False,
-            approved=not should_warn and not has_profanity,
+            approved=not should_warn,
             media_url=media_filename,
             media_type=media_type,
-            privacy=form.privacy.data,
+            privacy=request.form.get('privacy', 'public'),
             scheduled_for=scheduled_for
         )
         db.session.add(post)
@@ -120,11 +133,39 @@ def index():
         ).order_by(Story.timestamp.desc())
     ).all()
 
+    def time_ago(dt):
+        now = datetime.now(timezone.utc)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        diff = now - dt
+
+        if diff.days > 0:
+            return f'{diff.days}d ago'
+        if diff.seconds > 3600:
+            return f'{diff.seconds // 3600}h ago'
+        if diff.seconds > 60:
+            return f'{diff.seconds // 60}m ago'
+        return 'Just now'
+
     stories_by_user = {}
+    stories_data = []
     for story in stories:
         if story.user_id not in stories_by_user:
             stories_by_user[story.user_id] = []
         stories_by_user[story.user_id].append(story)
+
+        reaction_count = db.session.query(StoryReaction).filter_by(story_id=story.id).count()
+
+        stories_data.append({
+            'id': story.id,
+            'media_url': story.media_url,
+            'media_type': story.media_type,
+            'caption': story.caption or '',
+            'author_name': story.author.username,
+            'author_avatar': story.author.avatar(48),
+            'time_ago': time_ago(story.timestamp),
+            'reaction_count': reaction_count
+        })
 
     page = request.args.get('page', 1, type=int)
     posts = db.paginate(current_user.following_posts(), page=page,
@@ -135,6 +176,7 @@ def index():
 
     return render_template('index.html', title='Home', form=form, comment_form=comment_form,
                            story_form=story_form, stories_by_user=stories_by_user,
+                           stories_data=stories_data,
                            posts=posts.items, next_url=next_url, prev_url=prev_url)
 
 @bp.route('/add_story', methods=['POST'])
@@ -432,19 +474,44 @@ def edit_profile():
         current_user.about_me = form.about_me.data
         current_user.is_private = form.is_private.data == 'True'
 
+        current_user.relationship_status = form.relationship_status.data
+        current_user.work = form.work.data
+        current_user.education = form.education.data
+        current_user.location = form.location.data
+        current_user.website = form.website.data
+        current_user.birthday = form.birthday.data
+        current_user.gender = form.gender.data
+        current_user.interested_in = form.interested_in.data
+        current_user.phone = form.phone.data
+
         if form.profile_pic.data and form.profile_pic.data.filename:
             old_pic = current_user.profile_pic
             current_user.profile_pic = save_profile_picture(form.profile_pic.data, old_pic)
 
+        if form.cover_pic.data and form.cover_pic.data.filename:
+            old_cover = current_user.cover_pic
+            current_user.cover_pic = save_cover_picture(form.cover_pic.data, old_cover)
+
         db.session.commit()
-        flash('Your changes have been saved.')
-        return redirect(url_for('main.edit_profile'))
+        flash('Your changes have been saved.', 'success')
+        return redirect(url_for('main.user', username=current_user.username))
+
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
         form.is_private.data = str(current_user.is_private)
-    return render_template('edit_profile.html', title='Edit Profile', form=form)
 
+        form.relationship_status.data = current_user.relationship_status
+        form.work.data = current_user.work
+        form.education.data = current_user.education
+        form.location.data = current_user.location
+        form.website.data = current_user.website
+        form.birthday.data = current_user.birthday
+        form.gender.data = current_user.gender
+        form.interested_in.data = current_user.interested_in
+        form.phone.data = current_user.phone
+
+    return render_template('edit_profile.html', title='Edit Profile', form=form)
 
 @bp.route('/follow/<username>', methods=['POST'])
 @login_required
@@ -1207,3 +1274,95 @@ def export_posts():
         current_user.launch_task('export_posts', 'Exporting posts...')
         db.session.commit()
     return redirect(url_for('main.user', username=current_user.username))
+
+
+from datetime import datetime, timezone
+
+
+@bp.route('/react_story/<int:story_id>/<reaction>', methods=['POST'])
+@login_required
+def react_story(story_id, reaction):
+    story = db.session.get(Story, story_id)
+    if not story:
+        return jsonify({'success': False, 'error': 'Story not found'}), 404
+
+    existing = db.session.scalar(
+        sa.select(StoryReaction).where(
+            StoryReaction.user_id == current_user.id,
+            StoryReaction.story_id == story_id
+        )
+    )
+
+    if existing:
+        if existing.reaction == reaction:
+            db.session.delete(existing)
+        else:
+            existing.reaction = reaction
+    else:
+        new_reaction = StoryReaction(
+            user_id=current_user.id,
+            story_id=story_id,
+            reaction=reaction
+        )
+        db.session.add(new_reaction)
+
+    db.session.commit()
+
+    reaction_count = db.session.query(StoryReaction).filter_by(story_id=story_id).count()
+
+    return jsonify({'success': True, 'reaction_count': reaction_count})
+
+
+@bp.route('/send_story_comment', methods=['POST'])
+@login_required
+def send_story_comment():
+    data = request.get_json()
+    story_id = data.get('story_id')
+    message = data.get('message', '').strip()
+
+    if not message:
+        return jsonify({'success': False, 'error': 'Message cannot be empty'}), 400
+
+    story = db.session.get(Story, story_id)
+    if not story:
+        return jsonify({'success': False, 'error': 'Story not found'}), 404
+
+    comment = StoryComment(
+        story_id=story_id,
+        user_id=current_user.id,
+        message=message
+    )
+    db.session.add(comment)
+    db.session.commit()
+
+    return jsonify({'success': True})
+
+
+@bp.route('/get_story_comments/<int:story_id>')
+@login_required
+def get_story_comments(story_id):
+    comments = db.session.scalars(
+        sa.select(StoryComment)
+        .where(StoryComment.story_id == story_id)
+        .order_by(StoryComment.timestamp.asc())
+    ).all()
+
+    def time_ago(dt):
+        now = datetime.now(timezone.utc)
+        diff = now - dt
+
+        if diff.days > 0:
+            return f'{diff.days}d ago'
+        if diff.seconds > 3600:
+            return f'{diff.seconds // 3600}h ago'
+        if diff.seconds > 60:
+            return f'{diff.seconds // 60}m ago'
+        return 'Just now'
+
+    return jsonify([{
+        'id': c.id,
+        'author_name': c.author.username,
+        'author_avatar': c.author.avatar(32),
+        'message': c.message,
+        'time_ago': time_ago(c.timestamp)
+    } for c in comments])

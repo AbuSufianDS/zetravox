@@ -1,19 +1,19 @@
-<div class="post-card fade-in">
+<div class="post-card">
     <div class="post-header">
         <img src="{{ post.author.avatar(48) }}" class="post-avatar" alt="{{ post.author.username }}">
         <div class="post-user-info">
             <a href="{{ url_for('main.user', username=post.author.username) }}" class="post-username">
                 {{ post.author.username }}
                 {% if post.author.is_verified %}
-                <i class="fas fa-check-circle text-primary" style="font-size: 12px;"></i>
+                <i class="fas fa-check-circle text-primary verification-badge"></i>
                 {% endif %}
             </a>
             <div class="post-time">
                 <i class="far fa-clock me-1"></i>{{ moment(post.timestamp).fromNow() }}
                 {% if post.privacy == 'followers' %}
-                <i class="fas fa-user-friends ms-2"></i>
+                <i class="fas fa-user-friends privacy-icon ms-2"></i>
                 {% elif post.privacy == 'only_me' %}
-                <i class="fas fa-lock ms-2"></i>
+                <i class="fas fa-lock privacy-icon ms-2"></i>
                 {% endif %}
             </div>
         </div>
@@ -47,13 +47,12 @@
 
     <div class="post-content">
         <div class="post-text">{{ post.body }}</div>
-
         {% if post.media_url %}
-        <div class="post-media mt-2">
+        <div class="post-media">
             {% if post.media_type == 'image' %}
-            <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}" class="img-fluid rounded" alt="Post image">
+            <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}" class="img-fluid" alt="Post image">
             {% elif post.media_type == 'video' %}
-            <video controls class="w-100 rounded">
+            <video controls>
                 <source src="{{ url_for('static', filename='uploads/' + post.media_url) }}" type="video/mp4">
             </video>
             {% endif %}
@@ -61,52 +60,120 @@
         {% endif %}
     </div>
 
+    <div id="reactionSummary{{ post.id }}" class="reaction-summary">
+        {% set reaction_counts = post.get_reaction_counts() %}
+        {% if reaction_counts %}
+        <div class="reaction-stats">
+            <div class="reaction-icons">
+                {% for reaction, count in reaction_counts.items() %}
+                    {% if loop.index <= 3 %}
+                        {% if reaction == 'like' %}👍
+                        {% elif reaction == 'love' %}❤️
+                        {% elif reaction == 'haha' %}😂
+                        {% elif reaction == 'wow' %}😮
+                        {% elif reaction == 'sad' %}😢
+                        {% elif reaction == 'angry' %}😠
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <span class="reaction-count">{{ reaction_counts.values() | sum }}</span>
+        </div>
+        {% endif %}
+    </div>
+
     <div class="post-actions">
-        <button class="post-action-btn" onclick="reactPost({{ post.id }}, 'like')">
-            <i class="fas fa-heart {{ 'text-danger' if post.is_liked_by(current_user) else '' }}"></i>
-            <span>{{ post.like_count() }}</span>
+        <div class="reaction-container">
+            <button class="action-btn reaction-trigger" id="reactionTrigger{{ post.id }}">
+                {% set user_reaction = post.user_reaction(current_user) %}
+                {% if user_reaction %}
+                    {% if user_reaction == 'like' %}👍
+                    {% elif user_reaction == 'love' %}❤️
+                    {% elif user_reaction == 'haha' %}😂
+                    {% elif user_reaction == 'wow' %}😮
+                    {% elif user_reaction == 'sad' %}😢
+                    {% elif user_reaction == 'angry' %}😠
+                    {% else %}<i class="far fa-smile"></i> React
+                    {% endif %}
+                {% else %}
+                    <i class="far fa-smile"></i> React
+                {% endif %}
+            </button>
+            <div class="reaction-picker">
+                <button class="reaction-option" onclick="reactPost({{ post.id }}, 'like')" data-reaction="like">
+                    <span class="reaction-emoji">👍</span>
+                    <span class="reaction-label">Like</span>
+                </button>
+                <button class="reaction-option" onclick="reactPost({{ post.id }}, 'love')" data-reaction="love">
+                    <span class="reaction-emoji">❤️</span>
+                    <span class="reaction-label">Love</span>
+                </button>
+                <button class="reaction-option" onclick="reactPost({{ post.id }}, 'haha')" data-reaction="haha">
+                    <span class="reaction-emoji">😂</span>
+                    <span class="reaction-label">Haha</span>
+                </button>
+                <button class="reaction-option" onclick="reactPost({{ post.id }}, 'wow')" data-reaction="wow">
+                    <span class="reaction-emoji">😮</span>
+                    <span class="reaction-label">Wow</span>
+                </button>
+                <button class="reaction-option" onclick="reactPost({{ post.id }}, 'sad')" data-reaction="sad">
+                    <span class="reaction-emoji">😢</span>
+                    <span class="reaction-label">Sad</span>
+                </button>
+                <button class="reaction-option" onclick="reactPost({{ post.id }}, 'angry')" data-reaction="angry">
+                    <span class="reaction-emoji">😠</span>
+                    <span class="reaction-label">Angry</span>
+                </button>
+            </div>
+        </div>
+        <button class="action-btn comment-btn" data-bs-toggle="collapse" data-bs-target="#comments{{ post.id }}">
+            <i class="far fa-comment"></i> Comment
+            <span class="comment-count">{{ post.comment_count() }}</span>
         </button>
-        <button class="post-action-btn" data-bs-toggle="collapse" data-bs-target="#comments{{ post.id }}">
-            <i class="fas fa-comment"></i>
-            <span>{{ post.comment_count() }}</span>
-        </button>
-        <button class="post-action-btn" onclick="sharePost({{ post.id }})">
-            <i class="fas fa-share"></i>
-            <span>{{ post.share_count }}</span>
+        <button class="action-btn share-btn" onclick="sharePost({{ post.id }})">
+            <i class="fas fa-share-alt"></i> Share
+            <span class="share-count">{{ post.share_count }}</span>
         </button>
     </div>
 
-    <div class="collapse" id="comments{{ post.id }}">
-        <div class="comments-section">
+    <div class="collapse comments-section" id="comments{{ post.id }}">
+        <div class="comments-container">
             {% for comment in post.get_comments() %}
-            <div class="comment-item">
+            <div class="comment">
                 <img src="{{ comment.author.avatar(32) }}" class="comment-avatar">
-                <div class="comment-content">
-                    <span class="comment-username">{{ comment.author.username }}</span>
+                <div class="comment-bubble">
+                    <div class="comment-header">
+                        <span class="comment-author">{{ comment.author.username }}</span>
+                        <span class="comment-time">{{ moment(comment.timestamp).fromNow() }}</span>
+                    </div>
                     <p class="comment-text">{{ comment.body }}</p>
                 </div>
                 {% if current_user == comment.author or current_user.is_admin %}
-                <a href="{{ url_for('main.delete_comment', comment_id=comment.id) }}" class="text-danger small">
+                <a href="{{ url_for('main.delete_comment', comment_id=comment.id) }}" class="comment-delete">
                     <i class="fas fa-times"></i>
                 </a>
                 {% endif %}
             </div>
             {% else %}
-            <p class="text-muted text-center mb-0">No comments yet.</p>
+            <div class="no-comments">
+                <p>No comments yet. Be the first to comment!</p>
+            </div>
             {% endfor %}
 
-            <form action="{{ url_for('main.add_comment', post_id=post.id) }}" method="post" class="mt-3">
+            <form action="{{ url_for('main.add_comment', post_id=post.id) }}" method="post" class="comment-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
-                <div class="input-group">
-                    <input type="text" name="body" class="form-control form-control-sm" placeholder="Write a comment..." required>
-                    <button type="submit" class="btn btn-primary btn-sm">Post</button>
+                <div class="comment-input-group">
+                    <img src="{{ current_user.avatar(32) }}" class="comment-input-avatar">
+                    <input type="text" name="body" class="comment-input" placeholder="Write a comment..." required>
+                    <button type="submit" class="comment-submit">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal{{ post.id }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -116,6 +183,7 @@
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete this post?</p>
+                <p class="text-muted small">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -124,3 +192,268 @@
         </div>
     </div>
 </div>
+
+<style>
+.post-card {
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow 0.2s;
+}
+.post-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+}
+.post-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.post-user-info {
+    flex: 1;
+}
+.post-username {
+    font-weight: 600;
+    color: #1a1a2e;
+    text-decoration: none;
+    font-size: 15px;
+}
+.post-username:hover {
+    text-decoration: underline;
+}
+.verification-badge {
+    font-size: 12px;
+    margin-left: 4px;
+}
+.post-time {
+    font-size: 12px;
+    color: #65676b;
+    margin-top: 2px;
+}
+.privacy-icon {
+    font-size: 10px;
+}
+.post-content {
+    padding: 0 16px 12px;
+}
+.post-text {
+    font-size: 15px;
+    color: #1a1a2e;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+.post-media {
+    margin-top: 12px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f0f2f5;
+}
+.post-media img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+}
+.post-media video {
+    width: 100%;
+    max-height: 500px;
+}
+.reaction-summary {
+    padding: 8px 16px;
+    border-top: 1px solid #e4e6eb;
+    border-bottom: 1px solid #e4e6eb;
+}
+.reaction-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.reaction-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 14px;
+}
+.reaction-count {
+    font-size: 13px;
+    color: #65676b;
+}
+.post-actions {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 8px;
+}
+.action-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #65676b;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.action-btn:hover {
+    background-color: #f0f2f5;
+}
+.reaction-container {
+    position: relative;
+    flex: 1;
+}
+.reaction-picker {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: white;
+    border-radius: 40px;
+    padding: 8px 12px;
+    display: flex;
+    gap: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    margin-bottom: 8px;
+}
+.reaction-container:hover .reaction-picker {
+    opacity: 1;
+    visibility: visible;
+}
+.reaction-option {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 30px;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+.reaction-option:hover {
+    transform: scale(1.05);
+    background: #f0f2f5;
+}
+.reaction-emoji {
+    font-size: 20px;
+}
+.reaction-label {
+    font-size: 13px;
+    color: #65676b;
+}
+.comments-section {
+    background: #f8f9fa;
+    border-top: 1px solid #e4e6eb;
+    padding: 16px;
+}
+.comments-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+.comment {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+}
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.comment-bubble {
+    flex: 1;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.comment-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a1a2e;
+}
+.comment-time {
+    font-size: 11px;
+    color: #65676b;
+}
+.comment-text {
+    font-size: 13px;
+    color: #1a1a2e;
+    margin: 0;
+    word-wrap: break-word;
+}
+.comment-delete {
+    color: #dc3545;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.comment:hover .comment-delete {
+    opacity: 1;
+}
+.no-comments {
+    text-align: center;
+    padding: 24px;
+    color: #65676b;
+    font-size: 13px;
+}
+.comment-form {
+    margin-top: 16px;
+}
+.comment-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.comment-input-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.comment-input {
+    flex: 1;
+    border: none;
+    background: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+}
+.comment-input:focus {
+    background: #e4e6eb;
+}
+.comment-submit {
+    background: none;
+    border: none;
+    color: #1877f2;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+.comment-submit:hover {
+    background: #e4e6eb;
+}
+</style>
