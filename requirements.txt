@@ -117,8 +117,7 @@ sympy==1.13.1
 termcolor==3.3.0
 threadpoolctl==3.6.0
 tokenizers==0.22.2
-torch==2.5.0 --index-url https://download.pytorch.org/whl/cpu
-tqdm==4.67.3
+torch==2.5.0
 transformers==5.10.2
 Twisted==26.4.0
 typer==0.25.1
