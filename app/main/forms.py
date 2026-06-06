@@ -8,6 +8,7 @@ from flask_babel import _, lazy_gettext as _l
 from app import db
 from app.models import User
 from wtforms.fields import DateTimeField
+from flask_wtf.file import MultipleFileField
 
 
 class EditProfileForm(FlaskForm):
@@ -73,10 +74,12 @@ class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+from flask_wtf.file import FileField, FileAllowed, MultipleFileField
+
 class PostForm(FlaskForm):
     post = TextAreaField(_l('What\'s on your mind?'), validators=[
         DataRequired(), Length(min=1, max=280)])
-    media = FileField(_l('Add Photo/Video'), validators=[
+    media_files = MultipleFileField(_l('Add Photos/Videos'), validators=[
         FileAllowed(['png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm'], _('Images and videos only!'))
     ])
     privacy = SelectField(_l('Privacy'), choices=[
@@ -86,8 +89,6 @@ class PostForm(FlaskForm):
     ], default='public')
     schedule_date = DateTimeField(_l('Schedule for later'), validators=[Optional()], format='%Y-%m-%d %H:%M')
     submit = SubmitField(_l('Post'))
-
-
 class CommentForm(FlaskForm):
     body = TextAreaField(_l('Write a comment...'), validators=[DataRequired(), Length(min=1, max=500)])
     submit = SubmitField(_l('Post'))

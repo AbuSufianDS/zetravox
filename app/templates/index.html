@@ -3,22 +3,22 @@
 {% block content %}
 <style>
     .create-post-card {
-        background: white;
+        background: var(--bg-card);
         border-radius: 12px;
         padding: 16px;
         margin-bottom: 20px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow);
         cursor: pointer;
         transition: all 0.2s ease;
     }
 
     .create-post-card:hover {
-        background: #f8f9fa;
+        background: var(--hover-bg);
         transform: translateY(-1px);
     }
 
     .create-post-input {
-        background: #f0f2f5;
+        background: var(--hover-bg);
         border: none;
         border-radius: 40px;
         padding: 12px 16px;
@@ -26,10 +26,11 @@
         font-size: 14px;
         cursor: pointer;
         transition: background 0.2s;
+        color: var(--text-primary);
     }
 
     .create-post-input:hover {
-        background: #e4e6eb;
+        background: var(--border-color);
     }
 
     .post-actions-bar {
@@ -37,7 +38,7 @@
         justify-content: space-around;
         margin-top: 12px;
         padding-top: 8px;
-        border-top: 1px solid #e4e6eb;
+        border-top: 1px solid var(--border-color);
     }
 
     .post-action-btn {
@@ -48,7 +49,7 @@
         border-radius: 8px;
         font-size: 13px;
         font-weight: 500;
-        color: #65676b;
+        color: var(--text-secondary);
         transition: background 0.2s;
         display: flex;
         align-items: center;
@@ -57,7 +58,7 @@
     }
 
     .post-action-btn:hover {
-        background: #f0f2f5;
+        background: var(--hover-bg);
     }
 
     .post-action-btn i {
@@ -91,7 +92,7 @@
         height: 70px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #e4e6eb;
+        border: 2px solid var(--border-color);
         padding: 2px;
     }
 
@@ -113,7 +114,7 @@
 
     .story-name {
         font-size: 11px;
-        color: #65676b;
+        color: var(--text-secondary);
         margin-top: 4px;
         max-width: 70px;
         overflow: hidden;
@@ -135,14 +136,14 @@
         border-radius: 10px;
         cursor: pointer;
         transition: background 0.2s;
-        color: #1a1a2e;
+        color: var(--text-primary);
         text-decoration: none;
     }
 
     .left-sidebar-item:hover {
-        background: #f0f2f5;
+        background: var(--hover-bg);
         text-decoration: none;
-        color: #1a1a2e;
+        color: var(--text-primary);
     }
 
     .left-sidebar-icon {
@@ -162,13 +163,13 @@
 
     .sidebar-divider {
         margin: 12px 0;
-        border-top: 1px solid #e4e6eb;
+        border-top: 1px solid var(--border-color);
     }
 
     .section-title {
         font-size: 16px;
         font-weight: 600;
-        color: #65676b;
+        color: var(--text-secondary);
         margin: 16px 0 8px 12px;
     }
 
@@ -183,7 +184,7 @@
     .birthday-icon {
         width: 36px;
         height: 36px;
-        background: #e4e6eb;
+        background: var(--hover-bg);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -203,7 +204,7 @@
     }
 
     .contact-item:hover {
-        background: #f0f2f5;
+        background: var(--hover-bg);
     }
 
     .contact-info {
@@ -223,6 +224,7 @@
     .contact-name {
         font-size: 13px;
         font-weight: 500;
+        color: var(--text-primary);
     }
 
     .online-dot {
@@ -233,7 +235,7 @@
         position: absolute;
         bottom: 0;
         right: 0;
-        border: 2px solid white;
+        border: 2px solid var(--bg-card);
     }
 
     .create-post-modal .modal-content {
@@ -242,7 +244,7 @@
     }
 
     .create-post-modal .modal-header {
-        border-bottom: 1px solid #e4e6eb;
+        border-bottom: 1px solid var(--border-color);
         padding: 16px;
     }
 
@@ -251,6 +253,8 @@
         font-size: 20px;
         resize: none;
         padding: 16px;
+        background: var(--bg-card);
+        color: var(--text-primary);
     }
 
     .create-post-textarea:focus {
@@ -262,8 +266,8 @@
         display: flex;
         gap: 16px;
         padding: 12px 16px;
-        border-top: 1px solid #e4e6eb;
-        border-bottom: 1px solid #e4e6eb;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .media-btn {
@@ -278,15 +282,23 @@
         justify-content: center;
         gap: 8px;
         transition: background 0.2s;
+        color: var(--text-secondary);
     }
 
     .media-btn:hover {
-        background: #f0f2f5;
+        background: var(--hover-bg);
     }
 
     .media-btn.live { color: #e41e3f; }
     .media-btn.photo { color: #45bd62; }
     .media-btn.feeling { color: #f7b928; }
+
+    .media-preview-img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
 
     @media (max-width: 992px) {
         .left-sidebar, .right-sidebar {
@@ -311,7 +323,6 @@
                         </div>
                         <div class="story-name">Your Story</div>
                     </div>
-
                     {% for story in stories_data %}
                     <div class="story-circle" onclick="openStoryViewer({{ story.id }})">
                         <div class="story-avatar">
@@ -382,6 +393,7 @@
         </div>
     </div>
 
+    <!-- Center Feed -->
     <div class="col-lg-6">
         <div class="create-post-card" data-bs-toggle="modal" data-bs-target="#createPostModal">
             <div class="d-flex gap-3">
@@ -433,7 +445,6 @@
     <!-- Right Sidebar -->
     <div class="col-lg-3 d-none d-lg-block">
         <div class="right-sidebar">
-            <!-- Birthdays -->
             {% if upcoming_birthdays %}
                 {% for birthday in upcoming_birthdays[:3] %}
                 <div class="birthday-item">
@@ -511,8 +522,9 @@
     </div>
 </div>
 
+<!-- Create Post Modal -->
 <div class="modal fade create-post-modal" id="createPostModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Create Post</h5>
@@ -535,14 +547,11 @@
                         </div>
                     </div>
 
-                    {{ form.post(class="create-post-textarea", rows=4, placeholder="What's on your mind?", style="border: none; width: 100%; padding: 0 16px;") }}
+                    {{ form.post(class="create-post-textarea", rows=4, placeholder="What's on your mind?") }}
 
                     <div class="media-buttons">
-                        <button type="button" class="media-btn live" onclick="document.getElementById('postMedia').click()">
-                            <i class="fas fa-video"></i> Live Video
-                        </button>
                         <button type="button" class="media-btn photo" onclick="document.getElementById('postMedia').click()">
-                            <i class="fas fa-image"></i> Photo/Video
+                            <i class="fas fa-images"></i> Photo/Video
                         </button>
                         <button type="button" class="media-btn feeling" onclick="insertEmoji()">
                             <i class="fas fa-smile"></i> Feeling
@@ -550,9 +559,13 @@
                     </div>
 
                     <div class="px-3 pb-3">
-                        {{ form.media(class="form-control d-none", id="postMedia", accept="image/*,video/*") }}
-                        {{ form.schedule_date(class="form-control mb-2", placeholder="Schedule for later (optional)") }}
-                    </div>
+    <input type="file" name="media_files" id="postMedia" class="form-control"
+           accept="image/*,video/*" multiple style="display: none;"
+           onchange="previewMultipleMedia(this)">
+    <div id="mediaPreview" class="row g-2 mt-2"></div>
+    {{ form.schedule_date(class="form-control mb-2", placeholder="Schedule for later (optional)") }}
+</div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -605,6 +618,35 @@ function openStoryViewer(storyId) {
     window.location.href = '/view_story/' + storyId;
 }
 
+function previewMultipleMedia(input) {
+    const preview = document.getElementById('mediaPreview');
+    preview.innerHTML = '';
+
+    if (input.files && input.files.length > 0) {
+        for (let i = 0; i < Math.min(input.files.length, 10); i++) {
+            const file = input.files[i];
+            const col = document.createElement('div');
+            col.className = 'col-4';
+
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'media-preview-img';
+                img.src = URL.createObjectURL(file);
+                col.appendChild(img);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.className = 'media-preview-img';
+                video.muted = true;
+                const source = document.createElement('source');
+                source.src = URL.createObjectURL(file);
+                video.appendChild(source);
+                col.appendChild(video);
+            }
+            preview.appendChild(col);
+        }
+    }
+}
+
 document.querySelector('.create-post-card').addEventListener('click', function(e) {
     if (!e.target.closest('.post-action-btn')) {
         const modal = new bootstrap.Modal(document.getElementById('createPostModal'));
@@ -617,7 +659,6 @@ document.querySelectorAll('.post-action-btn').forEach(btn => {
         e.stopPropagation();
         const modal = new bootstrap.Modal(document.getElementById('createPostModal'));
         modal.show();
-
         if (this.classList.contains('photo')) {
             document.getElementById('postMedia').click();
         } else if (this.classList.contains('feeling')) {

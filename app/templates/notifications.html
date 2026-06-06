@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-bell me-2"></i>Notifications
-                    </h4>
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h4>
                 </div>
-                <div class="card-body p-0" id="notifications-container">
-                    <div class="text-center py-5" id="loading">
-                        <div class="spinner-border text-primary"></div>
-                        <p class="mt-2 text-muted">Loading notifications...</p>
+                <div class="card-body p-0">
+                    <div id="notifications-list" class="list-group list-group-flush">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-2">Loading notifications...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -22,193 +24,110 @@
 </div>
 
 <script>
-function getTargetUrl(notification) {
-    const data = notification.data;
-    const type = notification.name;
-
-    if (type === 'follow') {
-        return `/user/${data.username}`;
-    }
-    if (data.post_id) {
-        return `/post/${data.post_id}`;
-    }
-    return '#';
-}
-
-function getNotificationIcon(type) {
-    const icons = {
-        'like': '<i class="fas fa-heart text-danger" style="font-size: 24px;"></i>',
-        'comment': '<i class="fas fa-comment text-primary" style="font-size: 24px;"></i>',
-        'follow': '<i class="fas fa-user-plus text-success" style="font-size: 24px;"></i>',
-        'share': '<i class="fas fa-share text-info" style="font-size: 24px;"></i>'
-    };
-    return icons[type] || '<i class="fas fa-bell text-secondary" style="font-size: 24px;"></i>';
-}
-
-function formatNotificationMessage(notification) {
-    const data = notification.data;
-    const type = notification.name;
-
-    switch(type) {
-        case 'like':
-            return `<strong>${escapeHtml(data.username)}</strong> liked your post: "${escapeHtml(data.post_preview || '')}"`;
-        case 'comment':
-            return `<strong>${escapeHtml(data.username)}</strong> commented: "${escapeHtml(data.comment_preview || '')}"`;
-        case 'follow':
-            return `<strong>${escapeHtml(data.username)}</strong> started following you`;
-        case 'share':
-            return `<strong>${escapeHtml(data.username)}</strong> shared your post`;
-        default:
-            return data.message || `New ${type} notification`;
-    }
-}
-
-function getTimeAgo(timestamp) {
-    const now = Math.floor(Date.now() / 1000);
-    const diff = now - timestamp;
+function formatTime(timestamp) {
+    const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
 
     if (diff < 60) return 'Just now';
     if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
     if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
-    return new Date(timestamp * 1000).toLocaleDateString();
+    return date.toLocaleDateString();
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function getNotificationHTML(notif) {
+    let icon = '';
+    let message = '';
+    let link = '#';
+
+    if (notif.name === 'like') {
+        icon = '<i class="fas fa-heart text-danger fa-fw"></i>';
+        message = `${notif.from_user} liked your post`;
+        link = `/post/${notif.post_id}`;
+    } else if (notif.name === 'comment') {
+        icon = '<i class="fas fa-comment text-primary fa-fw"></i>';
+        const comment = notif.comment.substring(0, 50);
+        message = `${notif.from_user} commented: "${comment}${notif.comment.length > 50 ? '...' : ''}"`;
+        link = `/post/${notif.post_id}`;
+    } else if (notif.name === 'follow') {
+        icon = '<i class="fas fa-user-plus text-success fa-fw"></i>';
+        message = `${notif.from_user} started following you`;
+        link = `/user/${notif.from_user}`;
+    } else if (notif.name === 'share') {
+        icon = '<i class="fas fa-share text-info fa-fw"></i>';
+        message = `${notif.from_user} shared your post`;
+        link = `/post/${notif.post_id}`;
+    } else if (notif.name === 'friend_request') {
+        icon = '<i class="fas fa-user-friends text-primary fa-fw"></i>';
+        message = `${notif.from_user} sent you a friend request`;
+        link = `/friend-requests`;
+    } else if (notif.name === 'friend_accepted') {
+        icon = '<i class="fas fa-check-circle text-success fa-fw"></i>';
+        message = `${notif.from_user} accepted your friend request`;
+        link = `/friends`;
+    } else {
+        icon = '<i class="fas fa-bell text-secondary fa-fw"></i>';
+        message = notif.message || 'You have a new notification';
+    }
+
+    return `
+        <a href="${link}" class="list-group-item list-group-item-action" style="text-decoration: none;">
+            <div class="d-flex align-items-start gap-3">
+                <div class="flex-shrink-0">${icon}</div>
+                <div class="flex-grow-1">
+                    <p class="mb-1">${message}</p>
+                    <small class="text-muted">${formatTime(notif.timestamp)}</small>
+                </div>
+            </div>
+        </a>
+    `;
 }
 
 function loadNotifications() {
-    fetch('/notifications?since=0')
+    fetch('/notifications-list')
         .then(response => response.json())
         .then(notifications => {
-            const container = document.getElementById('notifications-container');
-            const loading = document.getElementById('loading');
-
-            if (loading) loading.remove();
+            const container = document.getElementById('notifications-list');
 
             if (!notifications || notifications.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
                         <p class="text-muted">No notifications yet</p>
+                        <small class="text-muted">When someone interacts with you, you'll see it here</small>
                     </div>
                 `;
                 return;
             }
 
-            const today = [];
-            const yesterday = [];
-            const older = [];
-            const now = Math.floor(Date.now() / 1000);
-            const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
-            const yesterdayStart = todayStart - 86400;
-
-            notifications.forEach(notification => {
-                if (notification.timestamp >= todayStart) {
-                    today.push(notification);
-                } else if (notification.timestamp >= yesterdayStart) {
-                    yesterday.push(notification);
-                } else {
-                    older.push(notification);
-                }
-            });
-
             let html = '';
-
-            if (today.length > 0) {
-                html += `<div class="notification-group"><div class="bg-light px-3 py-2 border-bottom"><small class="text-muted fw-bold">TODAY</small></div>`;
-                today.forEach(n => {
-                    html += `
-                        <div class="notification-item p-3 border-bottom" onclick="window.location.href='${getTargetUrl(n)}'">
-                            <div class="d-flex align-items-start">
-                                <div class="me-3" style="min-width: 45px;">
-                                    ${getNotificationIcon(n.name)}
-                                </div>
-                                <div class="flex-grow-1">
-                                    <p class="mb-1">${formatNotificationMessage(n)}</p>
-                                    <small class="text-muted">${getTimeAgo(n.timestamp)}</small>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-            }
-
-            if (yesterday.length > 0) {
-                html += `<div class="notification-group"><div class="bg-light px-3 py-2 border-bottom"><small class="text-muted fw-bold">YESTERDAY</small></div>`;
-                yesterday.forEach(n => {
-                    html += `
-                        <div class="notification-item p-3 border-bottom" onclick="window.location.href='${getTargetUrl(n)}'">
-                            <div class="d-flex align-items-start">
-                                <div class="me-3" style="min-width: 45px;">
-                                    ${getNotificationIcon(n.name)}
-                                </div>
-                                <div class="flex-grow-1">
-                                    <p class="mb-1">${formatNotificationMessage(n)}</p>
-                                    <small class="text-muted">${getTimeAgo(n.timestamp)}</small>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-            }
-
-            if (older.length > 0) {
-                html += `<div class="notification-group"><div class="bg-light px-3 py-2 border-bottom"><small class="text-muted fw-bold">OLDER</small></div>`;
-                older.forEach(n => {
-                    html += `
-                        <div class="notification-item p-3 border-bottom" onclick="window.location.href='${getTargetUrl(n)}'">
-                            <div class="d-flex align-items-start">
-                                <div class="me-3" style="min-width: 45px;">
-                                    ${getNotificationIcon(n.name)}
-                                </div>
-                                <div class="flex-grow-1">
-                                    <p class="mb-1">${formatNotificationMessage(n)}</p>
-                                    <small class="text-muted">${getTimeAgo(n.timestamp)}</small>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-            }
-
+            notifications.forEach(notif => {
+                html += getNotificationHTML(notif);
+            });
             container.innerHTML = html;
         })
         .catch(error => {
-            console.error('Error:', error);
-            const container = document.getElementById('notifications-container');
-            const loading = document.getElementById('loading');
-            if (loading) loading.remove();
-            container.innerHTML = `
+            console.error('Error loading notifications:', error);
+            document.getElementById('notifications-list').innerHTML = `
                 <div class="text-center py-5">
-                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                    <p class="text-danger">Failed to load notifications</p>
-                    <button class="btn btn-primary btn-sm mt-2" onclick="loadNotifications()">Try Again</button>
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <p class="text-muted">Failed to load notifications</p>
+                    <button class="btn btn-primary btn-sm" onclick="loadNotifications()">
+                        <i class="fas fa-sync me-2"></i>Try Again
+                    </button>
                 </div>
             `;
         });
 }
 
+// Clear badge when viewing page
+const badge = document.getElementById('notification-count');
+if (badge) {
+    badge.style.display = 'none';
+    badge.innerText = '0';
+}
+
 loadNotifications();
 </script>
-
-<style>
-.notification-item {
-    transition: background-color 0.2s ease;
-    cursor: pointer;
-}
-.notification-item:hover {
-    background-color: #f8f9fa;
-}
-.notification-group {
-    margin-bottom: 5px;
-}
-</style>
 {% endblock %}

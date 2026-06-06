@@ -9,11 +9,11 @@ from langdetect import detect, LangDetectException
 from app import db
 from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, MessageForm, CommentForm, ReportForm, StoryForm
 from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
-                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment, FriendRequest, friends)
+                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment, FriendRequest, friends, PostMedia, HiddenPost, NotInterestedPost, InterestedPost, SecurityEvent)
+from app.media_helpers import save_media, delete_media, save_multiple_media, delete_multiple_media
 from app.translate import translate
 from app.main import bp
 from spam_service.integration import spam_checker
-from app.media_helpers import save_media, delete_media
 from app.profile_helpers import save_profile_picture, save_cover_picture, delete_profile_picture, delete_cover_picture
 from app.notification_helper import send_like_notification, send_comment_notification, send_follow_notification, send_share_notification
 from app.services.recommendation_service import recommendation_engine
@@ -21,6 +21,8 @@ from app.services.report_service import report_service
 from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
                         PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment)
 
+import time
+lastNotificationTime = 0
 
 def admin_required(f):
     @wraps(f)
@@ -52,13 +54,6 @@ def index():
     story_form = StoryForm()
 
     if request.method == 'POST' and 'submit_post' in request.form:
-        media_filename = None
-        media_type = None
-
-        if 'media' in request.files and request.files['media'].filename:
-            file = request.files['media']
-            media_filename, media_type = save_media(file)
-
         post_content = request.form.get('post', '')
         if not post_content:
             flash('Post content cannot be empty.', 'warning')
@@ -87,14 +82,29 @@ def index():
             spam_confidence=spam_confidence,
             reviewed=False,
             approved=not should_warn,
-            media_url=media_filename,
-            media_type=media_type,
             privacy=request.form.get('privacy', 'public'),
             scheduled_for=scheduled_for
         )
         db.session.add(post)
         db.session.commit()
 
+        # Handle multiple media uploads
+        if 'media_files' in request.files:
+            files = request.files.getlist('media_files')
+            files = [f for f in files if f and f.filename]
+            if files:
+                saved_media = save_multiple_media(files, 'posts')
+                for idx, media in enumerate(saved_media):
+                    post_media = PostMedia(
+                        post_id=post.id,
+                        media_url=media['filename'],
+                        media_type=media['media_type'],
+                        order=idx
+                    )
+                    db.session.add(post_media)
+                db.session.commit()
+
+        # Extract hashtags
         hashtags = re.findall(r'#(\w+)', post.body)
         for tag_name in hashtags:
             hashtag = db.session.scalar(sa.select(Hashtag).where(Hashtag.name == tag_name.lower()))
@@ -115,6 +125,7 @@ def index():
             flash('Your post is now live!')
         return redirect(url_for('main.index'))
 
+    # Get stories
     following_ids = [f.id for f in db.session.scalars(current_user.following.select())]
     following_ids.append(current_user.id)
     stories = db.session.scalars(
@@ -129,7 +140,6 @@ def index():
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         diff = now - dt
-
         if diff.days > 0:
             return f'{diff.days}d ago'
         if diff.seconds > 3600:
@@ -144,9 +154,7 @@ def index():
         if story.user_id not in stories_by_user:
             stories_by_user[story.user_id] = []
         stories_by_user[story.user_id].append(story)
-
         reaction_count = db.session.query(StoryReaction).filter_by(story_id=story.id).count()
-
         stories_data.append({
             'id': story.id,
             'media_url': story.media_url,
@@ -158,7 +166,7 @@ def index():
             'reaction_count': reaction_count
         })
 
-    # Get upcoming birthdays from friends
+    # Get upcoming birthdays
     upcoming_birthdays = []
     for friend in current_user.get_friends():
         if friend.birthday:
@@ -176,15 +184,39 @@ def index():
                     })
             except:
                 pass
-
     upcoming_birthdays.sort(key=lambda x: x['days_until'])
 
     active_contacts = current_user.get_active_friends_online()
 
+    # Get posts feed with filters
     page = request.args.get('page', 1, type=int)
-    posts = db.paginate(current_user.following_posts(), page=page,
+
+    # Filter out blocked users
+    blocked_user_ids = db.session.query(BlockedUser.blocked_id).filter_by(blocker_id=current_user.id).all()
+    blocked_ids = [b[0] for b in blocked_user_ids]
+
+    # Filter out hidden and not interested posts
+    hidden_post_ids = db.session.query(HiddenPost.post_id).filter_by(user_id=current_user.id).all()
+    not_interested_ids = db.session.query(NotInterestedPost.post_id).filter_by(user_id=current_user.id).all()
+    excluded_post_ids = list(set([h[0] for h in hidden_post_ids] + [n[0] for n in not_interested_ids]))
+
+    # Build query
+    posts_query = sa.select(Post).where(
+        Post.scheduled_for == None,
+        Post.privacy == 'public'
+    )
+
+    if blocked_ids:
+        posts_query = posts_query.where(Post.user_id.notin_(blocked_ids))
+    if excluded_post_ids:
+        posts_query = posts_query.where(Post.id.notin_(excluded_post_ids))
+
+    posts_query = posts_query.order_by(Post.timestamp.desc())
+
+    posts = db.paginate(posts_query, page=page,
                         per_page=current_app.config['POSTS_PER_PAGE'],
                         error_out=False)
+
     next_url = url_for('main.index', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.index', page=posts.prev_num) if posts.has_prev else None
 
@@ -194,6 +226,172 @@ def index():
                            posts=posts.items, next_url=next_url, prev_url=prev_url,
                            upcoming_birthdays=upcoming_birthdays,
                            active_contacts=active_contacts)
+
+@bp.route('/interested/<int:post_id>')
+@login_required
+def interested(post_id):
+    post = db.session.get(Post, post_id)
+    if not post:
+        return jsonify({'error': 'Post not found'}), 404
+
+    existing = InterestedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    if existing:
+        db.session.delete(existing)
+        interested = False
+    else:
+        interested_post = InterestedPost(user_id=current_user.id, post_id=post_id)
+        db.session.add(interested_post)
+        # Remove from not interested if exists
+        not_interested = NotInterestedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+        if not_interested:
+            db.session.delete(not_interested)
+        interested = True
+
+    db.session.commit()
+    return jsonify(
+        {'interested': interested, 'message': 'Post marked as interested' if interested else 'Removed from interested'})
+
+
+@bp.route('/get-blocked-users')
+@login_required
+def get_blocked_users():
+    blocked_list = BlockedUser.query.filter_by(blocker_id=current_user.id).all()
+    blocked_users = []
+    for b in blocked_list:
+        user = db.session.get(User, b.blocked_id)
+        if user:
+            blocked_users.append({
+                'id': user.id,
+                'username': user.username,
+                'avatar': user.avatar(50),
+                'is_verified': user.is_verified
+            })
+    return jsonify({'blocked_users': blocked_users})
+
+@bp.route('/user/<username>/media-data')
+@login_required
+def user_media_data(username):
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+
+    media_list = []
+    posts_with_media = Post.query.filter(
+        Post.user_id == user.id,
+        Post.media_items.any(),
+        Post.privacy == 'public'
+    ).order_by(Post.timestamp.desc()).limit(20).all()
+
+    for post in posts_with_media:
+        for media in post.media_items:
+            media_list.append({
+                'url': media.media_url,
+                'type': media.media_type,
+                'post_id': post.id
+            })
+
+    return jsonify({'media': media_list})
+
+@bp.route('/not-interested/<int:post_id>')
+@login_required
+def not_interested(post_id):
+    post = db.session.get(Post, post_id)
+    if not post:
+        return jsonify({'error': 'Post not found'}), 404
+
+    # Check if already marked
+    existing = NotInterestedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    if not existing:
+        not_interested = NotInterestedPost(user_id=current_user.id, post_id=post_id)
+        db.session.add(not_interested)
+        db.session.commit()
+        flash('Post marked as not interested', 'info')
+
+    return redirect(request.referrer or url_for('main.index'))
+
+
+@bp.route('/hide-post/<int:post_id>')
+@login_required
+def hide_post(post_id):
+    post = db.session.get(Post, post_id)
+    if not post:
+        return jsonify({'error': 'Post not found'}), 404
+
+    existing = HiddenPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    if not existing:
+        hidden = HiddenPost(user_id=current_user.id, post_id=post_id)
+        db.session.add(hidden)
+        db.session.commit()
+        flash('Post hidden from your feed', 'info')
+
+    return redirect(request.referrer or url_for('main.index'))
+@bp.route('/block-user/<int:user_id>', methods=['POST'])
+@login_required
+def block_user(user_id):
+    user_to_block = db.session.get(User, user_id)
+    if not user_to_block:
+        return jsonify({'error': 'User not found'}), 404
+
+    if user_to_block.id == current_user.id:
+        return jsonify({'error': 'Cannot block yourself'}), 400
+
+    existing = BlockedUser.query.filter_by(blocker_id=current_user.id, blocked_id=user_id).first()
+    if not existing:
+        blocked = BlockedUser(blocker_id=current_user.id, blocked_id=user_id)
+        db.session.add(blocked)
+
+        if current_user.is_following(user_to_block):
+            current_user.unfollow(user_to_block)
+
+        if current_user.is_friend_with(user_to_block):
+            current_user.friends.remove(user_to_block)
+            user_to_block.friends.remove(current_user)
+
+        db.session.commit()
+        SecurityEvent.log(current_user.id, 'user_blocked', request.remote_addr,
+                          f'Blocked user {user_to_block.username}')
+        return jsonify({'success': True, 'message': f'Blocked {user_to_block.username}'})
+
+    return jsonify({'error': 'User already blocked'}), 400
+
+@bp.route('/unblock-user/<int:user_id>', methods=['POST'])
+@login_required
+def unblock_user(user_id):
+    blocked = BlockedUser.query.filter_by(
+        blocker_id=current_user.id,
+        blocked_id=user_id
+    ).first()
+
+    if blocked:
+        db.session.delete(blocked)
+        db.session.commit()
+        flash('User unblocked', 'success')
+
+    return redirect(url_for('main.user', username=current_user.username))
+
+
+@bp.route('/user/<username>/media')
+@login_required
+def user_media(username):
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+
+    # Get all user's posts with media
+    posts_with_media = Post.query.filter(
+        Post.user_id == user.id,
+        Post.media_items.any()
+    ).order_by(Post.timestamp.desc()).all()
+
+    all_media = []
+    for post in posts_with_media:
+        for media in post.media_items:
+            all_media.append({
+                'id': media.id,
+                'url': media.media_url,
+                'type': media.media_type,
+                'post_id': post.id,
+                'timestamp': post.timestamp
+            })
+
+    return render_template('user_media.html', title=f"{user.username}'s Media",
+                           user=user, media_items=all_media)
 
 @bp.route('/add_story', methods=['POST'])
 @login_required
@@ -710,8 +908,10 @@ def delete_post(post_id):
         flash('You cannot delete this post.')
         return redirect(url_for('main.index'))
 
-    if post.media_url:
-        delete_media(post.media_url)
+    # Delete all media files associated with the post
+    for media in post.media_items.all():
+        delete_media(media.media_url, 'posts')
+        db.session.delete(media)
 
     db.session.delete(post)
     db.session.commit()
@@ -731,13 +931,34 @@ def edit_post(post_id):
         post.original_body = post.body
         post.body = form.post.data
         post.edited_at = datetime.now(timezone.utc)
+
+        # Handle media removal (checkboxes for keeping media)
+        media_to_keep = request.form.getlist('keep_media')
+        for media in post.media_items.all():
+            if str(media.id) not in media_to_keep:
+                delete_media(media.media_url, 'posts')
+                db.session.delete(media)
+
+        # Handle new media uploads
+        if 'media_files' in request.files:
+            files = request.files.getlist('media_files')
+            saved_media = save_multiple_media(files, 'posts')
+            current_order = post.media_items.count()
+            for idx, media in enumerate(saved_media):
+                post_media = PostMedia(
+                    post_id=post.id,
+                    media_url=media['filename'],
+                    media_type=media['media_type'],
+                    order=current_order + idx
+                )
+                db.session.add(post_media)
+
         db.session.commit()
         flash('Post updated!', 'success')
         return redirect(url_for('main.index'))
 
     form.post.data = post.body
     return render_template('edit_post.html', title='Edit Post', form=form, post=post)
-
 
 @bp.route('/chat/<username>')
 @login_required
@@ -917,12 +1138,93 @@ def view_story(story_id):
 @bp.route('/notifications')
 @login_required
 def notifications():
-    since = request.args.get('since', 0.0, type=float)
-    query = current_user.notifications.select().where(Notification.timestamp > since).order_by(
-        Notification.timestamp.asc())
-    notifications = db.session.scalars(query)
-    return [{'name': n.name, 'data': n.get_data(), 'timestamp': n.timestamp} for n in notifications]
+    """Get unread notification count for badge"""
+    try:
+        # Simple count of notifications in last 24 hours
+        from datetime import datetime, timedelta
+        day_ago = datetime.now().timestamp() - (24 * 60 * 60)
 
+        count = current_user.notifications.select().where(
+            Notification.timestamp > day_ago
+        ).count()
+
+        return jsonify({'count': count})
+    except Exception as e:
+        current_app.logger.error(f"Notification count error: {e}")
+        return jsonify({'count': 0})
+
+
+@bp.route('/notifications-list')
+@login_required
+def notifications_list():
+    """Get all notifications for the notifications page"""
+    try:
+        notifications = db.session.scalars(
+            current_user.notifications.select().order_by(
+                Notification.timestamp.desc()
+            ).limit(50)
+        )
+
+        result = []
+        for n in notifications:
+            data = n.get_data()
+            result.append({
+                'id': n.id,
+                'name': n.name,
+                'from_user': data.get('from_user', 'Someone'),
+                'post_id': data.get('post_id'),
+                'comment': data.get('comment', ''),
+                'message': data.get('message', ''),
+                'timestamp': n.timestamp
+            })
+        return jsonify(result)
+    except Exception as e:
+        current_app.logger.error(f"Notifications list error: {e}")
+        return jsonify([])
+
+
+@bp.route('/clear-notifications', methods=['POST'])
+@login_required
+def clear_notifications():
+    """Clear old notifications"""
+    try:
+        from datetime import datetime, timedelta
+        week_ago = datetime.now().timestamp() - (7 * 24 * 60 * 60)
+
+        current_user.notifications.delete().where(
+            Notification.timestamp < week_ago
+        )
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False})
+
+
+@bp.route('/mark-notification-read/<int:notification_id>', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    try:
+        notification = Notification.query.get(notification_id)
+        if notification and notification.user_id == current_user.id:
+            # Add read attribute if not exists (you may need to add this column)
+            setattr(notification, 'read', True)
+            db.session.commit()
+            return jsonify({'success': True})
+    except Exception as e:
+        current_app.logger.error(f"Error marking notification read: {e}")
+    return jsonify({'success': False})
+
+
+@bp.route('/mark-all-notifications-read', methods=['POST'])
+@login_required
+def mark_all_notifications_read():
+    try:
+        for notification in current_user.notifications.all():
+            setattr(notification, 'read', True)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False})
 
 @bp.route('/notifications-page')
 @login_required
@@ -1188,51 +1490,6 @@ def trending_hashtags():
         sa.select(Hashtag).order_by(Hashtag.post_count.desc()).limit(10)
     ).all()
     return jsonify([{'name': h.name, 'post_count': h.post_count} for h in trending_hashtags])
-
-
-@bp.route('/block_user/<int:user_id>')
-@login_required
-def block_user(user_id):
-    user_to_block = db.session.get(User, user_id)
-    if user_to_block is None:
-        flash('User not found.')
-        return redirect(url_for('main.index'))
-
-    blocked = db.session.scalar(
-        sa.select(BlockedUser).where(
-            BlockedUser.blocker_id == current_user.id,
-            BlockedUser.blocked_id == user_id
-        )
-    )
-
-    if not blocked:
-        blocked = BlockedUser(blocker_id=current_user.id, blocked_id=user_id)
-        db.session.add(blocked)
-        db.session.commit()
-        flash(f'You have blocked {user_to_block.username}.', 'warning')
-    else:
-        flash('User already blocked.', 'info')
-
-    return redirect(request.referrer or url_for('main.index'))
-
-
-@bp.route('/unblock_user/<int:user_id>')
-@login_required
-def unblock_user(user_id):
-    blocked = db.session.scalar(
-        sa.select(BlockedUser).where(
-            BlockedUser.blocker_id == current_user.id,
-            BlockedUser.blocked_id == user_id
-        )
-    )
-
-    if blocked:
-        db.session.delete(blocked)
-        db.session.commit()
-        flash('User unblocked.', 'success')
-
-    return redirect(url_for('main.user', username=current_user.username))
-
 
 @bp.route('/translate', methods=['POST'])
 @login_required

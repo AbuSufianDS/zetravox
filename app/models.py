@@ -167,6 +167,68 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         foreign_keys='FriendRequest.to_user_id',
         backref='receiver', lazy='dynamic'
     )
+    otp_secret = db.Column(db.String(32), nullable=True)
+    two_factor_enabled = db.Column(db.Boolean, default=False)
+    backup_codes = db.Column(db.String(500), nullable=True)
+
+    gdpr_consent = db.Column(db.Boolean, default=False)
+    gdpr_consent_date = db.Column(db.DateTime)
+    data_anonymized = db.Column(db.Boolean, default=False)
+
+    login_attempts = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime)
+    last_login_ip = db.Column(db.String(45))
+    last_login_time = db.Column(db.DateTime)
+    account_created_ip = db.Column(db.String(45))
+    rate_limit_reset = db.Column(db.DateTime)
+
+    login_history = db.relationship('LoginHistory', backref='user_rel', lazy='dynamic',
+                                    foreign_keys='LoginHistory.user_id')
+    security_events = db.relationship('SecurityEvent', backref='user_rel', lazy='dynamic',
+                                      foreign_keys='SecurityEvent.user_id')
+    active_sessions = db.relationship('UserSession', backref='user_rel', lazy='dynamic',
+                                      foreign_keys='UserSession.user_id')
+    notify_email_likes = db.Column(db.Boolean, default=True)
+    notify_email_comments = db.Column(db.Boolean, default=True)
+    notify_email_follows = db.Column(db.Boolean, default=True)
+    notify_push_likes = db.Column(db.Boolean, default=True)
+    notify_push_comments = db.Column(db.Boolean, default=True)
+    notify_push_follows = db.Column(db.Boolean, default=True)
+    albums = db.relationship('Album', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+
+
+    def increment_login_attempts(self):
+        self.login_attempts += 1
+        if self.login_attempts >= 5:
+            self.locked_until = datetime.utcnow() + timedelta(minutes=15)
+        db.session.commit()
+
+    def reset_login_attempts(self):
+        self.login_attempts = 0
+        self.locked_until = None
+        db.session.commit()
+
+    def is_account_locked(self):
+        if self.locked_until and self.locked_until > datetime.utcnow():
+            return True
+        return False
+
+    def set_2fa_secret(self, secret):
+        self.otp_secret = secret
+        db.session.commit()
+
+    def enable_2fa(self):
+        self.two_factor_enabled = True
+        db.session.commit()
+
+    def disable_2fa(self):
+        self.two_factor_enabled = False
+        db.session.commit()
+
+    def set_gdpr_consent(self, consent=True):
+        self.gdpr_consent = consent
+        self.gdpr_consent_date = datetime.utcnow() if consent else None
+        db.session.commit()
 
     def get_friends(self):
         return self.friends.all()
@@ -223,24 +285,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             self.set_password(data['password'])
 
     def following_posts(self):
-        from datetime import datetime, timezone
-        Author = so.aliased(User)
-        Follower = so.aliased(User)
         return (
             sa.select(Post)
-            .join(Post.author.of_type(Author))
-            .outerjoin(Author.followers.of_type(Follower))
-            .where(
-                sa.or_(
-                    Author.id == self.id,
-                    Follower.id == self.id
-                )
-            )
             .where(Post.scheduled_for.is_(None))
-            .where(Post.privacy.in_(['public', 'followers']))
+            .where(Post.privacy == 'public')
             .order_by(Post.timestamp.desc())
         )
-
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -401,6 +451,35 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
         return [f for f in self.friends if f.last_seen and f.last_seen > five_minutes_ago]
 
+    def get_blocked_users(self):
+        blocked_list = BlockedUser.query.filter_by(blocker_id=self.id).all()
+        return [db.session.get(User, b.blocked_id) for b in blocked_list if db.session.get(User, b.blocked_id)]
+
+    def get_blocked_count(self):
+        return BlockedUser.query.filter_by(blocker_id=self.id).count()
+
+
+class Album(db.Model):
+    __tablename__ = 'album'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), default='Timeline Photos')
+    description = db.Column(db.String(500))
+    cover_photo = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    photos = db.relationship('AlbumPhoto', backref='album', lazy='dynamic', cascade='all, delete-orphan')
+
+
+class AlbumPhoto(db.Model):
+    __tablename__ = 'album_photo'
+    id = db.Column(db.Integer, primary_key=True)
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id', ondelete='CASCADE'), nullable=False)
+    media_url = db.Column(db.String(500), nullable=False)
+    media_type = db.Column(db.String(10), default='image')
+    caption = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -429,6 +508,17 @@ class PostReaction(db.Model):
 
     __table_args__ = (sa.UniqueConstraint('user_id', 'post_id', name='unique_reaction'),)
 
+
+class PostMedia(db.Model):
+    __tablename__ = 'post_media'
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
+    media_url = db.Column(db.String(500), nullable=False)
+    media_type = db.Column(db.String(10), nullable=False)  # 'image' or 'video'
+    order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    post = db.relationship('Post', backref=db.backref('media_items', lazy='dynamic', cascade='all, delete-orphan'))
 
 class Like(db.Model):
     __tablename__ = 'like'
@@ -554,8 +644,6 @@ class Post(SearchableMixin, db.Model):
     spam_confidence: so.Mapped[float] = so.mapped_column(sa.Float, default=0.0)
     reviewed: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False)
     approved: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=True)
-    media_url: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
-    media_type: so.Mapped[Optional[str]] = so.mapped_column(sa.String(10))
     privacy: so.Mapped[str] = so.mapped_column(sa.String(20), default='public')
     scheduled_for: so.Mapped[Optional[datetime]] = so.mapped_column()
     is_pinned: so.Mapped[bool] = so.mapped_column(default=False)
@@ -637,6 +725,38 @@ class Post(SearchableMixin, db.Model):
         return '<Post {}>'.format(self.body[:50])
 
 
+class HiddenPost(db.Model):
+    __tablename__ = 'hidden_post'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+    post = db.relationship('Post', foreign_keys=[post_id])
+
+
+class NotInterestedPost(db.Model):
+    __tablename__ = 'not_interested_post'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+    post = db.relationship('Post', foreign_keys=[post_id])
+
+
+class InterestedPost(db.Model):
+    __tablename__ = 'interested_post'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+    post = db.relationship('Post', foreign_keys=[post_id])
+
 class SpamReport(db.Model):
     __tablename__ = 'spam_report'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -680,7 +800,6 @@ class Notification(db.Model):
 
     def get_data(self):
         return json.loads(str(self.payload_json))
-
 
 class Task(db.Model):
     __tablename__ = 'task'
@@ -733,6 +852,80 @@ class StoryComment(db.Model):
     timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
 
     author: so.Mapped[User] = so.relationship(foreign_keys=[user_id])
+
+
+class LoginHistory(db.Model):
+    __tablename__ = 'login_history'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.String(500))
+    success = db.Column(db.Boolean, default=False)
+    failure_reason = db.Column(db.String(100))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+
+    @classmethod
+    def create(cls, user_id, ip_address, user_agent, success=True, failure_reason=None):
+        history = cls(
+            user_id=user_id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            success=success,
+            failure_reason=failure_reason
+        )
+        db.session.add(history)
+        db.session.commit()
+        return history
+
+class SecurityEvent(db.Model):
+    __tablename__ = 'security_event'
+    id = db.Column(db.Integer, primary_key=True)
+    event_type = db.Column(db.String(50), index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
+    ip_address = db.Column(db.String(45))
+    details = db.Column(db.String(1000))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+
+    @classmethod
+    def log(cls, user_id, event_type, ip_address, details):
+        event = cls(
+            user_id=user_id,
+            event_type=event_type,
+            ip_address=ip_address,
+            details=details
+        )
+        db.session.add(event)
+        db.session.commit()
+        return event
+
+
+class UserSession(db.Model):
+    __tablename__ = 'user_session'
+    id = db.Column(db.String(128), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+
+
+class DataDeletionRequest(db.Model):
+    __tablename__ = 'data_deletion_request'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    request_date = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_date = db.Column(db.DateTime)
+    status = db.Column(db.String(20), default='pending')
+    request_ip = db.Column(db.String(45))
+
+    user = db.relationship('User', foreign_keys=[user_id])
 
 @login.user_loader
 def load_user(id):

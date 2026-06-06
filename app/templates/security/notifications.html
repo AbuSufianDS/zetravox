@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h4>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="markAllRead()">
+                        <i class="fas fa-check-double me-1"></i>Mark all as read
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="notifications-list">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-2">Loading notifications...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getNotificationIcon(type) {
+    const icons = {
+        'like': '<i class="fas fa-heart text-danger fa-fw"></i>',
+        'comment': '<i class="fas fa-comment text-primary fa-fw"></i>',
+        'follow': '<i class="fas fa-user-plus text-success fa-fw"></i>',
+        'share': '<i class="fas fa-share text-info fa-fw"></i>',
+        'friend_request': '<i class="fas fa-user-friends text-primary fa-fw"></i>',
+        'friend_accepted': '<i class="fas fa-check-circle text-success fa-fw"></i>'
+    };
+    return icons[type] || '<i class="fas fa-bell text-secondary fa-fw"></i>';
+}
+
+function getNotificationLink(notification) {
+    if (notification.name === 'like' || notification.name === 'comment' || notification.name === 'share') {
+        return `/post/${notification.data.post_id}`;
+    } else if (notification.name === 'follow') {
+        return `/user/${notification.data.from_user}`;
+    } else if (notification.name === 'friend_request') {
+        return `/friend-requests`;
+    } else if (notification.name === 'friend_accepted') {
+        return `/friends`;
+    }
+    return '#';
+}
+
+function formatTime(timestamp) {
+    const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+    return date.toLocaleDateString();
+}
+
+function markAsRead(notificationId, element) {
+    fetch(`/mark-notification-read/${notificationId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove unread styling
+            if (element) {
+                element.classList.remove('bg-light');
+                element.classList.add('bg-white');
+            }
+            // Update badge count
+            updateBadgeCount();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAllRead() {
+    fetch('/mark-all-notifications-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function updateBadgeCount() {
+    fetch('/notifications')
+        .then(response => response.json())
+        .then(notifications => {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const badge = document.getElementById('notification-count');
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        });
+}
+
+function loadNotifications() {
+    fetch('/notifications')
+        .then(response => response.json())
+        .then(notifications => {
+            const container = document.getElementById('notifications-list');
+
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No notifications yet</p>
+                        <small class="text-muted">When someone interacts with you, you'll see it here</small>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="list-group list-group-flush">';
+            notifications.forEach(notif => {
+                let message = '';
+                let link = getNotificationLink(notif);
+
+                if (notif.name === 'like') {
+                    message = `${notif.data?.from_user || 'Someone'} liked your post`;
+                } else if (notif.name === 'comment') {
+                    const comment = notif.data?.comment || '';
+                    message = `${notif.data?.from_user || 'Someone'} commented: "${comment.substring(0, 50)}${comment.length > 50 ? '...' : ''}"`;
+                } else if (notif.name === 'follow') {
+                    message = `${notif.data?.from_user || 'Someone'} started following you`;
+                } else if (notif.name === 'share') {
+                    message = `${notif.data?.from_user || 'Someone'} shared your post`;
+                } else if (notif.name === 'friend_request') {
+                    message = `${notif.data?.from_user || 'Someone'} sent you a friend request`;
+                } else if (notif.name === 'friend_accepted') {
+                    message = `${notif.data?.from_user || 'Someone'} accepted your friend request`;
+                } else {
+                    message = notif.data?.message || 'You have a new notification';
+                }
+
+                const isUnread = !notif.read;
+
+                html += `
+                    <a href="${link}" class="list-group-item list-group-item-action ${isUnread ? 'bg-light' : ''}"
+                       onclick="markAsRead(${notif.id}, this)"
+                       style="cursor: pointer; text-decoration: none;">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="flex-shrink-0">
+                                ${getNotificationIcon(notif.name)}
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1 ${isUnread ? 'fw-semibold' : ''}">${message}</p>
+                                <small class="text-muted">${formatTime(notif.timestamp)}</small>
+                            </div>
+                            ${isUnread ? '<div class="flex-shrink-0"><span class="badge bg-primary rounded-pill">New</span></div>' : ''}
+                        </div>
+                    </a>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error loading notifications:', error);
+            document.getElementById('notifications-list').innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <p class="text-muted">Failed to load notifications</p>
+                    <button class="btn btn-primary btn-sm" onclick="loadNotifications()">
+                        <i class="fas fa-sync me-2"></i>Try Again
+                    </button>
+                </div>
+            `;
+        });
+}
+
+// Reset notification badge when viewing page
+const badge = document.getElementById('notification-count');
+if (badge) {
+    badge.style.display = 'none';
+    badge.innerText = '0';
+}
+
+// Load notifications
+loadNotifications();
+</script>
+{% endblock %}

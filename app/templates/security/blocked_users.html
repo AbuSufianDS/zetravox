@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
+                        <h5>{{ current_user.username }}</h5>
+                        <p class="text-muted small">{{ current_user.email }}</p>
+                    </div>
+                    <hr>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('security.account_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-user fa-fw" style="width: 24px;"></i>
+                            <span>Account</span>
+                        </a>
+                        <a href="{{ url_for('security.security_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-shield-alt fa-fw text-success" style="width: 24px;"></i>
+                            <span>Security</span>
+                        </a>
+                        <a href="{{ url_for('security.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-lock fa-fw text-warning" style="width: 24px;"></i>
+                            <span>Privacy</span>
+                        </a>
+                        <a href="{{ url_for('security.blocked_users') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
+                            <i class="fas fa-user-slash fa-fw text-danger" style="width: 24px;"></i>
+                            <span>Blocked Users</span>
+                        </a>
+                        <a href="{{ url_for('security.session_management') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-desktop fa-fw text-info" style="width: 24px;"></i>
+                            <span>Sessions</span>
+                        </a>
+                        <a href="{{ url_for('security.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-history fa-fw text-secondary" style="width: 24px;"></i>
+                            <span>Login History</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user-slash me-2 text-danger"></i>Blocked Users</h5>
+                    <small class="text-muted">Users you have blocked cannot interact with you</small>
+                </div>
+                <div class="card-body">
+                    {% if blocked_users %}
+                        <div class="row g-3">
+                            {% for blocked_user in blocked_users %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ blocked_user.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div>
+                                            <a href="{{ url_for('main.user', username=blocked_user.username) }}" class="fw-semibold text-decoration-none">
+                                                {{ blocked_user.username }}
+                                            </a>
+                                            <div class="small text-muted">
+                                                {% if blocked_user.is_verified %}
+                                                <i class="fas fa-check-circle text-primary"></i> Verified
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <form action="{{ url_for('security.unblock', user_id=blocked_user.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Unblock {{ blocked_user.username }}? They will be able to interact with you again.')">
+                                                <i class="fas fa-user-check me-1"></i>Unblock
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-3">You haven't blocked any users.</p>
+                            <p class="small text-muted">When you block someone, they will appear here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>About Blocking</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-ban text-danger me-2"></i> Blocked users cannot follow you</li>
+                        <li class="mb-2"><i class="fas fa-envelope text-danger me-2"></i> Blocked users cannot send you messages</li>
+                        <li class="mb-2"><i class="fas fa-comment text-danger me-2"></i> Blocked users cannot comment on your posts</li>
+                        <li class="mb-2"><i class="fas fa-eye-slash text-danger me-2"></i> You won't see their posts in your feed</li>
+                        <li class="mb-2"><i class="fas fa-user-check text-success me-2"></i> Unblocking restores normal interaction</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

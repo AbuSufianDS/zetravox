@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
+                        <h5>{{ current_user.username }}</h5>
+                        <p class="text-muted small">{{ current_user.email }}</p>
+                    </div>
+                    <hr>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('security.account_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-user fa-fw"></i> Account
+                        </a>
+                        <a href="{{ url_for('security.security_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-shield-alt fa-fw text-success"></i> Security
+                        </a>
+                        <a href="{{ url_for('security.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-lock fa-fw text-warning"></i> Privacy
+                        </a>
+                        <a href="{{ url_for('security.session_management') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
+                            <i class="fas fa-desktop fa-fw text-info"></i> Sessions
+                        </a>
+                        <a href="{{ url_for('security.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-history fa-fw text-secondary"></i> Login History
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-desktop me-2 text-primary"></i>Active Sessions</h5>
+                    <button class="btn btn-sm btn-outline-danger" onclick="revokeAllSessions()">Revoke All Other Sessions</button>
+                </div>
+                <div class="card-body">
+                    {% if sessions %}
+                        {% for session in sessions %}
+                        <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                            <div>
+                                <div class="fw-semibold">
+                                    <i class="fas fa-{{ 'desktop' if 'Windows' in session.user_agent or 'Mac' in session.user_agent else 'mobile-alt' }} me-2"></i>
+                                    {{ session.user_agent[:50] if session.user_agent else 'Unknown Device' }}...
+                                </div>
+                                <div class="small text-muted">
+                                    IP: {{ session.ip_address }}<br>
+                                    Logged in: {{ moment(session.created_at).fromNow() if session.created_at else 'Unknown' }}
+                                </div>
+                            </div>
+                            {% if session.id != request.cookies.get('session') %}
+                            <form action="{{ url_for('security.revoke_session', session_id=session.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
+                            </form>
+                            {% else %}
+                            <span class="badge bg-success">Current Session</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-desktop fa-3x mb-3"></i>
+                            <p>No active sessions found</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function revokeAllSessions() {
+    if(confirm('This will log you out from all other devices. Continue?')) {
+        fetch('{{ url_for("security.revoke_all_sessions") }}', {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token() }}'}
+        }).then(() => location.reload());
+    }
+}
+</script>
+{% endblock %}

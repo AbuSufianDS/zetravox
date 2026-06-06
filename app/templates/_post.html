@@ -25,32 +25,67 @@
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    {% if current_user == post.author %}
-                    <li><a class="dropdown-item" href="{{ url_for('main.edit_post', post_id=post.id) }}"><i class="fas fa-edit me-2"></i>Edit</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('main.pin_post', post_id=post.id) }}"><i class="fas fa-thumbtack me-2"></i>Pin</a></li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareStoryModal{{ post.id }}"><i class="fas fa-plus-circle me-2"></i>Share to Story</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ post.id }}"><i class="fas fa-trash me-2"></i>Delete</a></li>
-                    {% else %}
-                    <li><a class="dropdown-item" href="#" onclick="savePost({{ post.id }})" id="saveBtn{{ post.id }}"><i class="far fa-bookmark me-2"></i>Save</a></li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareStoryModal{{ post.id }}"><i class="fas fa-plus-circle me-2"></i>Share to Story</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('main.report_post', post_id=post.id) }}"><i class="fas fa-flag me-2"></i>Report</a></li>
-                    {% endif %}
-                </ul>
+    {% if current_user == post.author %}
+    <li><a class="dropdown-item" href="{{ url_for('main.edit_post', post_id=post.id) }}">
+        <i class="fas fa-edit me-2"></i>Edit
+    </a></li>
+    <li><a class="dropdown-item" href="{{ url_for('main.pin_post', post_id=post.id) }}">
+        <i class="fas fa-thumbtack me-2"></i>Pin
+    </a></li>
+    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareStoryModal{{ post.id }}">
+        <i class="fas fa-plus-circle me-2"></i>Share to Story
+    </a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ post.id }}">
+        <i class="fas fa-trash me-2"></i>Delete
+    </a></li>
+    {% else %}
+    <li><a class="dropdown-item" href="#" onclick="savePost({{ post.id }})" id="saveBtn{{ post.id }}">
+        <i class="far fa-bookmark me-2"></i>Save
+    </a></li>
+    <li><a class="dropdown-item" href="#" onclick="interestedPost({{ post.id }})">
+        <i class="fas fa-thumbs-up me-2"></i>Interested
+    </a></li>
+    <li><a class="dropdown-item" href="#" onclick="notInterested({{ post.id }})">
+        <i class="fas fa-eye-slash me-2"></i>Not Interested
+    </a></li>
+    <li><a class="dropdown-item" href="#" onclick="hidePost({{ post.id }})">
+        <i class="fas fa-ban me-2"></i>Hide Post
+    </a></li>
+    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal{{ post.id }}">
+        <i class="fas fa-flag me-2"></i>Report
+    </a></li>
+    <li><a class="dropdown-item" href="#" onclick="blockUser({{ post.author.id }})">
+        <i class="fas fa-user-slash me-2"></i>Block @{{ post.author.username }}
+    </a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareStoryModal{{ post.id }}">
+        <i class="fas fa-plus-circle me-2"></i>Share to Story
+    </a></li>
+    {% endif %}
+</ul>
             </div>
         </div>
 
         <div class="mb-3">
             <div class="post-text">{{ post.body }}</div>
-            {% if post.media_url %}
-            <div class="mt-3 rounded overflow-hidden bg-light">
-                {% if post.media_type == 'image' %}
-                <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}" class="img-fluid" alt="Post image">
-                {% elif post.media_type == 'video' %}
-                <video controls class="w-100">
-                    <source src="{{ url_for('static', filename='uploads/' + post.media_url) }}" type="video/mp4">
-                </video>
-                {% endif %}
+            {% if post.media_items %}
+            <div class="post-media-grid mt-3">
+                <div class="row g-2">
+                    {% for media in post.media_items %}
+                    <div class="col-{% if post.media_items.count() == 1 %}12{% elif post.media_items.count() == 2 %}6{% elif post.media_items.count() >= 3 %}4{% endif %}">
+                        {% if media.media_type == 'image' %}
+                        <img src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}"
+                             class="img-fluid rounded post-media-img"
+                             style="width: 100%; height: 250px; object-fit: cover; cursor: pointer;">
+                        {% elif media.media_type == 'video' %}
+                        <video controls class="w-100 rounded" style="height: 250px; object-fit: cover;">
+                            <source src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}" type="video/mp4">
+                        </video>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
@@ -154,87 +189,67 @@
         </div>
     </div>
 </div>
-
-<!-- Share to Story Modal -->
-<div class="modal fade" id="shareStoryModal{{ post.id }}" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title"><i class="fas fa-plus-circle me-2 text-primary"></i>Share to Story</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ url_for('main.share_post_to_story', post_id=post.id) }}" method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
-                <div class="modal-body">
-                    <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded">
-                        <img src="{{ post.author.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px;">
-                        <div>
-                            <div class="fw-bold">{{ post.author.username }}</div>
-                            <div class="small text-muted">{{ moment(post.timestamp).fromNow() }}</div>
-                        </div>
-                    </div>
-                    <div class="bg-light rounded p-3 mb-3">
-                        <p class="mb-0">{{ post.body[:200] }}{% if post.body|length > 200 %}...{% endif %}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Add your thoughts</label>
-                        <textarea name="caption" class="form-control" rows="2" placeholder="Say something about this post..."></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Story Background</label>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <div class="bg-option active" data-color="gradient-purple" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 50px; height: 50px; border-radius: 12px; cursor: pointer; border: 2px solid #667eea;"></div>
-                            <div class="bg-option" data-color="gradient-pink" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); width: 50px; height: 50px; border-radius: 12px; cursor: pointer;"></div>
-                            <div class="bg-option" data-color="gradient-blue" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); width: 50px; height: 50px; border-radius: 12px; cursor: pointer;"></div>
-                            <div class="bg-option" data-color="gradient-green" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); width: 50px; height: 50px; border-radius: 12px; cursor: pointer;"></div>
-                            <div class="bg-option" data-color="gradient-orange" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); width: 50px; height: 50px; border-radius: 12px; cursor: pointer;"></div>
-                        </div>
-                        <input type="hidden" name="bg_color" id="selectedBgColor{{ post.id }}" value="gradient-purple">
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-share me-2"></i>Share</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Modal -->
-<div class="modal fade" id="deleteModal{{ post.id }}" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete Post</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this post?</p>
-                <p class="text-muted small">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="{{ url_for('main.delete_post', post_id=post.id) }}" class="btn btn-danger">Delete</a>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-document.querySelectorAll('.bg-option').forEach(option => {
-    option.addEventListener('click', function() {
-        let container = this.closest('.modal-body');
-        container.querySelectorAll('.bg-option').forEach(opt => {
-            opt.style.border = '2px solid transparent';
+function notInterested(postId) {
+    if(confirm('Mark this post as not interested? We\'ll show fewer posts like this.')) {
+        fetch(`/not-interested/${postId}`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if(response.ok) {
+                location.reload();
+            }
         });
-        this.style.border = '2px solid #667eea';
-        let hiddenInput = container.querySelector('[name="bg_color"]');
-        if(hiddenInput) hiddenInput.value = this.getAttribute('data-color');
-    });
-});
-</script>
+    }
+}
 
+function hidePost(postId) {
+    if(confirm('Hide this post? You won\'t see it again.')) {
+        fetch(`/hide-post/${postId}`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if(response.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+function interestedPost(postId) {
+    fetch(`/interested/${postId}`, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.interested) {
+            alert('You marked this post as interested!');
+        } else {
+            alert('Removed from interested');
+        }
+        location.reload();
+    });
+}
+
+function blockUser(userId) {
+    if(confirm('Block this user? They will not be able to interact with you.')) {
+        fetch(`/block-user/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+            }
+        })
+        .then(response => {
+            if(response.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
 <style>
 .post-card {
     background: white;
@@ -243,14 +258,17 @@ document.querySelectorAll('.bg-option').forEach(option => {
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     transition: all 0.2s ease;
 }
+
 .post-card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
+
 .post-text {
     font-size: 15px;
     color: #1a1a2e;
     line-height: 1.5;
 }
+
 .post-actions {
     display: flex;
     align-items: center;
@@ -258,6 +276,7 @@ document.querySelectorAll('.bg-option').forEach(option => {
     border-top: 1px solid #e4e6eb;
     padding-top: 8px;
 }
+
 .action-icon {
     flex: 1;
     background: transparent;
@@ -272,9 +291,11 @@ document.querySelectorAll('.bg-option').forEach(option => {
     gap: 6px;
     cursor: pointer;
 }
+
 .action-icon i { font-size: 18px; }
 .action-icon:hover { background-color: #f0f2f5; color: #667eea; }
 .action-icon:active { transform: scale(0.96); }
+
 .count-badge {
     background: #e4e6eb;
     padding: 2px 6px;
@@ -283,10 +304,12 @@ document.querySelectorAll('.bg-option').forEach(option => {
     font-weight: 600;
     color: #4a5568;
 }
+
 .reaction-container {
     position: relative;
     flex: 1;
 }
+
 .reaction-picker {
     position: absolute;
     bottom: 100%;
@@ -305,10 +328,12 @@ document.querySelectorAll('.bg-option').forEach(option => {
     margin-bottom: 8px;
     border: 1px solid #e4e6eb;
 }
+
 .reaction-container:hover .reaction-picker {
     opacity: 1;
     visibility: visible;
 }
+
 .reaction-option {
     background: none;
     border: none;
@@ -320,19 +345,20 @@ document.querySelectorAll('.bg-option').forEach(option => {
     align-items: center;
     justify-content: center;
 }
+
 .reaction-option i { font-size: 18px; }
 .reaction-option:hover {
     transform: scale(1.2);
     background: #f0f2f5;
 }
+
 .reaction-icons {
     display: flex;
     align-items: center;
     gap: 2px;
     font-size: 14px;
 }
-.bg-option { transition: transform 0.2s ease; }
-.bg-option:hover { transform: scale(1.05); }
+
 @media (max-width: 768px) {
     .action-icon { padding: 6px 8px; }
     .action-icon i { font-size: 16px; }

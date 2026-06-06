@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
+                        <h5>{{ current_user.username }}</h5>
+                        <p class="text-muted small">{{ current_user.email }}</p>
+                    </div>
+                    <hr>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('security.account_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-user fa-fw" style="width: 24px;"></i>
+                            <span>Account</span>
+                        </a>
+                        <a href="{{ url_for('security.security_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-shield-alt fa-fw text-success" style="width: 24px;"></i>
+                            <span>Security</span>
+                        </a>
+                        <a href="{{ url_for('security.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-lock fa-fw text-warning" style="width: 24px;"></i>
+                            <span>Privacy</span>
+                        </a>
+                        <a href="{{ url_for('security.appearance_settings') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
+                            <i class="fas fa-palette fa-fw text-info" style="width: 24px;"></i>
+                            <span>Appearance</span>
+                        </a>
+                        <a href="{{ url_for('security.notification_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-bell fa-fw text-secondary" style="width: 24px;"></i>
+                            <span>Notifications</span>
+                        </a>
+                        <a href="{{ url_for('security.screen_protection') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-mobile-alt fa-fw text-secondary" style="width: 24px;"></i>
+                            <span>Screen Protection</span>
+                        </a>
+                        <a href="{{ url_for('security.session_management') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-desktop fa-fw text-secondary" style="width: 24px;"></i>
+                            <span>Sessions</span>
+                        </a>
+                        <a href="{{ url_for('security.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-history fa-fw text-secondary" style="width: 24px;"></i>
+                            <span>Login History</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-palette me-2 text-primary"></i>Theme Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="theme-option text-center p-3 border rounded cursor-pointer" data-theme="light">
+                                <i class="fas fa-sun fa-3x mb-2 text-warning"></i>
+                                <h6 class="mb-0">Light</h6>
+                                <small class="text-muted">Default bright theme</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="theme-option text-center p-3 border rounded cursor-pointer" data-theme="dark">
+                                <i class="fas fa-moon fa-3x mb-2 text-secondary"></i>
+                                <h6 class="mb-0">Dark</h6>
+                                <small class="text-muted">Easy on the eyes</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="theme-option text-center p-3 border rounded cursor-pointer" data-theme="system">
+                                <i class="fas fa-desktop fa-3x mb-2 text-primary"></i>
+                                <h6 class="mb-0">System</h6>
+                                <small class="text-muted">Follow device theme</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-font me-2 text-primary"></i>Font Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Font Size</label>
+                            <select class="form-select" id="fontSize">
+                                <option value="small">Small</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="large">Large</option>
+                                <option value="x-large">Extra Large</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Font Family</label>
+                            <select class="form-select" id="fontFamily">
+                                <option value="Inter">Inter (Default)</option>
+                                <option value="system-ui">System UI</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Arial">Arial</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.theme-option {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.theme-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.theme-option.active {
+    border: 2px solid #667eea !important;
+    background: rgba(102, 126, 234, 0.1);
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>
+
+<script>
+// Theme switching
+const savedTheme = localStorage.getItem('selected_theme') || 'light';
+
+document.querySelectorAll('.theme-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const theme = this.getAttribute('data-theme');
+        setTheme(theme);
+        localStorage.setItem('selected_theme', theme);
+
+        // Update active state
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        // Show confirmation
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `<i class="fas fa-check-circle me-2"></i>${theme.charAt(0).toUpperCase() + theme.slice(1)} theme applied`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    });
+
+    // Mark active theme
+    if (option.getAttribute('data-theme') === savedTheme) {
+        option.classList.add('active');
+    }
+});
+
+// Font size settings
+const fontSizeSelect = document.getElementById('fontSize');
+if (fontSizeSelect) {
+    const savedFontSize = localStorage.getItem('font_size') || 'medium';
+    fontSizeSelect.value = savedFontSize;
+
+    fontSizeSelect.addEventListener('change', function() {
+        const size = this.value;
+        localStorage.setItem('font_size', size);
+        let fontSize = '16px';
+        if (size === 'small') fontSize = '14px';
+        if (size === 'medium') fontSize = '16px';
+        if (size === 'large') fontSize = '18px';
+        if (size === 'x-large') fontSize = '20px';
+        document.body.style.fontSize = fontSize;
+    });
+
+    // Apply saved font size
+    let fontSize = '16px';
+    if (savedFontSize === 'small') fontSize = '14px';
+    if (savedFontSize === 'medium') fontSize = '16px';
+    if (savedFontSize === 'large') fontSize = '18px';
+    if (savedFontSize === 'x-large') fontSize = '20px';
+    document.body.style.fontSize = fontSize;
+}
+
+// Font family settings
+const fontFamilySelect = document.getElementById('fontFamily');
+if (fontFamilySelect) {
+    const savedFontFamily = localStorage.getItem('font_family') || 'Inter';
+    fontFamilySelect.value = savedFontFamily;
+
+    fontFamilySelect.addEventListener('change', function() {
+        const family = this.value;
+        localStorage.setItem('font_family', family);
+        document.body.style.fontFamily = family;
+    });
+
+    // Apply saved font family
+    document.body.style.fontFamily = savedFontFamily;
+}
+</script>
+{% endblock %}

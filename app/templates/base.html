@@ -22,127 +22,249 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
-        }
+    /* Theme Variables - Light Theme (Default) */
+    :root {
+        --bg-primary: #f0f2f5;
+        --bg-card: #ffffff;
+        --text-primary: #1a1a2e;
+        --text-secondary: #65676b;
+        --border-color: #e4e6eb;
+        --navbar-bg: #ffffff;
+        --hover-bg: #f0f2f5;
+        --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
+    }
 
-        .navbar {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            padding: 0.75rem 0;
-        }
+    /* Dark Theme */
+    [data-theme="dark"] {
+        --bg-primary: #18191a;
+        --bg-card: #242526;
+        --text-primary: #e4e6eb;
+        --text-secondary: #b0b3b8;
+        --border-color: #3e4042;
+        --navbar-bg: #242526;
+        --hover-bg: #3a3b3c;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-hover: 0 4px 12px rgba(0,0,0,0.4);
+    }
 
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .navbar {
+        background: var(--navbar-bg) !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 0.75rem 0;
+        transition: background 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: 800;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .nav-link {
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        position: relative;
+    }
+
+    .nav-link:hover {
+        color: #667eea;
+        background: var(--hover-bg);
+    }
+
+    .nav-link.active {
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.15);
+    }
+
+    .nav-link i {
+        font-size: 1.2rem;
+    }
+
+    .nav-link:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: -32px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1a202c;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 1000;
+        font-weight: 400;
+    }
+
+    .dropdown-menu {
+        background: var(--bg-card);
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        border-radius: 1rem;
+        padding: 0.5rem;
+    }
+
+    .dropdown-item {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        color: var(--text-primary);
+    }
+
+    .dropdown-item:hover {
+        background: var(--hover-bg);
+        color: #667eea;
+    }
+
+    .card {
+        background: var(--bg-card);
+        border: none;
+        border-radius: 1rem;
+        box-shadow: var(--shadow);
+        transition: box-shadow 0.2s;
+    }
+
+    .card:hover {
+        box-shadow: var(--shadow-hover);
+    }
+
+    .btn-outline-primary {
+        border-radius: 0.75rem;
+        border-width: 2px;
+        font-weight: 600;
+    }
+
+    .form-control {
+        background: var(--bg-card);
+        border-radius: 0.75rem;
+        border: 2px solid var(--border-color);
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .alert {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    .badge {
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+    }
+
+    /* Post card styles for theme */
+    .post-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        transition: box-shadow 0.2s;
+    }
+
+    .post-card:hover {
+        box-shadow: var(--shadow-hover);
+    }
+
+    .post-text {
+        color: var(--text-primary);
+    }
+
+    .post-time {
+        color: var(--text-secondary);
+    }
+
+    .btn-light {
+        background: var(--hover-bg);
+        color: var(--text-primary);
+        border: none;
+    }
+
+    .btn-light:hover {
+        background: rgba(102, 126, 234, 0.15);
+        color: #667eea;
+    }
+
+    /* Sidebar styles */
+    .left-sidebar-item {
+        color: var(--text-primary);
+    }
+
+    .left-sidebar-item:hover {
+        background: var(--hover-bg);
+    }
+
+    .section-title {
+        color: var(--text-secondary);
+    }
+
+    .sidebar-divider {
+        border-top-color: var(--border-color);
+    }
+
+    /* Toast container */
+    #toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+
+    .toast {
+        opacity: 1 !important;
+        animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
         .navbar-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.25rem;
         }
 
         .nav-link {
-            font-weight: 500;
-            color: #4a5568;
-            transition: color 0.2s ease;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem;
-            position: relative;
-        }
-
-        .nav-link:hover {
-            color: #667eea;
-            background: #f7fafc;
-        }
-
-        .nav-link.active {
-            color: #667eea;
-            background: #edf2f7;
-        }
-
-        .nav-link i {
-            font-size: 1.2rem;
-        }
-
-        .nav-link:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: -32px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a202c;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            white-space: nowrap;
-            z-index: 1000;
-            font-weight: 400;
-        }
-
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            border-radius: 1rem;
             padding: 0.5rem;
         }
 
-        .dropdown-item {
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            transition: all 0.2s;
+        .nav-link i {
+            font-size: 1rem;
         }
-
-        .dropdown-item:hover {
-            background: #f7fafc;
-            color: #667eea;
-        }
-
-        .btn-outline-primary {
-            border-radius: 0.75rem;
-            border-width: 2px;
-            font-weight: 600;
-        }
-
-        .form-control {
-            border-radius: 0.75rem;
-            border: 2px solid #e2e8f0;
-            font-weight: 500;
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .alert {
-            border-radius: 1rem;
-            border: none;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        .badge {
-            font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .navbar-brand {
-                font-size: 1.25rem;
-            }
-
-            .nav-link {
-                padding: 0.5rem;
-            }
-
-            .nav-link i {
-                font-size: 1rem;
-            }
-        }
-    </style>
+    }
+</style>
   </head>
   <body>
     {% if request.endpoint not in ['auth.login', 'auth.register', 'auth.reset_password_request', 'auth.reset_password'] %}
@@ -281,20 +403,23 @@
                 <img src="{{ current_user.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}">
-                  <i class="fas fa-user me-2"></i>Profile
-                </a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.saved_posts') }}">
-                  <i class="fas fa-bookmark me-2"></i>Saved
-                </a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">
-                  <i class="fas fa-edit me-2"></i>Edit
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
-                  <i class="fas fa-sign-out-alt me-2"></i>Logout
-                </a></li>
-              </ul>
+    <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}">
+        <i class="fas fa-user me-2"></i>Profile
+    </a></li>
+    <li><a class="dropdown-item" href="{{ url_for('main.saved_posts') }}">
+        <i class="fas fa-bookmark me-2"></i>Saved
+    </a></li>
+    <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">
+        <i class="fas fa-edit me-2"></i>Edit
+    </a></li>
+    <li><a class="dropdown-item" href="{{ url_for('security.settings') }}">
+        <i class="fas fa-cog me-2"></i>Settings
+    </a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+        <i class="fas fa-sign-out-alt me-2"></i>Logout
+    </a></li>
+</ul>
             </li>
             {% endif %}
           </ul>
@@ -341,190 +466,191 @@
     {{ moment.lang(g.locale) }}
 
     <script>
-      let lastNotificationTime = 0;
-      let notificationCheckInterval = null;
-      let displayedNotificationIds = new Set();
+    let notificationCheckInterval = null;
+    let lastNotifCount = 0;
 
-      function getNotificationIcon(type) {
-        const icons = {
-          'like': '<i class="fas fa-heart text-danger"></i>',
-          'comment': '<i class="fas fa-comment text-primary"></i>',
-          'follow': '<i class="fas fa-user-plus text-success"></i>',
-          'share': '<i class="fas fa-share text-info"></i>'
-        };
-        return icons[type] || '<i class="fas fa-bell text-secondary"></i>';
-      }
-
-      function formatNotificationTime(timestamp) {
-        const date = new Date(timestamp * 1000);
-        const now = new Date();
-        const diff = Math.floor((now - date) / 1000);
-
-        if (diff < 60) return 'Just now';
-        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-        return date.toLocaleDateString();
-      }
-
-      function showNotificationToast(notification) {
-        let toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-          toastContainer = document.createElement('div');
-          toastContainer.id = 'toast-container';
-          toastContainer.style.position = 'fixed';
-          toastContainer.style.bottom = '20px';
-          toastContainer.style.right = '20px';
-          toastContainer.style.zIndex = '1050';
-          document.body.appendChild(toastContainer);
-        }
-
-        const toastHtml = `
-          <div class="toast show" role="alert" style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 10px; min-width: 280px;">
-            <div class="toast-header">
-              ${getNotificationIcon(notification.name)}
-              <strong class="me-auto ms-2">New ${notification.name}</strong>
-              <small>${formatNotificationTime(notification.timestamp)}</small>
-              <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body">
-              ${notification.data?.message || 'You have a new notification'}
-            </div>
-          </div>
-        `;
-
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        const toastElement = toastContainer.lastElementChild;
-        setTimeout(() => toastElement.remove(), 5000);
-      }
-
-      function updateNotificationBadge(count) {
+    function updateNotificationBadge(count) {
         const badge = document.getElementById('notification-count');
         if (badge) {
-          if (count > 0) {
-            badge.style.display = 'inline-block';
-            badge.innerText = count > 99 ? '99+' : count;
-          } else {
-            badge.style.display = 'none';
-          }
-        }
-      }
-
-      function checkNewNotifications() {
-        fetch(`/notifications?since=${lastNotificationTime}`)
-          .then(response => response.json())
-          .then(notifications => {
-            if (notifications && notifications.length > 0) {
-              const newNotifs = notifications.filter(n => !displayedNotificationIds.has(n.id));
-              if (newNotifs.length > 0) {
-                newNotifs.forEach(n => displayedNotificationIds.add(n.id));
-                lastNotificationTime = notifications[notifications.length - 1].timestamp;
-                const unreadCount = newNotifs.filter(n => !n.read).length;
-                updateNotificationBadge(unreadCount);
-                newNotifs.forEach(notification => {
-                  showNotificationToast(notification);
-                });
-              }
-            }
-          })
-          .catch(error => console.error('Notification check failed:', error));
-      }
-
-      function reactPost(postId, reaction) {
-        fetch(`/react_post/${postId}/${reaction}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.reaction_set !== undefined) {
-              const trigger = document.getElementById(`reactionTrigger${postId}`);
-              if (trigger && data.reaction) {
-                const reactionMap = {
-                  'like': '👍',
-                  'love': '❤️',
-                  'haha': '😂',
-                  'wow': '😮',
-                  'sad': '😢',
-                  'angry': '😠'
-                };
-                trigger.innerHTML = reactionMap[data.reaction] || '<i class="far fa-smile fa-lg"></i>';
-                trigger.classList.add('active');
-              } else if (trigger) {
-                trigger.innerHTML = '<i class="far fa-smile fa-lg"></i>';
-                trigger.classList.remove('active');
-              }
-
-              const reactionSummary = document.getElementById(`reactionSummary${postId}`);
-              if (reactionSummary && data.counts) {
-                const icons = [];
-                for (const [key, value] of Object.entries(data.counts)) {
-                  if (value > 0 && icons.length < 3) {
-                    if (key === 'like') icons.push('👍');
-                    else if (key === 'love') icons.push('❤️');
-                    else if (key === 'haha') icons.push('😂');
-                    else if (key === 'wow') icons.push('😮');
-                    else if (key === 'sad') icons.push('😢');
-                    else if (key === 'angry') icons.push('😠');
-                  }
-                }
-                const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
-                reactionSummary.innerHTML = `<div class="d-flex align-items-center gap-2"><div class="reaction-summary-icons">${icons.join(' ')}</div><small class="text-muted">${total}</small></div>`;
-              }
-            }
-          })
-          .catch(error => console.error('Error:', error));
-      }
-
-      function sharePost(postId) {
-        fetch(`/share_post/${postId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-        .then(response => {
-          if (response.ok) {
-            location.reload();
-          }
-        });
-      }
-
-      function savePost(postId) {
-        fetch(`/save_post/${postId}`)
-          .then(response => response.json())
-          .then(data => {
-            const btn = document.getElementById(`saveBtn${postId}`);
-            if (data.saved) {
-              btn.innerHTML = '<i class="fas fa-bookmark me-2"></i>Saved';
+            if (count > 0) {
+                badge.style.display = 'inline-block';
+                badge.innerText = count > 99 ? '99+' : count;
             } else {
-              btn.innerHTML = '<i class="far fa-bookmark me-2"></i>Save';
+                badge.style.display = 'none';
             }
-          });
-      }
+        }
+    }
 
-      document.addEventListener('DOMContentLoaded', function() {
+    function checkNewNotifications() {
+        fetch('/notifications')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count !== undefined) {
+                    updateNotificationBadge(data.count);
+                }
+            })
+            .catch(error => console.error('Notification check failed:', error));
+    }
+
+    // Check every 30 seconds
+    if (notificationCheckInterval) clearInterval(notificationCheckInterval);
+    notificationCheckInterval = setInterval(checkNewNotifications, 30000);
+    checkNewNotifications();
+
+    function reactPost(postId, reaction) {
+        fetch(`/react_post/${postId}/${reaction}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.reaction_set !== undefined) {
+                    const trigger = document.getElementById(`reactionTrigger${postId}`);
+                    if (trigger && data.reaction) {
+                        const reactionMap = {
+                            'like': '👍',
+                            'love': '❤️',
+                            'haha': '😂',
+                            'wow': '😮',
+                            'sad': '😢',
+                            'angry': '😠'
+                        };
+                        trigger.innerHTML = reactionMap[data.reaction] || '<i class="far fa-smile fa-lg"></i>';
+                        trigger.classList.add('active');
+                    } else if (trigger) {
+                        trigger.innerHTML = '<i class="far fa-thumbs-up"></i>';
+                        trigger.classList.remove('active');
+                    }
+
+                    const reactionSummary = document.getElementById(`reactionSummary${postId}`);
+                    if (reactionSummary && data.counts) {
+                        const icons = [];
+                        for (const [key, value] of Object.entries(data.counts)) {
+                            if (value > 0 && icons.length < 3) {
+                                if (key === 'like') icons.push('👍');
+                                else if (key === 'love') icons.push('❤️');
+                                else if (key === 'haha') icons.push('😂');
+                                else if (key === 'wow') icons.push('😮');
+                                else if (key === 'sad') icons.push('😢');
+                                else if (key === 'angry') icons.push('😠');
+                            }
+                        }
+                        const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
+                        reactionSummary.innerHTML = `<div class="d-flex align-items-center gap-2"><div class="reaction-icons">${icons.join(' ')}</div><small class="text-muted">${total}</small></div>`;
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function sharePost(postId) {
+        fetch(`/share_post/${postId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => { if (response.ok) location.reload(); })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function savePost(postId) {
+        fetch(`/save_post/${postId}`)
+            .then(response => response.json())
+            .then(data => {
+                const btn = document.getElementById(`saveBtn${postId}`);
+                if (btn) {
+                    btn.innerHTML = data.saved ? '<i class="fas fa-bookmark me-2"></i>Saved' : '<i class="far fa-bookmark me-2"></i>Save';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function notInterested(postId) {
+        if (confirm('Mark this post as not interested? We\'ll show fewer posts like this.')) {
+            fetch(`/not-interested/${postId}`)
+                .then(response => { if (response.ok) location.reload(); })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function hidePost(postId) {
+        if (confirm('Hide this post? You won\'t see it again.')) {
+            fetch(`/hide-post/${postId}`)
+                .then(response => { if (response.ok) location.reload(); })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function blockUser(userId) {
+        if (confirm('Block this user? They will not be able to interact with you.')) {
+            fetch(`/block-user/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+                }
+            })
+            .then(response => { if (response.ok) location.reload(); })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
         const notificationBell = document.getElementById('notification-bell');
         if (notificationBell) {
-          notificationBell.addEventListener('click', function() {
-            const badge = document.getElementById('notification-count');
-            if (badge) {
-              badge.style.display = 'none';
-              badge.innerText = '0';
-            }
-          });
+            notificationBell.addEventListener('click', function() {
+                const badge = document.getElementById('notification-count');
+                if (badge) {
+                    badge.style.display = 'none';
+                    badge.innerText = '0';
+                }
+            });
         }
+    });
 
-        if (notificationCheckInterval) clearInterval(notificationCheckInterval);
-        notificationCheckInterval = setInterval(checkNewNotifications, 10000);
-        checkNewNotifications();
-      });
-
-      setTimeout(function() {
+    setTimeout(function() {
         let alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
-          let bsAlert = bootstrap.Alert.getInstance(alert);
-          if (bsAlert) bsAlert.close();
+            let bsAlert = bootstrap.Alert.getInstance(alert);
+            if (bsAlert) bsAlert.close();
         });
-      }, 5000);
-    </script>
+    }, 5000);
+</script>
   {% include '_story_viewer.html' %}
+  <script>
+    // Theme handling
+    function setTheme(theme) {
+        if (theme === 'system') {
+            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            if (darkModeMediaQuery.matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        localStorage.setItem('selected_theme', theme);
+    }
+
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('selected_theme') || 'light';
+        setTheme(savedTheme);
+    }
+
+    if (window.matchMedia) {
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        darkModeMediaQuery.addEventListener('change', () => {
+            const savedTheme = localStorage.getItem('selected_theme');
+            if (savedTheme === 'system') {
+                if (darkModeMediaQuery.matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTheme();
+    });
+  </script>
   </body>
 </html>

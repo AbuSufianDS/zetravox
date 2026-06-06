@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
+                        <h5>{{ current_user.username }}</h5>
+                        <p class="text-muted small">{{ current_user.email }}</p>
+                    </div>
+                    <hr>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('security.account_settings') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
+                            <i class="fas fa-user fa-fw" style="width: 24px;"></i>
+                            <span>Account</span>
+                        </a>
+                        <a href="{{ url_for('security.security_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-shield-alt fa-fw text-success" style="width: 24px;"></i>
+                            <span>Security</span>
+                        </a>
+                        <a href="{{ url_for('security.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-lock fa-fw text-warning" style="width: 24px;"></i>
+                            <span>Privacy</span>
+                        </a>
+                        <a href="{{ url_for('security.session_management') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-desktop fa-fw text-info" style="width: 24px;"></i>
+                            <span>Sessions</span>
+                        </a>
+                        <a href="{{ url_for('security.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                            <i class="fas fa-history fa-fw text-secondary" style="width: 24px;"></i>
+                            <span>Login History</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user me-2 text-primary"></i>Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('main.edit_profile') }}" enctype="multipart/form-data">
+                        {{ form.hidden_tag() if form else '' }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" name="username" class="form-control" value="{{ current_user.username }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="email" class="form-control" value="{{ current_user.email }}" disabled>
+                                <span class="input-group-text bg-light">Cannot be changed</span>
+                            </div>
+                            <small class="text-muted">Contact support to change your email address</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Profile Picture</label>
+                            <input type="file" name="profile_pic" class="form-control" accept="image/*">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">About Me</label>
+                            <textarea name="about_me" class="form-control" rows="3">{{ current_user.about_me or '' }}</textarea>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Work</label>
+                            <input type="text" name="work" class="form-control" value="{{ current_user.work or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Education</label>
+                            <input type="text" name="education" class="form-control" value="{{ current_user.education or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="location" class="form-control" value="{{ current_user.location or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Website</label>
+                            <input type="url" name="website" class="form-control" value="{{ current_user.website or '' }}" placeholder="https://">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

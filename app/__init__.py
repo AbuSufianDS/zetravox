@@ -12,13 +12,14 @@ from elasticsearch import Elasticsearch
 from redis import Redis
 import rq
 from config import Config
-import os
+from flask_wtf.csrf import CSRFProtect
+
+csrf = CSRFProtect()
 
 IS_RENDER = os.environ.get('RENDER', 'False').lower() == 'true'
 if IS_RENDER:
     os.environ['ENABLE_AI'] = 'false'
     os.environ['USE_SIMPLE_SPAM'] = 'true'
-
 
 
 def get_locale():
@@ -45,6 +46,16 @@ def create_app(config_class=Config):
     mail.init_app(app)
     moment.init_app(app)
     babel.init_app(app, locale_selector=get_locale)
+    csrf.init_app(app)
+
+    # Initialize rate limiter after db
+    from app.security.security_limiter import limiter
+    limiter.init_app(app)
+
+    # Initialize security middleware
+    from app.security.security_middleware import SecurityMiddleware
+    SecurityMiddleware(app)
+
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
     app.redis = Redis.from_url(app.config['REDIS_URL'])
@@ -61,6 +72,10 @@ def create_app(config_class=Config):
 
     from app.cli import bp as cli_bp
     app.register_blueprint(cli_bp)
+
+    # Register security blueprint - ONLY ONCE
+    from app.security import bp as security_bp
+    app.register_blueprint(security_bp)
 
     from app.api import bp as api_bp
     app.register_blueprint(api_bp, url_prefix='/api')

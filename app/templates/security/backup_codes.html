@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-code me-2 text-warning"></i>Backup Codes</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p>Save these backup codes in a safe place. You can use them to access your account if you lose your phone.</p>
+                    
+                    <div class="bg-light p-3 rounded mb-3">
+                        {% for code in backup_codes %}
+                        <code class="d-block mb-1">{{ code }}</code>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Each code can only be used once.
+                    </div>
+                    
+                    <a href="{{ url_for('security.security_settings') }}" class="btn btn-primary">
+                        <i class="fas fa-check me-2"></i>I've Saved My Codes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
