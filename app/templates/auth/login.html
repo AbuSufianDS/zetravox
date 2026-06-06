@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TinyBook - Sign In</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -17,7 +15,6 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f0c29;
             background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             min-height: 100vh;
             overflow: hidden;
@@ -115,12 +112,8 @@
         }
 
         @keyframes patternMove {
-            0% {
-                transform: translate(0, 0);
-            }
-            100% {
-                transform: translate(50px, 50px);
-            }
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
         }
 
         .brand-header {
@@ -478,19 +471,15 @@
                 max-width: 500px;
                 margin: 0 auto;
             }
-
             .hero-section {
                 padding: 2rem;
             }
-
             .form-section {
                 padding: 2rem;
             }
-
             .hero-title {
                 font-size: 2rem;
             }
-
             .feature-grid {
                 grid-template-columns: 1fr;
             }
@@ -500,7 +489,6 @@
             .login-wrapper {
                 padding: 1rem;
             }
-
             .form-section {
                 padding: 1.5rem;
             }
@@ -585,38 +573,32 @@
                     {% endwith %}
 
                     <form method="POST" action="" id="loginForm">
-                        {{ form.hidden_tag() }}
-
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                        
                         <div class="form-group">
                             <label class="input-label" for="username">
-                                <i class="fas fa-user"></i> Username
+                                Username
                             </label>
                             <div class="input-wrapper">
                                 <i class="fas fa-user input-icon"></i>
-                                {{ form.username(class="input-field", id="username", placeholder="e.g., johndoe", autocomplete="off") }}
+                                <input type="text" name="username" id="username" class="input-field" placeholder="e.g., johndoe" autocomplete="off" required>
                             </div>
-                            {% for error in form.username.errors %}
-                                <span class="error-message">{{ error }}</span>
-                            {% endfor %}
                         </div>
 
                         <div class="form-group">
                             <label class="input-label" for="password">
-                                <i class="fas fa-lock"></i> Password
+                                Password
                             </label>
                             <div class="input-wrapper">
                                 <i class="fas fa-lock input-icon"></i>
-                                {{ form.password(class="input-field", id="password", placeholder="Enter your password") }}
+                                <input type="password" name="password" id="password" class="input-field" placeholder="Enter your password" required>
                                 <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
                             </div>
-                            {% for error in form.password.errors %}
-                                <span class="error-message">{{ error }}</span>
-                            {% endfor %}
                         </div>
 
                         <div class="form-options">
                             <label class="checkbox-wrapper">
-                                {{ form.remember_me() }}
+                                <input type="checkbox" name="remember_me">
                                 <span>Remember me for 30 days</span>
                             </label>
                             <a href="{{ url_for('auth.reset_password_request') }}" class="forgot-link">
@@ -695,15 +677,16 @@
             const inputs = document.querySelectorAll('.input-field');
             inputs.forEach(input => {
                 input.addEventListener('focus', function() {
-                    this.parentElement.parentElement.querySelector('.input-label').style.color = '#667eea';
+                    const label = this.closest('.form-group').querySelector('.input-label');
+                    if (label) label.style.color = '#667eea';
                 });
 
                 input.addEventListener('blur', function() {
-                    this.parentElement.parentElement.querySelector('.input-label').style.color = '#2d3748';
+                    const label = this.closest('.form-group').querySelector('.input-label');
+                    if (label) label.style.color = '#2d3748';
                 });
             });
         });
     </script>
 </body>
 </html>
-{% endblock %}

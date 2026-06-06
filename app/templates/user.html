@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="container mt-3">
-    <!-- Cover Photo Section -->
     <div class="card mb-4 overflow-hidden">
         {% if user.cover_pic and user.cover_pic != 'default_cover.jpg' and user.cover_pic != 'None' %}
             <img src="{{ url_for('static', filename='uploads/profiles/' + user.cover_pic) }}"
@@ -15,7 +14,6 @@
         <div class="card-body position-relative">
             <div class="row">
                 <div class="col-md-3 text-center">
-                    <!-- Profile Picture -->
                     <div class="position-relative" style="margin-top: -80px;">
                         {% if user.profile_pic and user.profile_pic != 'default.jpg' and user.profile_pic != 'None' %}
                             <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_pic) }}"
@@ -50,7 +48,6 @@
                         </div>
                         <div class="mt-2">
                             {% if user != current_user %}
-                                <!-- Follow Button -->
                                 {% if not current_user.is_following(user) %}
                                     <form action="{{ url_for('main.follow', username=user.username) }}" method="post" class="d-inline">
                                         {{ form.hidden_tag() }}
@@ -67,7 +64,6 @@
                                     </form>
                                 {% endif %}
 
-                                <!-- Friend Request Button -->
                                 {% set is_friend = current_user.is_friend_with(user) %}
                                 {% set pending_sent = current_user.has_friend_request_pending(user) %}
                                 {% set pending_received = user.has_friend_request_pending(current_user) %}
@@ -162,7 +158,6 @@
     </div>
 
     <div class="row">
-        <!-- About Section Sidebar -->
         <div class="col-md-4">
             <div class="card mb-3">
                 <div class="card-header bg-white">
@@ -298,7 +293,6 @@
             </div>
         </div>
 
-        <!-- Posts Feed -->
         <div class="col-md-8">
             {% for post in posts %}
                 {% include '_post.html' %}
@@ -336,7 +330,6 @@
     </div>
 </div>
 
-<!-- Block User Modal -->
 <div class="modal fade" id="blockModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

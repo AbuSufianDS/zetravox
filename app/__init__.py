@@ -48,11 +48,9 @@ def create_app(config_class=Config):
     babel.init_app(app, locale_selector=get_locale)
     csrf.init_app(app)
 
-    # Initialize rate limiter after db
     from app.security.security_limiter import limiter
     limiter.init_app(app)
 
-    # Initialize security middleware
     from app.security.security_middleware import SecurityMiddleware
     SecurityMiddleware(app)
 
@@ -73,7 +71,6 @@ def create_app(config_class=Config):
     from app.cli import bp as cli_bp
     app.register_blueprint(cli_bp)
 
-    # Register security blueprint - ONLY ONCE
     from app.security import bp as security_bp
     app.register_blueprint(security_bp)
 

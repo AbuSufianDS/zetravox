@@ -2,208 +2,171 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+    <div class="row">
+        <div class="col-md-3">
             <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h4>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="markAllRead()">
-                        <i class="fas fa-check-double me-1"></i>Mark all as read
-                    </button>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('main.edit_profile') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i> Account
+                    </a>
+                    <a href="{{ url_for('main.security_settings') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shield-alt me-2"></i> Security
+                    </a>
+                    <a href="{{ url_for('main.privacy_settings') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-lock me-2"></i> Privacy
+                    </a>
+                    <a href="{{ url_for('main.notification_settings') }}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-bell me-2"></i> Notifications
+                    </a>
                 </div>
-                <div class="card-body p-0">
-                    <div id="notifications-list">
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-bell me-2"></i>Notification Settings</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+
+                        <h5 class="mb-3">Push Notifications</h5>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_push_likes(class="form-check-input") }}
+                                {{ form.notify_push_likes.label(class="form-check-label") }}
                             </div>
-                            <p class="text-muted mt-2">Loading notifications...</p>
                         </div>
-                    </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_push_comments(class="form-check-input") }}
+                                {{ form.notify_push_comments.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_push_follows(class="form-check-input") }}
+                                {{ form.notify_push_follows.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_push_shares(class="form-check-input") }}
+                                {{ form.notify_push_shares.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_push_friend_requests(class="form-check-input") }}
+                                {{ form.notify_push_friend_requests.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.notify_push_messages(class="form-check-input") }}
+                                {{ form.notify_push_messages.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="mb-3">Email Notifications</h5>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_email_likes(class="form-check-input") }}
+                                {{ form.notify_email_likes.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_email_comments(class="form-check-input") }}
+                                {{ form.notify_email_comments.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_email_follows(class="form-check-input") }}
+                                {{ form.notify_email_follows.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_email_shares(class="form-check-input") }}
+                                {{ form.notify_email_shares.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.notify_email_friend_requests(class="form-check-input") }}
+                                {{ form.notify_email_friend_requests.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.notify_email_messages(class="form-check-input") }}
+                                {{ form.notify_email_messages.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex gap-2">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <button type="button" class="btn btn-outline-secondary" id="testNotificationBtn">
+                                <i class="fas fa-bell me-1"></i>Send Test Notification
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-function getNotificationIcon(type) {
-    const icons = {
-        'like': '<i class="fas fa-heart text-danger fa-fw"></i>',
-        'comment': '<i class="fas fa-comment text-primary fa-fw"></i>',
-        'follow': '<i class="fas fa-user-plus text-success fa-fw"></i>',
-        'share': '<i class="fas fa-share text-info fa-fw"></i>',
-        'friend_request': '<i class="fas fa-user-friends text-primary fa-fw"></i>',
-        'friend_accepted': '<i class="fas fa-check-circle text-success fa-fw"></i>'
-    };
-    return icons[type] || '<i class="fas fa-bell text-secondary fa-fw"></i>';
-}
+document.getElementById('testNotificationBtn')?.addEventListener('click', async function() {
+    const btn = this;
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
 
-function getNotificationLink(notification) {
-    if (notification.name === 'like' || notification.name === 'comment' || notification.name === 'share') {
-        return `/post/${notification.data.post_id}`;
-    } else if (notification.name === 'follow') {
-        return `/user/${notification.data.from_user}`;
-    } else if (notification.name === 'friend_request') {
-        return `/friend-requests`;
-    } else if (notification.name === 'friend_accepted') {
-        return `/friends`;
+    try {
+        const response = await fetch('{{ url_for("main.api_test_notification") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            }
+        });
+        const data = await response.json();
+
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${data.success ? 'success' : 'danger'} position-fixed bottom-0 end-0 m-3`;
+        toast.style.zIndex = '9999';
+        toast.style.minWidth = '250px';
+        toast.innerHTML = `<i class="fas fa-${data.success ? 'check-circle' : 'exclamation-circle'} me-2"></i>${data.success ? 'Test notification sent!' : 'Failed to send'}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
     }
-    return '#';
-}
-
-function formatTime(timestamp) {
-    const date = new Date(timestamp * 1000);
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000);
-
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
-    return date.toLocaleDateString();
-}
-
-function markAsRead(notificationId, element) {
-    fetch(`/mark-notification-read/${notificationId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove unread styling
-            if (element) {
-                element.classList.remove('bg-light');
-                element.classList.add('bg-white');
-            }
-            // Update badge count
-            updateBadgeCount();
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function markAllRead() {
-    fetch('/mark-all-notifications-read', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function updateBadgeCount() {
-    fetch('/notifications')
-        .then(response => response.json())
-        .then(notifications => {
-            const unreadCount = notifications.filter(n => !n.read).length;
-            const badge = document.getElementById('notification-count');
-            if (badge) {
-                if (unreadCount > 0) {
-                    badge.style.display = 'inline-block';
-                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        });
-}
-
-function loadNotifications() {
-    fetch('/notifications')
-        .then(response => response.json())
-        .then(notifications => {
-            const container = document.getElementById('notifications-list');
-
-            if (!notifications || notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No notifications yet</p>
-                        <small class="text-muted">When someone interacts with you, you'll see it here</small>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '<div class="list-group list-group-flush">';
-            notifications.forEach(notif => {
-                let message = '';
-                let link = getNotificationLink(notif);
-
-                if (notif.name === 'like') {
-                    message = `${notif.data?.from_user || 'Someone'} liked your post`;
-                } else if (notif.name === 'comment') {
-                    const comment = notif.data?.comment || '';
-                    message = `${notif.data?.from_user || 'Someone'} commented: "${comment.substring(0, 50)}${comment.length > 50 ? '...' : ''}"`;
-                } else if (notif.name === 'follow') {
-                    message = `${notif.data?.from_user || 'Someone'} started following you`;
-                } else if (notif.name === 'share') {
-                    message = `${notif.data?.from_user || 'Someone'} shared your post`;
-                } else if (notif.name === 'friend_request') {
-                    message = `${notif.data?.from_user || 'Someone'} sent you a friend request`;
-                } else if (notif.name === 'friend_accepted') {
-                    message = `${notif.data?.from_user || 'Someone'} accepted your friend request`;
-                } else {
-                    message = notif.data?.message || 'You have a new notification';
-                }
-
-                const isUnread = !notif.read;
-
-                html += `
-                    <a href="${link}" class="list-group-item list-group-item-action ${isUnread ? 'bg-light' : ''}"
-                       onclick="markAsRead(${notif.id}, this)"
-                       style="cursor: pointer; text-decoration: none;">
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="flex-shrink-0">
-                                ${getNotificationIcon(notif.name)}
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="mb-1 ${isUnread ? 'fw-semibold' : ''}">${message}</p>
-                                <small class="text-muted">${formatTime(notif.timestamp)}</small>
-                            </div>
-                            ${isUnread ? '<div class="flex-shrink-0"><span class="badge bg-primary rounded-pill">New</span></div>' : ''}
-                        </div>
-                    </a>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error loading notifications:', error);
-            document.getElementById('notifications-list').innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                    <p class="text-muted">Failed to load notifications</p>
-                    <button class="btn btn-primary btn-sm" onclick="loadNotifications()">
-                        <i class="fas fa-sync me-2"></i>Try Again
-                    </button>
-                </div>
-            `;
-        });
-}
-
-// Reset notification badge when viewing page
-const badge = document.getElementById('notification-count');
-if (badge) {
-    badge.style.display = 'none';
-    badge.innerText = '0';
-}
-
-// Load notifications
-loadNotifications();
+});
 </script>
 {% endblock %}

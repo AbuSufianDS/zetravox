@@ -195,6 +195,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     notify_push_comments = db.Column(db.Boolean, default=True)
     notify_push_follows = db.Column(db.Boolean, default=True)
     albums = db.relationship('Album', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    notify_push_shares = db.Column(db.Boolean, default=True)
+    notify_push_friend_requests = db.Column(db.Boolean, default=True)
+    notify_push_messages = db.Column(db.Boolean, default=True)
+    notify_email_shares = db.Column(db.Boolean, default=False)
+    notify_email_friend_requests = db.Column(db.Boolean, default=False)
+    notify_email_messages = db.Column(db.Boolean, default=False)
 
 
     def increment_login_attempts(self):
@@ -745,6 +751,7 @@ class NotInterestedPost(db.Model):
 
     user = db.relationship('User', foreign_keys=[user_id])
     post = db.relationship('Post', foreign_keys=[post_id])
+    read = db.Column(db.Boolean, default=False)
 
 
 class InterestedPost(db.Model):
@@ -799,7 +806,10 @@ class Notification(db.Model):
     user: so.Mapped[User] = so.relationship(back_populates='notifications')
 
     def get_data(self):
-        return json.loads(str(self.payload_json))
+        try:
+            return json.loads(self.payload_json) if self.payload_json else {}
+        except:
+            return {}
 
 class Task(db.Model):
     __tablename__ = 'task'

@@ -49,11 +49,9 @@ def download_uci_dataset():
 def load_all_datasets():
     print("Loading datasets...")
 
-    # Dataset 1: SMS Spam Collection (5,574 messages)
     df1 = download_sms_dataset()
     print(f"SMS dataset: {len(df1)} messages")
 
-    # Dataset 2: UCI SMS Spam Collection (same but different source)
     try:
         df2 = download_uci_dataset()
         print(f"UCI dataset: {len(df2)} messages")
@@ -62,7 +60,6 @@ def load_all_datasets():
         df = df1
         print("UCI dataset download failed, using only SMS dataset")
 
-    # Add custom ham examples (greetings, casual messages)
     custom_ham = [
         "Hello, how are you?",
         "Good morning everyone",

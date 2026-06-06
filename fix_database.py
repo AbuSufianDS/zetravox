@@ -20,6 +20,12 @@ def fix_database():
         ('gender', 'VARCHAR(20)', 'NULL'),
         ('interested_in', 'VARCHAR(100)', 'NULL'),
         ('phone', 'VARCHAR(20)', 'NULL'),
+        ('notify_push_shares', 'BOOLEAN', '1'),
+        ('notify_push_friend_requests', 'BOOLEAN', '1'),
+        ('notify_push_messages', 'BOOLEAN', '1'),
+        ('notify_email_shares', 'BOOLEAN', '0'),
+        ('notify_email_friend_requests', 'BOOLEAN', '0'),
+        ('notify_email_messages', 'BOOLEAN', '0'),
     ]
 
     for col_name, col_type, default_value in new_columns:
@@ -32,6 +38,16 @@ def fix_database():
                 print(f"Error adding {col_name}: {e}")
         else:
             print(f"Column already exists: {col_name}")
+
+    cursor.execute("PRAGMA table_info(notification)")
+    notification_cols = [col[1] for col in cursor.fetchall()]
+
+    if 'read' not in notification_cols:
+        try:
+            cursor.execute('ALTER TABLE notification ADD COLUMN read BOOLEAN DEFAULT 0')
+            print("Added column: notification.read")
+        except Exception as e:
+            print(f"Error adding notification.read: {e}")
 
     cursor.execute("SELECT * FROM user WHERE username = 'Sufian'")
     admin = cursor.fetchone()

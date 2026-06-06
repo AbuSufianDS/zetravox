@@ -14,7 +14,6 @@ def allowed_file(filename):
 
 
 def save_media(file, folder='posts'):
-    """Save a single media file (backward compatibility)"""
     if not file or not file.filename:
         return None, None
 
@@ -48,13 +47,11 @@ def save_media(file, folder='posts'):
 
 
 def save_multiple_media(files, folder='posts'):
-    """Save multiple media files and return list of (filename, media_type)"""
     saved_files = []
 
     if not files:
         return saved_files
 
-    # Ensure files is a list
     if not isinstance(files, list):
         files = [files]
 
@@ -91,7 +88,6 @@ def save_multiple_media(files, folder='posts'):
     return saved_files
 
 def delete_media(filename, folder='posts'):
-    """Delete a single media file"""
     if filename and filename not in ['default.jpg', 'default_cover.jpg', 'None', '']:
         try:
             filepath = os.path.join(current_app.root_path, 'static', 'uploads', folder, filename)
@@ -105,6 +101,5 @@ def delete_media(filename, folder='posts'):
 
 
 def delete_multiple_media(filenames, folder='posts'):
-    """Delete multiple media files"""
     for filename in filenames:
         delete_media(filename, folder)

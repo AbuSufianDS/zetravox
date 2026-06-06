@@ -1,7 +1,7 @@
 from flask import request
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, SubmitField, TextAreaField, SelectField, DateTimeField
+from wtforms import StringField, SubmitField, TextAreaField, SelectField, DateTimeField, BooleanField
 from wtforms.validators import ValidationError, DataRequired, Length, Optional
 import sqlalchemy as sa
 from flask_babel import _, lazy_gettext as _l
@@ -74,8 +74,6 @@ class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-from flask_wtf.file import FileField, FileAllowed, MultipleFileField
-
 class PostForm(FlaskForm):
     post = TextAreaField(_l('What\'s on your mind?'), validators=[
         DataRequired(), Length(min=1, max=280)])
@@ -89,6 +87,8 @@ class PostForm(FlaskForm):
     ], default='public')
     schedule_date = DateTimeField(_l('Schedule for later'), validators=[Optional()], format='%Y-%m-%d %H:%M')
     submit = SubmitField(_l('Post'))
+
+
 class CommentForm(FlaskForm):
     body = TextAreaField(_l('Write a comment...'), validators=[DataRequired(), Length(min=1, max=500)])
     submit = SubmitField(_l('Post'))
@@ -129,3 +129,37 @@ class StoryForm(FlaskForm):
     ])
     caption = TextAreaField(_l('Caption'), validators=[Optional(), Length(max=200)])
     submit = SubmitField(_l('Share to Story'))
+
+
+class NotificationSettingsForm(FlaskForm):
+    notify_on_like = BooleanField(_l('Likes on my posts'), default=True)
+    notify_on_comment = BooleanField(_l('Comments on my posts'), default=True)
+    notify_on_follow = BooleanField(_l('New followers'), default=True)
+    notify_on_share = BooleanField(_l('Shares of my posts'), default=True)
+    notify_on_friend_request = BooleanField(_l('Friend requests'), default=True)
+    notify_on_message = BooleanField(_l('New messages'), default=True)
+
+    email_on_like = BooleanField(_l('Email me when someone likes my post'), default=False)
+    email_on_comment = BooleanField(_l('Email me when someone comments'), default=False)
+    email_on_follow = BooleanField(_l('Email me when someone follows me'), default=False)
+    email_on_message = BooleanField(_l('Email me when I receive a message'), default=False)
+
+    submit = SubmitField(_l('Save Notification Settings'))
+
+
+class NotificationSettingsForm(FlaskForm):
+    notify_push_likes = BooleanField(_l('Likes on my posts'), default=True)
+    notify_push_comments = BooleanField(_l('Comments on my posts'), default=True)
+    notify_push_follows = BooleanField(_l('New followers'), default=True)
+    notify_push_shares = BooleanField(_l('Shares of my posts'), default=True)
+    notify_push_friend_requests = BooleanField(_l('Friend requests'), default=True)
+    notify_push_messages = BooleanField(_l('New messages'), default=True)
+
+    notify_email_likes = BooleanField(_l('Email when someone likes my post'), default=False)
+    notify_email_comments = BooleanField(_l('Email when someone comments'), default=False)
+    notify_email_follows = BooleanField(_l('Email when someone follows me'), default=False)
+    notify_email_shares = BooleanField(_l('Email when someone shares my post'), default=False)
+    notify_email_friend_requests = BooleanField(_l('Email when I get a friend request'), default=False)
+    notify_email_messages = BooleanField(_l('Email when I receive a message'), default=False)
+
+    submit = SubmitField(_l('Save Notification Settings'))

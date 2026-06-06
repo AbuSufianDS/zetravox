@@ -24,7 +24,6 @@ def login():
         user = db.session.scalar(
             sa.select(User).where(User.username == form.username.data))
 
-        # Check if account is locked
         if user and user.is_account_locked():
             flash('Account is temporarily locked. Please try again later.', 'danger')
             SecurityEvent.log(user.id, 'login_blocked_locked', request.remote_addr,
@@ -42,12 +41,10 @@ def login():
                 flash('Invalid username or password.', 'danger')
             return redirect(url_for('auth.login'))
 
-        # Successful login
         user.reset_login_attempts()
         user.last_login_ip = request.remote_addr
         user.last_login_time = datetime.utcnow()
 
-        # Check if 2FA is enabled
         if user.two_factor_enabled:
             session['2fa_user_id'] = user.id
             session['2fa_verified'] = False
@@ -55,7 +52,6 @@ def login():
 
         login_user(user, remember=form.remember_me.data)
 
-        # Log successful login
         login_history = LoginHistory(
             user_id=user.id,
             ip_address=request.remote_addr,

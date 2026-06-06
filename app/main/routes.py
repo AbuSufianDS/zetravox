@@ -24,6 +24,131 @@ from app.models import (User, Post, Message, Notification, Like, Comment, SpamRe
 import time
 lastNotificationTime = 0
 
+
+@bp.route('/settings/notifications', methods=['GET', 'POST'])
+@login_required
+def notification_settings():
+    from app.main.forms import NotificationSettingsForm
+
+    form = NotificationSettingsForm()
+
+    if form.validate_on_submit():
+        current_user.notify_push_likes = form.notify_push_likes.data
+        current_user.notify_push_comments = form.notify_push_comments.data
+        current_user.notify_push_follows = form.notify_push_follows.data
+        current_user.notify_push_shares = form.notify_push_shares.data
+        current_user.notify_push_friend_requests = form.notify_push_friend_requests.data
+        current_user.notify_push_messages = form.notify_push_messages.data
+
+        current_user.notify_email_likes = form.notify_email_likes.data
+        current_user.notify_email_comments = form.notify_email_comments.data
+        current_user.notify_email_follows = form.notify_email_follows.data
+        current_user.notify_email_shares = form.notify_email_shares.data
+        current_user.notify_email_friend_requests = form.notify_email_friend_requests.data
+        current_user.notify_email_messages = form.notify_email_messages.data
+
+        db.session.commit()
+        flash('Your notification settings have been updated.', 'success')
+        return redirect(url_for('main.notification_settings'))
+
+    form.notify_push_likes.data = current_user.notify_push_likes
+    form.notify_push_comments.data = current_user.notify_push_comments
+    form.notify_push_follows.data = current_user.notify_push_follows
+    form.notify_push_shares.data = getattr(current_user, 'notify_push_shares', True)
+    form.notify_push_friend_requests.data = getattr(current_user, 'notify_push_friend_requests', True)
+    form.notify_push_messages.data = getattr(current_user, 'notify_push_messages', True)
+
+    form.notify_email_likes.data = current_user.notify_email_likes
+    form.notify_email_comments.data = current_user.notify_email_comments
+    form.notify_email_follows.data = current_user.notify_email_follows
+    form.notify_email_shares.data = getattr(current_user, 'notify_email_shares', False)
+    form.notify_email_friend_requests.data = getattr(current_user, 'notify_email_friend_requests', False)
+    form.notify_email_messages.data = getattr(current_user, 'notify_email_messages', False)
+
+    return render_template('security/notifications.html', title='Notification Settings', form=form)
+
+
+@bp.route('/api/notifications')
+@login_required
+def api_get_notifications():
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+
+        notifications_query = current_user.notifications.select().order_by(Notification.timestamp.desc())
+        notifications = db.paginate(notifications_query, page=page, per_page=per_page, error_out=False)
+
+        notifications_list = []
+        for notif in notifications.items:
+            payload = notif.get_data() if hasattr(notif, 'get_data') else {}
+            notifications_list.append({
+                'id': notif.id,
+                'name': notif.name,
+                'timestamp': notif.timestamp,
+                'payload': payload,
+                'read': getattr(notif, 'read', False)
+            })
+
+        unread_count = 0
+        for notif in current_user.notifications.all():
+            if not getattr(notif, 'read', False):
+                unread_count += 1
+
+        return jsonify({
+            'success': True,
+            'notifications': notifications_list,
+            'unread_count': unread_count,
+            'has_next': notifications.has_next,
+            'total': notifications.total
+        })
+    except Exception as e:
+        current_app.logger.error(f"API notifications error: {e}")
+        return jsonify({'success': False, 'error': str(e), 'notifications': [], 'unread_count': 0})
+
+
+@bp.route('/api/notifications/mark-read', methods=['POST'])
+@login_required
+def api_mark_notifications_read():
+    try:
+        for notif in current_user.notifications.all():
+            if not getattr(notif, 'read', False):
+                notif.read = True
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/notifications/<int:notif_id>/mark-read', methods=['POST'])
+@login_required
+def api_mark_single_notification_read(notif_id):
+    try:
+        notification = db.session.get(Notification, notif_id)
+        if notification and notification.user_id == current_user.id:
+            notification.read = True
+            db.session.commit()
+            return jsonify({'success': True})
+        return jsonify({'success': False, 'error': 'Notification not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/test-notification', methods=['POST'])
+@login_required
+def api_test_notification():
+    try:
+        from app.notification_helper import create_notification
+        create_notification(current_user.id, 'test', {
+            'type': 'test',
+            'message': 'This is a test notification',
+            'username': 'System'
+        })
+        return jsonify({'success': True, 'message': 'Test notification sent'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -88,7 +213,6 @@ def index():
         db.session.add(post)
         db.session.commit()
 
-        # Handle multiple media uploads
         if 'media_files' in request.files:
             files = request.files.getlist('media_files')
             files = [f for f in files if f and f.filename]
@@ -104,7 +228,6 @@ def index():
                     db.session.add(post_media)
                 db.session.commit()
 
-        # Extract hashtags
         hashtags = re.findall(r'#(\w+)', post.body)
         for tag_name in hashtags:
             hashtag = db.session.scalar(sa.select(Hashtag).where(Hashtag.name == tag_name.lower()))
@@ -125,7 +248,6 @@ def index():
             flash('Your post is now live!')
         return redirect(url_for('main.index'))
 
-    # Get stories
     following_ids = [f.id for f in db.session.scalars(current_user.following.select())]
     following_ids.append(current_user.id)
     stories = db.session.scalars(
@@ -166,7 +288,6 @@ def index():
             'reaction_count': reaction_count
         })
 
-    # Get upcoming birthdays
     upcoming_birthdays = []
     for friend in current_user.get_friends():
         if friend.birthday:
@@ -188,19 +309,15 @@ def index():
 
     active_contacts = current_user.get_active_friends_online()
 
-    # Get posts feed with filters
     page = request.args.get('page', 1, type=int)
 
-    # Filter out blocked users
     blocked_user_ids = db.session.query(BlockedUser.blocked_id).filter_by(blocker_id=current_user.id).all()
     blocked_ids = [b[0] for b in blocked_user_ids]
 
-    # Filter out hidden and not interested posts
     hidden_post_ids = db.session.query(HiddenPost.post_id).filter_by(user_id=current_user.id).all()
     not_interested_ids = db.session.query(NotInterestedPost.post_id).filter_by(user_id=current_user.id).all()
     excluded_post_ids = list(set([h[0] for h in hidden_post_ids] + [n[0] for n in not_interested_ids]))
 
-    # Build query
     posts_query = sa.select(Post).where(
         Post.scheduled_for == None,
         Post.privacy == 'public'
@@ -241,7 +358,6 @@ def interested(post_id):
     else:
         interested_post = InterestedPost(user_id=current_user.id, post_id=post_id)
         db.session.add(interested_post)
-        # Remove from not interested if exists
         not_interested = NotInterestedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
         if not_interested:
             db.session.delete(not_interested)
@@ -297,7 +413,6 @@ def not_interested(post_id):
     if not post:
         return jsonify({'error': 'Post not found'}), 404
 
-    # Check if already marked
     existing = NotInterestedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
     if not existing:
         not_interested = NotInterestedPost(user_id=current_user.id, post_id=post_id)
@@ -373,7 +488,6 @@ def unblock_user(user_id):
 def user_media(username):
     user = db.first_or_404(sa.select(User).where(User.username == username))
 
-    # Get all user's posts with media
     posts_with_media = Post.query.filter(
         Post.user_id == user.id,
         Post.media_items.any()
@@ -908,7 +1022,6 @@ def delete_post(post_id):
         flash('You cannot delete this post.')
         return redirect(url_for('main.index'))
 
-    # Delete all media files associated with the post
     for media in post.media_items.all():
         delete_media(media.media_url, 'posts')
         db.session.delete(media)
@@ -932,14 +1045,12 @@ def edit_post(post_id):
         post.body = form.post.data
         post.edited_at = datetime.now(timezone.utc)
 
-        # Handle media removal (checkboxes for keeping media)
         media_to_keep = request.form.getlist('keep_media')
         for media in post.media_items.all():
             if str(media.id) not in media_to_keep:
                 delete_media(media.media_url, 'posts')
                 db.session.delete(media)
 
-        # Handle new media uploads
         if 'media_files' in request.files:
             files = request.files.getlist('media_files')
             saved_media = save_multiple_media(files, 'posts')
@@ -1146,26 +1257,19 @@ def view_story(story_id):
 @bp.route('/notifications')
 @login_required
 def notifications():
-    """Get unread notification count for badge"""
     try:
-        # Simple count of notifications in last 24 hours
-        from datetime import datetime, timedelta
-        day_ago = datetime.now().timestamp() - (24 * 60 * 60)
-
-        count = current_user.notifications.select().where(
-            Notification.timestamp > day_ago
-        ).count()
-
-        return jsonify({'count': count})
+        unread_count = 0
+        for notif in current_user.notifications:
+            if not getattr(notif, 'read', False):
+                unread_count += 1
+        return jsonify({'count': unread_count})
     except Exception as e:
         current_app.logger.error(f"Notification count error: {e}")
         return jsonify({'count': 0})
 
-
 @bp.route('/notifications-list')
 @login_required
 def notifications_list():
-    """Get all notifications for the notifications page"""
     try:
         notifications = db.session.scalars(
             current_user.notifications.select().order_by(
@@ -1194,7 +1298,6 @@ def notifications_list():
 @bp.route('/clear-notifications', methods=['POST'])
 @login_required
 def clear_notifications():
-    """Clear old notifications"""
     try:
         from datetime import datetime, timedelta
         week_ago = datetime.now().timestamp() - (7 * 24 * 60 * 60)
@@ -1214,7 +1317,6 @@ def mark_notification_read(notification_id):
     try:
         notification = Notification.query.get(notification_id)
         if notification and notification.user_id == current_user.id:
-            # Add read attribute if not exists (you may need to add this column)
             setattr(notification, 'read', True)
             db.session.commit()
             return jsonify({'success': True})
@@ -1553,7 +1655,6 @@ def react_story(story_id, reaction):
 
     return jsonify({'success': True, 'reaction_count': reaction_count})
 
-
 @bp.route('/send_story_comment', methods=['POST'])
 @login_required
 def send_story_comment():
@@ -1778,11 +1879,9 @@ def ads_manager():
 def birthdays():
     from datetime import datetime, timedelta
 
-    # Get users who have birthdays today or within the next 7 days
     today = datetime.now(timezone.utc).date()
     next_week = today + timedelta(days=7)
 
-    # Find users with birthdays in this period
     all_users = db.session.execute(
         sa.select(User).where(User.id != current_user.id)
     ).scalars().all()
@@ -1877,3 +1976,79 @@ def get_story_data(story_id):
         'bg_color': getattr(story, 'bg_color', 'gradient-purple'),
         'shared_post_id': getattr(story, 'shared_post_id', None)
     })
+@bp.route('/settings/security')
+@login_required
+def security_settings():
+    return render_template('security/security.html', title='Security Settings')
+
+
+@bp.route('/settings/privacy')
+@login_required
+def privacy_settings():
+    return render_template('security/privacy.html', title='Privacy Settings')
+
+
+@bp.route('/settings/change-password', methods=['POST'])
+@login_required
+def change_password():
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+
+    if not current_user.check_password(current_password):
+        flash('Current password is incorrect.', 'danger')
+        return redirect(url_for('main.security_settings'))
+
+    if new_password != confirm_password:
+        flash('New passwords do not match.', 'danger')
+        return redirect(url_for('main.security_settings'))
+
+    if len(new_password) < 6:
+        flash('Password must be at least 6 characters.', 'danger')
+        return redirect(url_for('main.security_settings'))
+
+    current_user.set_password(new_password)
+    db.session.commit()
+    flash('Your password has been changed.', 'success')
+    return redirect(url_for('main.security_settings'))
+
+
+@bp.route('/settings/enable-2fa')
+@login_required
+def enable_2fa():
+    return render_template('security/enable_2fa.html', title='Enable Two-Factor Authentication')
+
+
+@bp.route('/settings/disable-2fa', methods=['POST'])
+@login_required
+def disable_2fa():
+    otp_code = request.form.get('otp_code')
+
+    import pyotp
+    if current_user.otp_secret and pyotp.TOTP(current_user.otp_secret).verify(otp_code):
+        current_user.two_factor_enabled = False
+        current_user.otp_secret = None
+        db.session.commit()
+        flash('Two-factor authentication has been disabled.', 'success')
+    else:
+        flash('Invalid OTP code.', 'danger')
+
+    return redirect(url_for('main.security_settings'))
+
+
+@bp.route('/settings/sessions')
+@login_required
+def session_management():
+    from app.models import UserSession
+    active_sessions = UserSession.query.filter_by(user_id=current_user.id, is_active=True).all()
+    return render_template('security/sessions.html', title='Session Management', sessions=active_sessions)
+
+
+@bp.route('/settings/login-history')
+@login_required
+def login_history():
+    from app.models import LoginHistory
+    page = request.args.get('page', 1, type=int)
+    history = LoginHistory.query.filter_by(user_id=current_user.id).order_by(LoginHistory.timestamp.desc()).paginate(
+        page=page, per_page=20)
+    return render_template('security/login_history.html', title='Login History', history=history)

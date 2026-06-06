@@ -539,7 +539,6 @@ body {
 .bg-option:hover {
     transform: scale(1.05);
 }
-/* Light Theme (Default) */
 :root {
     --bg-primary: #f0f2f5;
     --bg-card: #ffffff;
@@ -555,7 +554,6 @@ body {
     --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-/* Dark Theme */
 [data-theme="dark"] {
     --bg-primary: #18191a;
     --bg-card: #242526;
@@ -741,17 +739,15 @@ body {
 [data-theme="dark"] .sidebar-divider {
     border-top-color: var(--border-color);
 }
-/* Notification container */
+
 #toast-container {
     z-index: 1050;
 }
 
-/* Remove any default notification error messages */
 .notification-error {
     display: none;
 }
 
-/* Improve toast appearance */
 .toast {
     opacity: 1 !important;
     animation: slideInRight 0.3s ease;

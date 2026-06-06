@@ -140,13 +140,11 @@ function savePin() {
         alert('PIN must contain only numbers');
         return;
     }
-    
-    // Save PIN to localStorage or server
+
     localStorage.setItem('app_pin', pin);
     alert('PIN saved successfully');
 }
 
-// Load auto-lock timer preference
 const savedTimer = localStorage.getItem('auto_lock_timer');
 if(savedTimer) {
     document.getElementById('autoLockTimer').value = savedTimer;
@@ -156,7 +154,6 @@ document.getElementById('autoLockTimer').addEventListener('change', function() {
     localStorage.setItem('auto_lock_timer', this.value);
 });
 
-// Load inactivity logout preference
 const savedInactivity = localStorage.getItem('inactivity_logout');
 if(savedInactivity === 'true') {
     document.getElementById('inactivityLogout').checked = true;

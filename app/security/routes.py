@@ -13,12 +13,12 @@ import pyotp
 def appearance_settings():
     return render_template('security/appearance.html', title='Appearance Settings')
 
-
-@bp.route('/notifications')
+@bp.route('/settings/notifications')
 @login_required
 def notification_settings():
-    return render_template('security/notifications.html', title='Notification Settings')
-
+    from app.main.forms import NotificationSettingsForm
+    form = NotificationSettingsForm()
+    return render_template('security/notifications.html', title='Notification Settings', form=form)
 
 @bp.route('/screen-protection')
 @login_required
