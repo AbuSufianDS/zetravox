@@ -987,32 +987,40 @@ def chat(username):
 @bp.route('/send_chat_message', methods=['POST'])
 @login_required
 def send_chat_message():
-    recipient_id = request.form.get('recipient_id', type=int)
-    message = request.form.get('message', '').strip()
+    try:
+        recipient_id = request.form.get('recipient_id', type=int)
+        message = request.form.get('message', '').strip()
 
-    if not message:
-        return jsonify({'error': 'Message cannot be empty'}), 400
+        if not message:
+            return jsonify({'error': 'Message cannot be empty'}), 400
 
-    recipient = db.session.get(User, recipient_id)
-    if recipient is None:
-        return jsonify({'error': 'User not found'}), 404
+        if not recipient_id:
+            return jsonify({'error': 'Recipient not specified'}), 400
 
-    chat_message = ChatMessage(
-        sender_id=current_user.id,
-        recipient_id=recipient_id,
-        message=message,
-        is_read=False,
-        timestamp=datetime.now(timezone.utc)
-    )
-    db.session.add(chat_message)
-    db.session.commit()
+        recipient = db.session.get(User, recipient_id)
+        if recipient is None:
+            return jsonify({'error': 'User not found'}), 404
 
-    return jsonify({
-        'success': True,
-        'message': message,
-        'timestamp': chat_message.timestamp.timestamp()
-    })
+        chat_message = ChatMessage(
+            sender_id=current_user.id,
+            recipient_id=recipient_id,
+            message=message,
+            is_read=False,
+            timestamp=datetime.now(timezone.utc)
+        )
+        db.session.add(chat_message)
+        db.session.commit()
 
+        return jsonify({
+            'success': True,
+            'message': message,
+            'timestamp': chat_message.timestamp.timestamp(),
+            'message_id': chat_message.id,
+            'sender_id': current_user.id
+        })
+    except Exception as e:
+        current_app.logger.error(f"Send message error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/get_chat_messages/<int:other_user_id>')
 @login_required
@@ -1620,25 +1628,34 @@ def send_friend_request(user_id):
 @bp.route('/accept-friend-request/<int:request_id>', methods=['POST'])
 @login_required
 def accept_friend_request(request_id):
-    friend_request = db.session.get(FriendRequest, request_id)
-    if friend_request and friend_request.to_user_id == current_user.id:
-        current_user.accept_friend_request(friend_request)
-        friend_request.from_user.add_notification('friend_accepted', {
-            'from_user': current_user.username,
-            'user_id': current_user.id,
-            'message': f'{current_user.username} accepted your friend request'
-        })
-        flash('Friend request accepted!', 'success')
-    return redirect(url_for('main.friend_requests'))
+    try:
+        friend_request = db.session.get(FriendRequest, request_id)
+        if friend_request and friend_request.to_user_id == current_user.id:
+            current_user.accept_friend_request(friend_request)
+            friend_request.from_user.add_notification('friend_accepted', {
+                'from_user': current_user.username,
+                'user_id': current_user.id,
+                'message': f'{current_user.username} accepted your friend request'
+            })
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Friend request accepted!'})
+        return jsonify({'error': 'Invalid request'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @bp.route('/reject-friend-request/<int:request_id>', methods=['POST'])
 @login_required
 def reject_friend_request(request_id):
-    friend_request = db.session.get(FriendRequest, request_id)
-    if friend_request and friend_request.to_user_id == current_user.id:
-        current_user.reject_friend_request(friend_request)
-        flash('Friend request rejected', 'info')
-    return redirect(url_for('main.friend_requests'))
+    try:
+        friend_request = db.session.get(FriendRequest, request_id)
+        if friend_request and friend_request.to_user_id == current_user.id:
+            current_user.reject_friend_request(friend_request)
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Friend request rejected'})
+        return jsonify({'error': 'Invalid request'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/remove-friend/<int:user_id>', methods=['POST'])
 @login_required
