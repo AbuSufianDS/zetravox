@@ -1,2 +1,1 @@
-web: flask db upgrade; flask translate compile; gunicorn microblog:app
-worker: rq worker microblog-tasks
+web: python add_read_column.py && gunicorn microblog:app --workers 2 --threads 4 --timeout 120

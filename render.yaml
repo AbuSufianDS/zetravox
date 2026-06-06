@@ -12,3 +12,7 @@ services:
       - key: WORKER_CLASS
         value: sync
     plan: free
+
+buildCommand: |
+  pip install -r requirements_render.txt
+  python add_read_column.py

@@ -1315,33 +1315,37 @@ def notifications():
     except Exception as e:
         current_app.logger.error(f"Notification count error: {e}")
         return jsonify({'count': 0})
-
-
 @bp.route('/notifications-list')
 @login_required
 def notifications_list():
     try:
-        query = current_user.notifications.select().order_by(Notification.timestamp.desc()).limit(50)
-        notifications = db.session.scalars(query).all()
+        notifications = db.session.scalars(
+            current_user.notifications.select().order_by(Notification.timestamp.desc()).limit(50)
+        ).all()
 
         result = []
         for n in notifications:
             data = n.get_data()
 
-            # Extract the from_user correctly
+            # Handle case where data might be a string or non-dict
+            if not isinstance(data, dict):
+                data = {}
+
             from_user = data.get('from_user') or data.get('username') or 'Someone'
+            post_id = data.get('post_id')
+            comment = data.get('comment', '')
+            message = data.get('message', '')
 
             result.append({
                 'id': n.id,
                 'name': n.name,
-                'from_user': from_user,
-                'post_id': data.get('post_id'),
-                'comment': data.get('comment', ''),
-                'message': data.get('message', ''),
+                'from_user': str(from_user),
+                'post_id': post_id if isinstance(post_id, int) else None,
+                'comment': str(comment)[:100] if comment else '',
+                'message': str(message)[:100] if message else '',
                 'timestamp': n.timestamp
             })
 
-        print(f"Returning {len(result)} notifications for user {current_user.id}")
         return jsonify(result)
     except Exception as e:
         current_app.logger.error(f"Notifications list error: {e}")

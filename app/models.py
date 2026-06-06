@@ -812,8 +812,12 @@ class Notification(db.Model):
 
     def get_data(self):
         try:
-            return json.loads(self.payload_json) if self.payload_json else {}
-        except:
+            if self.payload_json:
+                data = json.loads(self.payload_json)
+                if isinstance(data, dict):
+                    return data
+            return {}
+        except (json.JSONDecodeError, TypeError, AttributeError):
             return {}
 
 class Task(db.Model):

@@ -48,6 +48,22 @@ def create_app(config_class=Config):
     babel.init_app(app, locale_selector=get_locale)
     csrf.init_app(app)
 
+    def add_missing_columns():
+        try:
+            from sqlalchemy import inspect, text
+            inspector = inspect(db.engine)
+
+            columns = [col['name'] for col in inspector.get_columns('notification')]
+
+            if 'read' not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE notification ADD COLUMN read BOOLEAN DEFAULT FALSE'))
+                    conn.commit()
+                    print("Added 'read' column to notification table")
+        except Exception as e:
+            print(f"Note: Could not add read column (may already exist): {e}")
+
+
     from app.security.security_limiter import limiter
     limiter.init_app(app)
 
