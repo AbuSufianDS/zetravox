@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h4>
+                    <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Activity</h4>
                 </div>
                 <div class="card-body p-0">
                     <div id="notifications-list" class="list-group list-group-flush">
@@ -14,7 +14,7 @@
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p class="text-muted mt-2">Loading notifications...</p>
+                            <p class="text-muted mt-2">Loading activity...</p>
                         </div>
                     </div>
                 </div>
@@ -43,12 +43,12 @@ function getNotificationHTML(notif) {
 
     if (notif.name === 'like') {
         icon = '<i class="fas fa-heart text-danger fa-fw"></i>';
-        message = `${notif.from_user} liked your post`;
+        message = `${notif.from_user} applauded your post`;
         link = `/post/${notif.post_id}`;
     } else if (notif.name === 'comment') {
         icon = '<i class="fas fa-comment text-primary fa-fw"></i>';
-        const comment = notif.comment.substring(0, 50);
-        message = `${notif.from_user} commented: "${comment}${notif.comment.length > 50 ? '...' : ''}"`;
+        const reply = notif.comment.substring(0, 50);
+        message = `${notif.from_user} replied: "${reply}${notif.comment.length > 50 ? '...' : ''}"`;
         link = `/post/${notif.post_id}`;
     } else if (notif.name === 'follow') {
         icon = '<i class="fas fa-user-plus text-success fa-fw"></i>';
@@ -56,19 +56,19 @@ function getNotificationHTML(notif) {
         link = `/user/${notif.from_user}`;
     } else if (notif.name === 'share') {
         icon = '<i class="fas fa-share text-info fa-fw"></i>';
-        message = `${notif.from_user} shared your post`;
+        message = `${notif.from_user} reposted your content`;
         link = `/post/${notif.post_id}`;
     } else if (notif.name === 'friend_request') {
-        icon = '<i class="fas fa-user-friends text-primary fa-fw"></i>';
-        message = `${notif.from_user} sent you a friend request`;
+        icon = '<i class="fas fa-user-plus text-primary fa-fw"></i>';
+        message = `${notif.from_user} wants to connect with you`;
         link = `/friend-requests`;
     } else if (notif.name === 'friend_accepted') {
         icon = '<i class="fas fa-check-circle text-success fa-fw"></i>';
-        message = `${notif.from_user} accepted your friend request`;
+        message = `${notif.from_user} accepted your connection request`;
         link = `/friends`;
     } else {
         icon = '<i class="fas fa-bell text-secondary fa-fw"></i>';
-        message = notif.message || 'You have a new notification';
+        message = notif.message || 'You have new activity';
     }
 
     return `
@@ -94,7 +94,7 @@ function loadNotifications() {
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No notifications yet</p>
+                        <p class="text-muted">No activity yet</p>
                         <small class="text-muted">When someone interacts with you, you'll see it here</small>
                     </div>
                 `;
@@ -108,11 +108,11 @@ function loadNotifications() {
             container.innerHTML = html;
         })
         .catch(error => {
-            console.error('Error loading notifications:', error);
+            console.error('Error loading activity:', error);
             document.getElementById('notifications-list').innerHTML = `
                 <div class="text-center py-5">
                     <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                    <p class="text-muted">Failed to load notifications</p>
+                    <p class="text-muted">Unable to load activity</p>
                     <button class="btn btn-primary btn-sm" onclick="loadNotifications()">
                         <i class="fas fa-sync me-2"></i>Try Again
                     </button>

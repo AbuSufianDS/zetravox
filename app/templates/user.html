@@ -64,16 +64,16 @@
                                     </form>
                                 {% endif %}
 
-                                {% set is_friend = current_user.is_friend_with(user) %}
+                                {% set is_connected = current_user.is_friend_with(user) %}
                                 {% set pending_sent = current_user.has_friend_request_pending(user) %}
                                 {% set pending_received = user.has_friend_request_pending(current_user) %}
 
-                                {% if not is_friend %}
+                                {% if not is_connected %}
                                     {% if not pending_sent and not pending_received %}
                                         <form action="{{ url_for('main.send_friend_request', user_id=user.id) }}" method="post" class="d-inline">
                                             {{ form.hidden_tag() }}
                                             <button type="submit" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-user-friends me-1"></i>Add Friend
+                                                <i class="fas fa-user-plus me-1"></i>Connect
                                             </button>
                                         </form>
                                     {% elif pending_sent %}
@@ -91,7 +91,7 @@
                                             <form action="{{ url_for('main.reject_friend_request', request_id=pending_received.id) }}" method="post" class="d-inline">
                                                 {{ form.hidden_tag() }}
                                                 <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-times me-1"></i>Reject
+                                                    <i class="fas fa-times me-1"></i>Decline
                                                 </button>
                                             </form>
                                         </div>
@@ -99,14 +99,14 @@
                                 {% else %}
                                     <div class="dropdown d-inline">
                                         <button class="btn btn-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                            <i class="fas fa-check me-1"></i>Friends
+                                            <i class="fas fa-check me-1"></i>Connected
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
                                                 <form action="{{ url_for('main.remove_friend', user_id=user.id) }}" method="post">
                                                     {{ form.hidden_tag() }}
                                                     <button type="submit" class="dropdown-item text-danger">
-                                                        <i class="fas fa-user-minus me-2"></i>Remove Friend
+                                                        <i class="fas fa-user-minus me-2"></i>Remove Connection
                                                     </button>
                                                 </form>
                                             </li>
@@ -144,7 +144,7 @@
                         <div class="text-center">
                             <a href="{{ url_for('main.friends') }}" class="text-decoration-none">
                                 <h5 class="mb-0">{{ user.get_friend_count() }}</h5>
-                                <small class="text-muted">Friends</small>
+                                <small class="text-muted">Connections</small>
                             </a>
                         </div>
                         <div class="text-center">
@@ -161,13 +161,13 @@
         <div class="col-md-4">
             <div class="card mb-3">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>About</h5>
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Bio</h5>
                 </div>
                 <div class="card-body">
                     {% if user.work %}
                     <div class="mb-3">
                         <i class="fas fa-briefcase text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Work</strong><br>
+                        <strong>Occupation</strong><br>
                         <span class="ms-4">{{ user.work }}</span>
                     </div>
                     {% endif %}
@@ -175,7 +175,7 @@
                     {% if user.education %}
                     <div class="mb-3">
                         <i class="fas fa-graduation-cap text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Education</strong><br>
+                        <strong>Studies</strong><br>
                         <span class="ms-4">{{ user.education }}</span>
                     </div>
                     {% endif %}
@@ -183,7 +183,7 @@
                     {% if user.location %}
                     <div class="mb-3">
                         <i class="fas fa-map-marker-alt text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Lives in</strong><br>
+                        <strong>Location</strong><br>
                         <span class="ms-4">{{ user.location }}</span>
                     </div>
                     {% endif %}
@@ -201,14 +201,14 @@
                     {% if user.relationship_status %}
                     <div class="mb-3">
                         <i class="fas fa-heart text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Relationship</strong><br>
+                        <strong>Status</strong><br>
                         <span class="ms-4">
                             {% if user.relationship_status == 'single' %}<i class="fas fa-user"></i> Single
-                            {% elif user.relationship_status == 'in_relationship' %}<i class="fas fa-heart"></i> In a Relationship
+                            {% elif user.relationship_status == 'in_relationship' %}<i class="fas fa-heart"></i> In Relationship
                             {% elif user.relationship_status == 'engaged' %}<i class="fas fa-ring"></i> Engaged
                             {% elif user.relationship_status == 'married' %}<i class="fas fa-ring"></i> Married
                             {% elif user.relationship_status == 'divorced' %}<i class="fas fa-heart-broken"></i> Divorced
-                            {% elif user.relationship_status == 'complicated' %}<i class="fas fa-question"></i> It's Complicated
+                            {% elif user.relationship_status == 'complicated' %}<i class="fas fa-question"></i> Complicated
                             {% endif %}
                         </span>
                     </div>
@@ -217,7 +217,7 @@
                     {% if user.birthday %}
                     <div class="mb-3">
                         <i class="fas fa-birthday-cake text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Birthday</strong><br>
+                        <strong>Born</strong><br>
                         <span class="ms-4">{{ user.birthday }}</span>
                     </div>
                     {% endif %}
@@ -230,7 +230,7 @@
                             {% if user.gender == 'male' %}<i class="fas fa-mars"></i> Male
                             {% elif user.gender == 'female' %}<i class="fas fa-venus"></i> Female
                             {% elif user.gender == 'non_binary' %}<i class="fas fa-genderless"></i> Non-binary
-                            {% elif user.gender == 'prefer_not_to_say' %}Prefer not to say
+                            {% elif user.gender == 'prefer_not_to_say' %}Not specified
                             {% endif %}
                         </span>
                     </div>
@@ -239,7 +239,7 @@
                     {% if user.interested_in %}
                     <div class="mb-3">
                         <i class="fas fa-users text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Interested in</strong><br>
+                        <strong>Interests</strong><br>
                         <span class="ms-4">
                             {% if user.interested_in == 'men' %}<i class="fas fa-mars"></i> Men
                             {% elif user.interested_in == 'women' %}<i class="fas fa-venus"></i> Women
@@ -252,7 +252,7 @@
                     {% if user.phone %}
                     <div class="mb-3">
                         <i class="fas fa-phone text-secondary me-2" style="width: 20px;"></i>
-                        <strong>Phone</strong><br>
+                        <strong>Contact</strong><br>
                         <span class="ms-4">{{ user.phone }}</span>
                     </div>
                     {% endif %}
@@ -260,10 +260,10 @@
                     {% if not user.work and not user.education and not user.location and not user.relationship_status and not user.birthday %}
                     <div class="text-center text-muted py-3">
                         <i class="fas fa-address-card fa-2x mb-2"></i>
-                        <p>No information added yet</p>
+                        <p>No details added yet</p>
                         {% if user == current_user %}
                             <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-outline-primary">
-                                Add information
+                                Add Details
                             </a>
                         {% endif %}
                     </div>
@@ -271,10 +271,9 @@
                 </div>
             </div>
 
-            <!-- Stats Card -->
             <div class="card mb-3">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Stats</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Activity</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -286,7 +285,7 @@
                         <strong>{{ moment(user.last_seen).fromNow() if user.last_seen else 'Never' }}</strong>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span><i class="fas fa-star me-2 text-muted"></i>Profile views</span>
+                        <span><i class="fas fa-eye me-2 text-muted"></i>Profile visits</span>
                         <strong>{{ user.profile_views if user.profile_views is defined else 0 }}</strong>
                     </div>
                 </div>
@@ -303,7 +302,7 @@
                         <p class="text-muted mb-0">No posts yet.</p>
                         {% if user == current_user %}
                             <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">
-                                <i class="fas fa-plus me-1"></i>Create your first post
+                                <i class="fas fa-plus me-1"></i>Create First Post
                             </a>
                         {% endif %}
                     </div>
@@ -341,9 +340,9 @@
                 <p>Are you sure you want to block {{ user.username }}?</p>
                 <p class="text-muted small">Blocked users cannot:</p>
                 <ul class="text-muted small">
-                    <li>Follow you or see your posts</li>
+                    <li>View your profile or posts</li>
                     <li>Send you messages</li>
-                    <li>Comment on your posts</li>
+                    <li>Interact with your content</li>
                 </ul>
             </div>
             <div class="modal-footer">

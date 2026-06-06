@@ -5,7 +5,7 @@
     <div class="col-lg-8 mx-auto">
         <div class="card">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="fas fa-user-friends me-2 text-primary"></i>Friends</h4>
+                <h4 class="mb-0"><i class="fas fa-user-friends me-2 text-primary"></i>Connections</h4>
                 <a href="{{ url_for('main.friend_requests_page') }}" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-user-plus"></i> Requests
                 </a>
@@ -24,7 +24,7 @@
                                         </a>
                                         <div class="small text-muted">
                                             {% if friend.is_online %}
-                                            <span class="text-success"><i class="fas fa-circle fa-fw" style="font-size: 8px;"></i> Online</span>
+                                            <span class="text-success"><i class="fas fa-circle fa-fw" style="font-size: 8px;"></i> Active Now</span>
                                             {% else %}
                                             <i class="far fa-clock"></i> {{ moment(friend.last_seen).fromNow() if friend.last_seen else 'Offline' }}
                                             {% endif %}
@@ -37,7 +37,7 @@
                                     </a>
                                     <form action="{{ url_for('main.remove_friend', user_id=friend.id) }}" method="post" class="d-inline">
                                         {{ form.hidden_tag() if form else '' }}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Friend" onclick="return confirm('Remove this friend?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Connection" onclick="return confirm('Remove this connection?')">
                                             <i class="fas fa-user-minus"></i>
                                         </button>
                                     </form>
@@ -62,9 +62,9 @@
                 {% else %}
                     <div class="text-center py-5">
                         <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
-                        <p class="text-muted mb-3">No friends yet.</p>
+                        <p class="text-muted mb-3">No connections yet.</p>
                         <a href="{{ url_for('main.discover') }}" class="btn btn-primary">
-                            <i class="fas fa-search me-2"></i>Discover People
+                            <i class="fas fa-search me-2"></i>Find People
                         </a>
                     </div>
                 {% endif %}

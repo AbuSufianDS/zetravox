@@ -41,27 +41,27 @@
                                 <i class="far fa-smile"></i> React
                             </button>
                             <div class="reaction-picker story-reaction-picker">
-                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'like')">
+                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'like')">
                                     <span class="reaction-emoji">👍</span>
-                                    <span class="reaction-label">Like</span>
+                                    <span class="reaction-label">Applaud</span>
                                 </button>
-                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'love')">
+                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'love')">
                                     <span class="reaction-emoji">❤️</span>
                                     <span class="reaction-label">Love</span>
                                 </button>
-                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'haha')">
+                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'haha')">
                                     <span class="reaction-emoji">😂</span>
-                                    <span class="reaction-label">Haha</span>
+                                    <span class="reaction-label">Funny</span>
                                 </button>
-                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'wow')">
+                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'wow')">
                                     <span class="reaction-emoji">😮</span>
-                                    <span class="reaction-label">Wow</span>
+                                    <span class="reaction-label">Amazing</span>
                                 </button>
-                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'sad')">
+                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'sad')">
                                     <span class="reaction-emoji">😢</span>
                                     <span class="reaction-label">Sad</span>
                                 </button>
-                                <button class="reaction-option" onclick="reactToStory(currentStoryId, 'angry')">
+                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'angry')">
                                     <span class="reaction-emoji">😠</span>
                                     <span class="reaction-label">Angry</span>
                                 </button>
@@ -72,13 +72,13 @@
                     <div class="story-comments-section">
                         <div class="story-comments-list">
                             <div class="story-comments-header">
-                                <i class="fas fa-comment-dots"></i> Comments
+                                <i class="fas fa-comment-dots"></i> Replies
                             </div>
                             <div id="storyComments"></div>
                         </div>
                         <div class="story-comment-input">
-                            <input type="text" id="storyCommentInput" placeholder="Send a message..." class="story-comment-field">
-                            <button onclick="sendStoryComment(currentStoryId)" class="story-comment-send">
+                            <input type="text" id="storyCommentInput" placeholder="Send a reply..." class="story-comment-field">
+                            <button onclick="sendMomentComment(currentStoryId)" class="story-comment-send">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
@@ -361,7 +361,7 @@ let currentStoryIndex = 0;
 let currentStories = [];
 let currentStoryId = null;
 
-function openStoryViewer(storyId) {
+function openMomentViewer(storyId) {
     fetch(`/story-data/${storyId}`)
         .then(response => response.json())
         .then(story => {
@@ -369,11 +369,11 @@ function openStoryViewer(storyId) {
             currentStoryIndex = 0;
             currentStoryId = story.id;
             document.getElementById('storyViewerModal').style.display = 'flex';
-            loadStory(currentStoryIndex);
+            loadMoment(currentStoryIndex);
         });
 }
 
-function loadStory(index) {
+function loadMoment(index) {
     const story = currentStories[index];
     if (!story) return;
     currentStoryId = story.id;
@@ -413,7 +413,7 @@ function loadStory(index) {
     document.getElementById('storyTime').innerHTML = story.time_ago;
     document.getElementById('storyCaption').innerHTML = story.caption || '';
     document.getElementById('storyReactionCount').innerHTML = story.reaction_count || 0;
-    loadStoryComments(story.id);
+    loadMomentComments(story.id);
 }
 
 function getGradientBackground(bgColor) {
@@ -431,14 +431,14 @@ function getGradientBackground(bgColor) {
 function prevStory() {
     if (currentStoryIndex > 0) {
         currentStoryIndex--;
-        loadStory(currentStoryIndex);
+        loadMoment(currentStoryIndex);
     }
 }
 
 function nextStory() {
     if (currentStoryIndex < currentStories.length - 1) {
         currentStoryIndex++;
-        loadStory(currentStoryIndex);
+        loadMoment(currentStoryIndex);
     }
 }
 
@@ -446,7 +446,7 @@ function closeStoryViewer() {
     document.getElementById('storyViewerModal').style.display = 'none';
 }
 
-function reactToStory(storyId, reaction) {
+function reactToMoment(storyId, reaction) {
     fetch(`/react_story/${storyId}/${reaction}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -459,13 +459,13 @@ function reactToStory(storyId, reaction) {
     });
 }
 
-function loadStoryComments(storyId) {
+function loadMomentComments(storyId) {
     fetch(`/get_story_comments/${storyId}`)
         .then(response => response.json())
         .then(comments => {
             const container = document.getElementById('storyComments');
             if (!comments || comments.length === 0) {
-                container.innerHTML = '<div class="no-comments">No comments yet. Send a message!</div>';
+                container.innerHTML = '<div class="no-comments">No replies yet. Send a message!</div>';
                 return;
             }
             container.innerHTML = comments.map(c => `
@@ -481,7 +481,7 @@ function loadStoryComments(storyId) {
         });
 }
 
-function sendStoryComment(storyId) {
+function sendMomentComment(storyId) {
     const input = document.getElementById('storyCommentInput');
     const message = input.value.trim();
     if (!message) return;
@@ -494,7 +494,7 @@ function sendStoryComment(storyId) {
     .then(data => {
         if (data.success) {
             input.value = '';
-            loadStoryComments(storyId);
+            loadMomentComments(storyId);
         }
     });
 }

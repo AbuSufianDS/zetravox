@@ -5,17 +5,19 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mb-3">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0">💾 Saved Posts</h4>
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-bookmark me-2"></i>Bookmarks</h4>
                 </div>
             </div>
-            
+
             {% for post in posts %}
                 {% include '_post.html' %}
             {% else %}
                 <div class="card">
-                    <div class="card-body text-center text-muted">
-                        You haven't saved any posts yet. Click the save button on posts to add them here.
+                    <div class="card-body text-center text-muted py-5">
+                        <i class="fas fa-bookmark fa-3x mb-3"></i>
+                        <p>You haven't bookmarked any content yet.</p>
+                        <small>Click the bookmark icon on posts to save them here</small>
                     </div>
                 </div>
             {% endfor %}

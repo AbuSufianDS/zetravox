@@ -1,7 +1,294 @@
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
 
 {% block content %}
-    <h1>{{ _('Register') }}</h1>
-    {{ wtf.quick_form(form) }}
+<style>
+.register-container {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-gradient-custom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.05) 100%);
+    z-index: -1;
+}
+
+.register-card {
+    background: white;
+    border: none;
+    border-radius: 36px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.register-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 32px;
+    text-align: center;
+    color: white;
+}
+
+.register-header i {
+    font-size: 48px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15));
+}
+
+.register-body {
+    padding: 40px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label-custom {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2d3748;
+    font-size: 14px;
+}
+
+.input-icon-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-group i {
+    position: absolute;
+    left: 16px;
+    color: #a0aec0;
+    font-size: 16px;
+    z-index: 2;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 15px;
+    transition: all 0.2s;
+    background: white;
+}
+
+.input-field:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.input-field.error {
+    border-color: #f56565;
+}
+
+.btn-register {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.terms-text {
+    font-size: 13px;
+    color: #718096;
+}
+
+.terms-text a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.terms-text a:hover {
+    text-decoration: underline;
+}
+
+.password-strength {
+    margin-top: 8px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.strength-bar.weak { background: #f56565; width: 33%; }
+.strength-bar.medium { background: #ed8936; width: 66%; }
+.strength-bar.strong { background: #48bb78; width: 100%; }
+</style>
+
+<div class="register-container">
+    <div class="bg-gradient-custom"></div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="register-card">
+                    <div class="register-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h3 class="mt-3 mb-1 fw-bold">Join ConnectHub</h3>
+                        <p class="mb-0 opacity-90">Start your journey today</p>
+                    </div>
+
+                    <div class="register-body">
+                        <form action="" method="post" id="registerForm">
+                            {{ form.hidden_tag() }}
+
+                            <div class="form-group">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-user me-2"></i>Username
+                                </label>
+                                <div class="input-icon-group">
+                                    <i class="fas fa-at"></i>
+                                    {{ form.username(class="input-field", placeholder="coolusername", id="username") }}
+                                </div>
+                                <small class="text-muted">Unique identifier for your profile</small>
+                                {% for error in form.username.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                                <div class="input-icon-group">
+                                    <i class="fas fa-envelope"></i>
+                                    {{ form.email(class="input-field", placeholder="hello@connecthub.com", id="email") }}
+                                </div>
+                                <small class="text-muted">We'll never share your email</small>
+                                {% for error in form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-lock me-2"></i>Password
+                                </label>
+                                <div class="input-icon-group">
+                                    <i class="fas fa-key"></i>
+                                    {{ form.password(class="input-field", placeholder="••••••••", id="password") }}
+                                </div>
+                                <div class="password-strength">
+                                    <div class="strength-bar" id="strengthBar"></div>
+                                </div>
+                                <small class="text-muted">Minimum 6 characters</small>
+                                {% for error in form.password.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-check-circle me-2"></i>Confirm Password
+                                </label>
+                                <div class="input-icon-group">
+                                    <i class="fas fa-check"></i>
+                                    {{ form.password2(class="input-field", placeholder="••••••••", id="password2") }}
+                                </div>
+                                {% for error in form.password2.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="termsCheckbox" required style="width: 18px; height: 18px;">
+                                    <span class="terms-text">
+                                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn-register w-100 text-white" id="submitBtn">
+                                <i class="fas fa-rocket me-2"></i>Create Account
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4 pt-3">
+                            <span class="text-muted">Already have an account?</span>
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold ms-2" style="color: #667eea;">
+                                Sign in
+                                <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const password = document.getElementById('password');
+const strengthBar = document.getElementById('strengthBar');
+const password2 = document.getElementById('password2');
+const submitBtn = document.getElementById('submitBtn');
+
+password.addEventListener('input', function() {
+    const val = this.value;
+    let strength = 0;
+
+    if (val.length >= 6) strength++;
+    if (val.match(/[a-z]/) && val.match(/[A-Z]/)) strength++;
+    if (val.match(/[0-9]/)) strength++;
+    if (val.match(/[^a-zA-Z0-9]/)) strength++;
+
+    if (strength <= 1) {
+        strengthBar.className = 'strength-bar weak';
+    } else if (strength <= 2) {
+        strengthBar.className = 'strength-bar medium';
+    } else {
+        strengthBar.className = 'strength-bar strong';
+    }
+
+    if (val.length === 0) {
+        strengthBar.className = 'strength-bar';
+        strengthBar.style.width = '0%';
+    }
+});
+
+function checkPasswordMatch() {
+    if (password.value && password2.value && password.value !== password2.value) {
+        password2.style.borderColor = '#f56565';
+        return false;
+    } else {
+        password2.style.borderColor = '#e2e8f0';
+        return true;
+    }
+}
+
+password2.addEventListener('input', checkPasswordMatch);
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    if (!checkPasswordMatch()) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+    if (!document.getElementById('termsCheckbox').checked) {
+        e.preventDefault();
+        alert('Please accept the Terms of Service and Privacy Policy');
+    }
+});
+</script>
 {% endblock %}

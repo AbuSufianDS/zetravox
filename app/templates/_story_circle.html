@@ -1,9 +1,9 @@
 {% if stories_data and stories_data|length > 0 %}
 <div class="d-flex overflow-auto">
     {% for story in stories_data %}
-        <div class="text-center me-3 story-circle-item"
-             onclick='openStoryViewer({{ stories_data | tojson | safe }}, {{ loop.index0 }})'>
-            <div class="story-ring">
+        <div class="text-center me-3 moment-circle-item"
+             onclick='openMomentViewer({{ stories_data | tojson | safe }}, {{ loop.index0 }})'>
+            <div class="moment-ring">
                 <img src="{{ story.author_avatar }}"
                      class="rounded-circle"
                      style="width: 60px; height: 60px; object-fit: cover; border: 3px solid white;">
@@ -14,6 +14,6 @@
 </div>
 {% else %}
 <div class="text-center text-muted small py-2">
-    No stories to show
+    No moments to show
 </div>
 {% endif %}

@@ -3,27 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     {% if title %}
-    <title>{{ title }} - TinyBook</title>
+    <title>{{ title }} - ConnectHub</title>
     {% else %}
-    <title>TinyBook - Connect with the world</title>
+    <title>ConnectHub - Connect with the world</title>
     {% endif %}
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-        crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-
     :root {
         --bg-primary: #f0f2f5;
         --bg-card: #ffffff;
@@ -35,7 +27,6 @@
         --shadow: 0 1px 3px rgba(0,0,0,0.08);
         --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
     }
-
 
     [data-theme="dark"] {
         --bg-primary: #18191a;
@@ -95,22 +86,6 @@
         font-size: 1.2rem;
     }
 
-    .nav-link:hover::after {
-        content: attr(title);
-        position: absolute;
-        bottom: -32px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #1a202c;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        white-space: nowrap;
-        z-index: 1000;
-        font-weight: 400;
-    }
-
     .dropdown-menu {
         background: var(--bg-card);
         border: none;
@@ -144,41 +119,21 @@
         box-shadow: var(--shadow-hover);
     }
 
-    .btn-outline-primary {
-        border-radius: 0.75rem;
-        border-width: 2px;
-        font-weight: 600;
+    .notif-dropdown {
+        width: 360px;
+        max-height: 450px;
+        overflow-y: auto;
+        padding: 0;
     }
 
-    .form-control {
-        background: var(--bg-card);
-        border-radius: 0.75rem;
-        border: 2px solid var(--border-color);
-        font-weight: 500;
-        color: var(--text-primary);
+    .notification-item {
+        transition: background 0.2s;
+        cursor: pointer;
     }
 
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    .notification-item:hover {
+        background: var(--hover-bg);
     }
-
-    .form-control::placeholder {
-        color: var(--text-secondary);
-    }
-
-    .alert {
-        border-radius: 1rem;
-        border: none;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    }
-
-    .badge {
-        font-weight: 600;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.5rem;
-    }
-
 
     .post-card {
         background: var(--bg-card);
@@ -192,150 +147,85 @@
         box-shadow: var(--shadow-hover);
     }
 
-    .post-text {
-        color: var(--text-primary);
-    }
-
-    .post-time {
-        color: var(--text-secondary);
-    }
-
-    .btn-light {
-        background: var(--hover-bg);
-        color: var(--text-primary);
-        border: none;
-    }
-
-    .btn-light:hover {
-        background: rgba(102, 126, 234, 0.15);
-        color: #667eea;
-    }
-
-    /* Sidebar styles */
-    .left-sidebar-item {
-        color: var(--text-primary);
-    }
-
-    .left-sidebar-item:hover {
-        background: var(--hover-bg);
-    }
-
-    .section-title {
-        color: var(--text-secondary);
-    }
-
-    .sidebar-divider {
-        border-top-color: var(--border-color);
-    }
-
-    /* Toast container */
-    #toast-container {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1050;
-    }
-
-    .toast {
-        opacity: 1 !important;
-        animation: slideInRight 0.3s ease;
-    }
-
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
     @media (max-width: 768px) {
         .navbar-brand {
             font-size: 1.25rem;
         }
-
         .nav-link {
             padding: 0.5rem;
         }
-
         .nav-link i {
             font-size: 1rem;
         }
+        .notif-dropdown {
+            width: 300px;
+        }
     }
-</style>
+    </style>
   </head>
   <body>
+  <script>
+(function() {
+    const savedTheme = localStorage.getItem('selected_theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+})();
+</script>
     {% if request.endpoint not in ['auth.login', 'auth.register', 'auth.reset_password_request', 'auth.reset_password'] %}
     <nav class="navbar navbar-expand-lg sticky-top">
       <div class="container">
         <a class="navbar-brand" href="{{ url_for('main.index') }}">
-          <i class="fas fa-feather-alt me-2"></i>TinyBook
+          <i class="fas fa-share-alt me-2"></i>ConnectHub
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
           <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
-                 href="{{ url_for('main.index') }}" title="Home">
+              <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}" title="Home">
                 <i class="fas fa-home"></i>
               </a>
             </li>
-
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.for_you' %}active{% endif %}"
-                 href="{{ url_for('main.for_you') }}" title="For You">
+              <a class="nav-link {% if request.endpoint == 'main.for_you' %}active{% endif %}" href="{{ url_for('main.for_you') }}" title="For You">
                 <i class="fas fa-star"></i>
                 <span class="badge bg-primary ms-1" style="font-size: 8px; padding: 2px 4px;">AI</span>
               </a>
             </li>
-
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.discover' %}active{% endif %}"
-                 href="{{ url_for('main.discover') }}" title="Discover">
+              <a class="nav-link {% if request.endpoint == 'main.discover' %}active{% endif %}" href="{{ url_for('main.discover') }}" title="Discover">
                 <i class="fas fa-compass"></i>
               </a>
             </li>
-
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.trending_feed' %}active{% endif %}"
-                 href="{{ url_for('main.trending_feed') }}" title="Trending">
+              <a class="nav-link {% if request.endpoint == 'main.trending_feed' %}active{% endif %}" href="{{ url_for('main.trending_feed') }}" title="Trending">
                 <i class="fas fa-fire"></i>
               </a>
             </li>
-
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('main.explore') }}" title="Explore">
                 <i class="fas fa-globe"></i>
               </a>
             </li>
-
-          {% if current_user.is_authenticated and current_user.is_admin %}
-<li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" title="Admin">
-        <i class="fas fa-shield-alt"></i>
-    </a>
-    <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="{{ url_for('main.moderation') }}">
-            <i class="fas fa-flag"></i> Moderation
-        </a></li>
-        <li><a class="dropdown-item" href="{{ url_for('main.report_dashboard') }}">
-            <i class="fas fa-chart-bar"></i> Reports
-        </a></li>
-        <li><a class="dropdown-item" href="{{ url_for('main.view_reports') }}">
-            <i class="fas fa-list"></i> User Reports
-        </a></li>
-        <li><a class="dropdown-item" href="{{ url_for('main.analytics') }}">
-            <i class="fas fa-chart-line"></i> Analytics
-        </a></li>
-    </ul>
-</li>
-{% endif %}
+            {% if current_user.is_authenticated and current_user.is_admin %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" title="Admin">
+                <i class="fas fa-shield-alt"></i>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('main.moderation') }}"><i class="fas fa-flag"></i> Moderation</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.report_dashboard') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.view_reports') }}"><i class="fas fa-list"></i> User Reports</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.analytics') }}"><i class="fas fa-chart-line"></i> Analytics</a></li>
+              </ul>
+            </li>
+            {% endif %}
           </ul>
 
           {% if g.search_form %}
@@ -351,52 +241,44 @@
 
           <ul class="navbar-nav">
             {% if current_user.is_anonymous %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.login') }}" title="Login">
-                <i class="fas fa-sign-in-alt"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.register') }}" title="Register">
-                <i class="fas fa-user-plus"></i>
-              </a>
-            </li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}" title="Login"><i class="fas fa-sign-in-alt"></i></a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}" title="Register"><i class="fas fa-user-plus"></i></a></li>
             {% else %}
             <li class="nav-item">
               <a class="nav-link position-relative" href="{{ url_for('main.messages') }}" title="Messages">
                 <i class="fas fa-envelope"></i>
                 {% set unread_count = current_user.unread_message_count() %}
                 {% if unread_count > 0 %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px;">
-                  {{ unread_count }}
-                </span>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px;">{{ unread_count }}</span>
                 {% endif %}
               </a>
             </li>
-              <li class="nav-item">
-  <a class="nav-link position-relative" href="{{ url_for('main.friend_requests_page') }}" title="Friend Requests">
-    <i class="fas fa-user-friends"></i>
-    {% set pending_count = current_user.get_pending_friend_requests()|length %}
-    {% if pending_count > 0 %}
-    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size: 9px;">
-      {{ pending_count }}
-    </span>
-    {% endif %}
-  </a>
-</li>
-
-
+            <li class="nav-item">
+              <a class="nav-link position-relative" href="{{ url_for('main.friend_requests_page') }}" title="Connection Requests">
+                <i class="fas fa-user-plus"></i>
+                {% set pending_count = current_user.get_pending_friend_requests()|length %}
+                {% if pending_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size: 9px;">{{ pending_count }}</span>
+                {% endif %}
+              </a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('main.conversations') }}" title="Conversations">
                 <i class="fas fa-comments"></i>
               </a>
             </li>
 
-            <li class="nav-item">
-              <a class="nav-link position-relative" href="{{ url_for('main.notifications_page') }}" id="notification-bell" title="Notifications">
+            <li class="nav-item dropdown">
+              <a class="nav-link position-relative dropdown-toggle" href="#" id="notificationBell" data-bs-toggle="dropdown" aria-expanded="false" title="Activity">
                 <i class="fas fa-bell"></i>
                 <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; display: none;">0</span>
               </a>
+              <div class="dropdown-menu dropdown-menu-end notif-dropdown" id="notificationsDropdown">
+                <div class="text-center p-3">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                  <p class="small mt-2 text-muted">Loading activity...</p>
+                </div>
+              </div>
             </li>
 
             <li class="nav-item dropdown">
@@ -404,23 +286,13 @@
                 <img src="{{ current_user.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
-    <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}">
-        <i class="fas fa-user me-2"></i>Profile
-    </a></li>
-    <li><a class="dropdown-item" href="{{ url_for('main.saved_posts') }}">
-        <i class="fas fa-bookmark me-2"></i>Saved
-    </a></li>
-    <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">
-        <i class="fas fa-edit me-2"></i>Edit
-    </a></li>
-    <li><a class="dropdown-item" href="{{ url_for('security.settings') }}">
-        <i class="fas fa-cog me-2"></i>Settings
-    </a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
-        <i class="fas fa-sign-out-alt me-2"></i>Logout
-    </a></li>
-</ul>
+                <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.saved_posts') }}"><i class="fas fa-bookmark me-2"></i>Bookmarks</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}"><i class="fas fa-edit me-2"></i>Edit Profile</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.account_settings') }}"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+              </ul>
             </li>
             {% endif %}
           </ul>
@@ -458,17 +330,25 @@
       {% block content %}{% endblock %}
     </div>
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     {{ moment.include_moment() }}
     {{ moment.lang(g.locale) }}
 
     <script>
-    let notificationCheckInterval = null;
-    let lastNotifCount = 0;
+    let notificationInterval = null;
+
+    function applySavedTheme() {
+    const savedTheme = localStorage.getItem('selected_theme');
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else if (savedTheme === 'system') {
+        document.documentElement.removeAttribute('data-theme');
+    }
+}
+
+applySavedTheme();
 
     function updateNotificationBadge(count) {
         const badge = document.getElementById('notification-count');
@@ -482,6 +362,121 @@
         }
     }
 
+    function formatTimeAgo(timestamp) {
+        const date = new Date(timestamp * 1000);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+        return date.toLocaleDateString();
+    }
+
+    function getNotificationIcon(name) {
+        const icons = {
+            'like': '<i class="fas fa-heart text-danger"></i>',
+            'comment': '<i class="fas fa-comment text-primary"></i>',
+            'follow': '<i class="fas fa-user-plus text-success"></i>',
+            'share': '<i class="fas fa-share-alt text-info"></i>',
+            'friend_request': '<i class="fas fa-user-friends text-primary"></i>',
+            'friend_accepted': '<i class="fas fa-check-circle text-success"></i>',
+            'test': '<i class="fas fa-bell text-warning"></i>'
+        };
+        return icons[name] || '<i class="fas fa-bell text-secondary"></i>';
+    }
+
+    function getNotificationMessage(notif) {
+        switch(notif.name) {
+            case 'like': return `<strong>${escapeHtml(notif.from_user)}</strong> applauded your post`;
+            case 'comment': return `<strong>${escapeHtml(notif.from_user)}</strong> replied to your post`;
+            case 'follow': return `<strong>${escapeHtml(notif.from_user)}</strong> started following you`;
+            case 'share': return `<strong>${escapeHtml(notif.from_user)}</strong> reposted your content`;
+            case 'friend_request': return `<strong>${escapeHtml(notif.from_user)}</strong> wants to connect with you`;
+            case 'friend_accepted': return `<strong>${escapeHtml(notif.from_user)}</strong> accepted your connection request`;
+            case 'test': return `🔔 ${escapeHtml(notif.message || 'Test notification')}`;
+            default: return escapeHtml(notif.message || 'You have new activity');
+        }
+    }
+
+    function getNotificationLink(notif) {
+        if (notif.name === 'like' || notif.name === 'comment' || notif.name === 'share') {
+            return `/post/${notif.post_id}`;
+        } else if (notif.name === 'follow') {
+            return `/user/${notif.from_user}`;
+        } else if (notif.name === 'friend_request' || notif.name === 'friend_accepted') {
+            return `/friend-requests`;
+        }
+        return '#';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function markNotificationRead(notifId) {
+        fetch(`/api/notifications/${notifId}/mark-read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+            }
+        }).then(() => {
+            checkNewNotifications();
+        }).catch(error => console.error('Error marking read:', error));
+    }
+
+    function loadNotificationsDropdown() {
+        fetch('/notifications-list')
+            .then(response => response.json())
+            .then(notifications => {
+                const dropdown = document.getElementById('notificationsDropdown');
+                if (!dropdown) return;
+
+                if (notifications && notifications.length > 0) {
+                    let html = '';
+                    notifications.slice(0, 10).forEach(notif => {
+                        html += `
+                            <div class="notification-item p-3 border-bottom" data-id="${notif.id}" onclick="markNotificationRead(${notif.id}); window.location.href='${getNotificationLink(notif)}'">
+                                <div class="d-flex gap-3">
+                                    <div class="flex-shrink-0">${getNotificationIcon(notif.name)}</div>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-1 small">${getNotificationMessage(notif)}</p>
+                                        <small class="text-muted">${formatTimeAgo(notif.timestamp)}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '<div class="text-center p-2 border-top"><a href="/notifications-page" class="small text-decoration-none">View all activity</a></div>';
+                    dropdown.innerHTML = html;
+                } else {
+                    dropdown.innerHTML = `
+                        <div class="text-center p-4">
+                            <i class="fas fa-bell-slash fa-2x text-muted mb-2 d-block"></i>
+                            <p class="text-muted small mb-0">No activity yet</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                const dropdown = document.getElementById('notificationsDropdown');
+                if (dropdown) {
+                    dropdown.innerHTML = `
+                        <div class="text-center p-3">
+                            <i class="fas fa-exclamation-triangle text-warning mb-2 d-block"></i>
+                            <p class="small text-muted">Failed to load activity</p>
+                            <button class="btn btn-sm btn-primary" onclick="loadNotificationsDropdown()">Retry</button>
+                        </div>
+                    `;
+                }
+            });
+    }
+
     function checkNewNotifications() {
         fetch('/notifications')
             .then(response => response.json())
@@ -493,33 +488,37 @@
             .catch(error => console.error('Notification check failed:', error));
     }
 
-    // Check every 30 seconds
-    if (notificationCheckInterval) clearInterval(notificationCheckInterval);
-    notificationCheckInterval = setInterval(checkNewNotifications, 30000);
+    document.getElementById('notificationBell')?.addEventListener('shown.bs.dropdown', function() {
+        loadNotificationsDropdown();
+    });
+
+    if (window.location.pathname === '/notifications-page') {
+        fetch('/api/notifications/mark-read', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+        }).then(() => {
+            checkNewNotifications();
+        });
+    }
+
+    if (notificationInterval) clearInterval(notificationInterval);
+    notificationInterval = setInterval(checkNewNotifications, 30000);
     checkNewNotifications();
 
-    function reactPost(postId, reaction) {
+    function applaudPost(postId, reaction) {
         fetch(`/react_post/${postId}/${reaction}`)
             .then(response => response.json())
             .then(data => {
                 if (data.reaction_set !== undefined) {
                     const trigger = document.getElementById(`reactionTrigger${postId}`);
                     if (trigger && data.reaction) {
-                        const reactionMap = {
-                            'like': '👍',
-                            'love': '❤️',
-                            'haha': '😂',
-                            'wow': '😮',
-                            'sad': '😢',
-                            'angry': '😠'
-                        };
+                        const reactionMap = {'like': '👍', 'love': '❤️', 'haha': '😂', 'wow': '😮', 'sad': '😢', 'angry': '😠'};
                         trigger.innerHTML = reactionMap[data.reaction] || '<i class="far fa-smile fa-lg"></i>';
                         trigger.classList.add('active');
                     } else if (trigger) {
                         trigger.innerHTML = '<i class="far fa-thumbs-up"></i>';
                         trigger.classList.remove('active');
                     }
-
                     const reactionSummary = document.getElementById(`reactionSummary${postId}`);
                     if (reactionSummary && data.counts) {
                         const icons = [];
@@ -541,40 +540,33 @@
             .catch(error => console.error('Error:', error));
     }
 
-    function sharePost(postId) {
-        fetch(`/share_post/${postId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(response => { if (response.ok) location.reload(); })
-        .catch(error => console.error('Error:', error));
+    function repostPost(postId) {
+        if (confirm('Repost this content to your stream?')) {
+            fetch(`/share_post/${postId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+            }).then(response => { if (response.ok) location.reload(); });
+        }
     }
 
-    function savePost(postId) {
+    function bookmarkPost(postId) {
         fetch(`/save_post/${postId}`)
             .then(response => response.json())
             .then(data => {
                 const btn = document.getElementById(`saveBtn${postId}`);
-                if (btn) {
-                    btn.innerHTML = data.saved ? '<i class="fas fa-bookmark me-2"></i>Saved' : '<i class="far fa-bookmark me-2"></i>Save';
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                if (btn) btn.innerHTML = data.saved ? '<i class="fas fa-bookmark me-2"></i>Bookmarked' : '<i class="far fa-bookmark me-2"></i>Bookmark';
+            });
     }
 
     function notInterested(postId) {
         if (confirm('Mark this post as not interested? We\'ll show fewer posts like this.')) {
-            fetch(`/not-interested/${postId}`)
-                .then(response => { if (response.ok) location.reload(); })
-                .catch(error => console.error('Error:', error));
+            fetch(`/not-interested/${postId}`).then(response => { if (response.ok) location.reload(); });
         }
     }
 
     function hidePost(postId) {
         if (confirm('Hide this post? You won\'t see it again.')) {
-            fetch(`/hide-post/${postId}`)
-                .then(response => { if (response.ok) location.reload(); })
-                .catch(error => console.error('Error:', error));
+            fetch(`/hide-post/${postId}`).then(response => { if (response.ok) location.reload(); });
         }
     }
 
@@ -582,38 +574,20 @@
         if (confirm('Block this user? They will not be able to interact with you.')) {
             fetch(`/block-user/${userId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-                }
-            })
-            .then(response => { if (response.ok) location.reload(); })
-            .catch(error => console.error('Error:', error));
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+            }).then(response => { if (response.ok) location.reload(); });
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const notificationBell = document.getElementById('notification-bell');
-        if (notificationBell) {
-            notificationBell.addEventListener('click', function() {
-                const badge = document.getElementById('notification-count');
-                if (badge) {
-                    badge.style.display = 'none';
-                    badge.innerText = '0';
-                }
-            });
-        }
-    });
-
     setTimeout(function() {
-        let alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
+        document.querySelectorAll('.alert').forEach(function(alert) {
             let bsAlert = bootstrap.Alert.getInstance(alert);
             if (bsAlert) bsAlert.close();
         });
     }, 5000);
-</script>
-  {% include '_story_viewer.html' %}
-  <input type="hidden" name="csrf_token" id="csrfToken" value="{{ csrf_token() if csrf_token else '' }}">
+    </script>
+
+    {% include '_story_viewer.html' %}
+    <input type="hidden" name="csrf_token" id="csrfToken" value="{{ csrf_token() if csrf_token else '' }}">
   </body>
 </html>

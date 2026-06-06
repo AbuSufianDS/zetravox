@@ -4,14 +4,20 @@
 <div class="container mt-3">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <h1 class="mb-4">Explore</h1>
-            
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h3><i class="fas fa-globe text-primary"></i> Explore</h3>
+                    <p class="text-muted">Discover content from around ConnectHub</p>
+                </div>
+            </div>
+
             {% for post in posts %}
                 {% include '_post.html' %}
             {% else %}
                 <div class="card">
-                    <div class="card-body text-center text-muted">
-                        No posts to explore yet.
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-binoculars fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No posts to explore yet.</p>
                     </div>
                 </div>
             {% endfor %}

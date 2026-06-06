@@ -5,18 +5,20 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mb-3">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">#{{ hashtag.name }}</h4>
-                    <small>{{ hashtag.post_count }} posts</small>
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-hashtag me-2"></i>{{ hashtag.name }}</h4>
+                    <small>{{ hashtag.post_count }} {{ 'post' if hashtag.post_count == 1 else 'posts' }}</small>
                 </div>
             </div>
-            
+
             {% for post in posts %}
                 {% include '_post.html' %}
             {% else %}
                 <div class="card">
-                    <div class="card-body text-center text-muted">
-                        No posts found with this hashtag.
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-hashtag fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No posts found with this hashtag</p>
+                        <small class="text-muted">Be the first to post with #{{ hashtag.name }}</small>
                     </div>
                 </div>
             {% endfor %}

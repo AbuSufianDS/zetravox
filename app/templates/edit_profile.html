@@ -7,7 +7,7 @@
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header">
-                    <h3>Edit Profile</h3>
+                    <h3><i class="fas fa-user-edit me-2"></i>Edit Profile</h3>
                 </div>
                 <div class="card-body">
                     <form action="" method="post" enctype="multipart/form-data">
@@ -37,7 +37,6 @@
                         </ul>
 
                         <div class="tab-content">
-                            <!-- Basic Info Tab -->
                             <div class="tab-pane fade show active" id="basic" role="tabpanel">
                                 <div class="mb-3">
                                     {{ form.username.label(class="form-label") }}
@@ -50,7 +49,7 @@
                                 <div class="mb-3">
                                     {{ form.about_me.label(class="form-label") }}
                                     {{ form.about_me(class="form-control", rows=4) }}
-                                    <small class="text-muted">Tell people something about yourself</small>
+                                    <small class="text-muted">Share something about yourself</small>
                                     {% for error in form.about_me.errors %}
                                         <div class="text-danger">{{ error }}</div>
                                     {% endfor %}
@@ -67,7 +66,7 @@
 
                             <div class="tab-pane fade" id="photos" role="tabpanel">
                                 <div class="text-center mb-4">
-                                    <label class="form-label fw-bold">Current Profile Picture</label>
+                                    <label class="form-label fw-bold">Current Avatar</label>
                                     <div>
                                         {% if current_user.profile_pic and current_user.profile_pic != 'default.jpg' and current_user.profile_pic != 'None' %}
                                             <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
@@ -91,7 +90,7 @@
                                 </div>
 
                                 <div class="text-center mb-4 mt-4">
-                                    <label class="form-label fw-bold">Current Cover Photo</label>
+                                    <label class="form-label fw-bold">Current Cover Image</label>
                                     <div>
                                         {% if current_user.cover_pic and current_user.cover_pic != 'default_cover.jpg' %}
                                             <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.cover_pic) }}"
@@ -113,12 +112,12 @@
                                 </div>
 
                                 <div id="profilePreview" style="display:none;" class="mb-3">
-                                    <label class="form-label">Profile Picture Preview</label>
+                                    <label class="form-label">Avatar Preview</label>
                                     <img id="profilePreviewImg" class="img-fluid rounded" style="max-height: 150px;">
                                 </div>
 
                                 <div id="coverPreview" style="display:none;" class="mb-3">
-                                    <label class="form-label">Cover Photo Preview</label>
+                                    <label class="form-label">Cover Preview</label>
                                     <img id="coverPreviewImg" class="img-fluid rounded" style="width: 100%; max-height: 200px; object-fit: cover;">
                                 </div>
                             </div>
@@ -210,12 +209,11 @@
                                 </div>
                             </div>
 
-                            <!-- Privacy Tab -->
                             <div class="tab-pane fade" id="privacy" role="tabpanel">
                                 <div class="mb-3">
                                     {{ form.is_private.label(class="form-label") }}
                                     {{ form.is_private(class="form-select") }}
-                                    <small class="text-muted">Private accounts require approval for followers and only approved followers can see your posts</small>
+                                    <small class="text-muted">Private profiles require approval for new connections. Only approved connections can see your posts</small>
                                 </div>
                             </div>
                         </div>
@@ -232,7 +230,6 @@
 </div>
 
 <script>
-// Profile picture preview
 document.getElementById('profile_pic').addEventListener('change', function(e) {
     const file = e.target.files[0];
     const preview = document.getElementById('profilePreview');

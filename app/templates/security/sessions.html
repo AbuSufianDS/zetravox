@@ -1,74 +1,361 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
+<style>
+.sessions-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.settings-sidebar {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 8px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 80px;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.settings-nav-item i {
+    width: 24px;
+    font-size: 18px;
+    color: #667eea;
+}
+
+.settings-nav-item:hover {
+    background: var(--hover-bg);
+    transform: translateX(4px);
+}
+
+.settings-nav-item.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+    border-left: 3px solid #667eea;
+}
+
+.sessions-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.sessions-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.sessions-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sessions-card-body {
+    padding: 0;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+.session-item:hover {
+    background: var(--hover-bg);
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-info {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.session-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.session-details {
+    flex: 1;
+}
+
+.session-device {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.session-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.session-meta i {
+    width: 14px;
+    margin-right: 4px;
+}
+
+.session-actions {
+    margin-left: 16px;
+}
+
+.btn-revoke {
+    background: transparent;
+    border: 2px solid #ef4444;
+    border-radius: 10px;
+    padding: 8px 20px;
+    color: #ef4444;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-revoke:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-revoke-all {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-revoke-all:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.current-badge {
+    background: #10b981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.location-badge {
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 24px;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.empty-state h6 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.alert-security {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border-left: 4px solid #667eea;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 24px;
+}
+
+.alert-security i {
+    color: #667eea;
+    margin-right: 12px;
+}
+
+.alert-security .title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.alert-security .text {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+</style>
+
+<div class="sessions-container">
+    <div class="row g-4">
         <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
-                        <h5>{{ current_user.username }}</h5>
-                        <p class="text-muted small">{{ current_user.email }}</p>
-                    </div>
-                    <hr>
-                    <div class="list-group list-group-flush">
-                        <a href="{{ url_for('security.account_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-user fa-fw"></i> Account
-                        </a>
-                        <a href="{{ url_for('security.security_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-shield-alt fa-fw text-success"></i> Security
-                        </a>
-                        <a href="{{ url_for('security.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-lock fa-fw text-warning"></i> Privacy
-                        </a>
-                        <a href="{{ url_for('security.session_management') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
-                            <i class="fas fa-desktop fa-fw text-info"></i> Sessions
-                        </a>
-                        <a href="{{ url_for('security.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-history fa-fw text-secondary"></i> Login History
-                        </a>
-                    </div>
-                </div>
+            <div class="settings-sidebar">
+                <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Account</span>
+                </a>
+                <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </a>
+                <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-lock"></i>
+                    <span>Privacy</span>
+                </a>
+                <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <a href="{{ url_for('main.session_management') }}" class="settings-nav-item active">
+                    <i class="fas fa-desktop"></i>
+                    <span>Sessions</span>
+                </a>
+                <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Login History</span>
+                </a>
+                <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
+                    <i class="fas fa-ban"></i>
+                    <span>Blocked Users</span>
+                </a>
+                <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-palette"></i>
+                    <span>Appearance</span>
+                </a>
             </div>
         </div>
 
         <div class="col-md-9">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-desktop me-2 text-primary"></i>Active Sessions</h5>
-                    <button class="btn btn-sm btn-outline-danger" onclick="revokeAllSessions()">Revoke All Other Sessions</button>
+            <div class="sessions-card">
+                <div class="sessions-card-header">
+                    <h5>
+                        <i class="fas fa-desktop" style="color: #667eea;"></i>
+                        Active Sessions
+                    </h5>
+                    <button class="btn-revoke-all" onclick="revokeAllSessions()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Revoke All Other Sessions
+                    </button>
                 </div>
-                <div class="card-body">
+                <div class="sessions-card-body">
                     {% if sessions %}
                         {% for session in sessions %}
-                        <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-                            <div>
-                                <div class="fw-semibold">
-                                    <i class="fas fa-{{ 'desktop' if 'Windows' in session.user_agent or 'Mac' in session.user_agent else 'mobile-alt' }} me-2"></i>
-                                    {{ session.user_agent[:50] if session.user_agent else 'Unknown Device' }}...
+                        <div class="session-item">
+                            <div class="session-info">
+                                <div class="session-icon">
+                                    {% if 'Windows' in session.user_agent or 'Mac' in session.user_agent %}
+                                    <i class="fas fa-desktop" style="color: #667eea;"></i>
+                                    {% elif 'iPhone' in session.user_agent or 'iPad' in session.user_agent %}
+                                    <i class="fas fa-tablet-alt" style="color: #667eea;"></i>
+                                    {% elif 'Android' in session.user_agent %}
+                                    <i class="fas fa-mobile-alt" style="color: #667eea;"></i>
+                                    {% else %}
+                                    <i class="fas fa-globe" style="color: #667eea;"></i>
+                                    {% endif %}
                                 </div>
-                                <div class="small text-muted">
-                                    IP: {{ session.ip_address }}<br>
-                                    Logged in: {{ moment(session.created_at).fromNow() if session.created_at else 'Unknown' }}
+                                <div class="session-details">
+                                    <div class="session-device">
+                                        {{ session.user_agent[:60] if session.user_agent else 'Unknown Device' }}
+                                        {% if session.id == request.cookies.get('session') %}
+                                        <span class="current-badge">
+                                            <i class="fas fa-check-circle me-1"></i>Current
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="session-meta">
+                                        <span><i class="fas fa-map-marker-alt"></i> IP: {{ session.ip_address }}</span>
+                                        <span><i class="far fa-clock"></i> Started: {{ session.created_at.strftime('%b %d, %Y at %H:%M') if session.created_at else 'Unknown' }}</span>
+                                        {% if session.user_agent and ('Chrome' in session.user_agent or 'Firefox' in session.user_agent or 'Safari' in session.user_agent) %}
+                                        <span class="location-badge">
+                                            <i class="fab fa-{% if 'Chrome' in session.user_agent %}chrome{% elif 'Firefox' in session.user_agent %}firefox{% elif 'Safari' in session.user_agent %}safari{% else %}edge{% endif %}"></i>
+                                            {{ session.user_agent.split(' ')[0] if session.user_agent else '' }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                            {% if session.id != request.cookies.get('session') %}
-                            <form action="{{ url_for('security.revoke_session', session_id=session.id) }}" method="POST">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
-                            </form>
-                            {% else %}
-                            <span class="badge bg-success">Current Session</span>
-                            {% endif %}
+                            <div class="session-actions">
+                                {% if session.id != request.cookies.get('session') %}
+                                <form action="{{ url_for('main.revoke_session', session_id=session.id) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn-revoke" onclick="return confirm('Revoke this session? You will be logged out from this device.')">
+                                        <i class="fas fa-trash-alt me-1"></i> Revoke
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="fas fa-desktop fa-3x mb-3"></i>
-                            <p>No active sessions found</p>
+                        <div class="empty-state">
+                            <i class="fas fa-desktop"></i>
+                            <h6>No Active Sessions</h6>
+                            <p>Your account is only active on this device</p>
                         </div>
                     {% endif %}
+                </div>
+            </div>
+
+            <div class="alert-security">
+                <div class="d-flex">
+                    <i class="fas fa-shield-alt fa-lg"></i>
+                    <div>
+                        <div class="title">Security Tip</div>
+                        <div class="text">Regularly review your active sessions. If you see a device you don't recognize, revoke it immediately and change your password.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -77,11 +364,25 @@
 
 <script>
 function revokeAllSessions() {
-    if(confirm('This will log you out from all other devices. Continue?')) {
-        fetch('{{ url_for("security.revoke_all_sessions") }}', {
+    if(confirm('This will sign you out from all other devices. You will remain logged in on this device. Continue?')) {
+        fetch('{{ url_for("main.revoke_all_sessions") }}', {
             method: 'POST',
-            headers: {'X-CSRFToken': '{{ csrf_token() }}'}
-        }).then(() => location.reload());
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => {
+            if(response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to revoke sessions. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
     }
 }
 </script>

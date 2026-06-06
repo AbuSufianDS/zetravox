@@ -5,46 +5,90 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                     <h4 class="mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
+                        <i class="fas fa-flag me-2"></i>Flagged Content History
                     </h4>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body">
-                                    <h6>Total Users</h6>
-                                    <h2>{{ total_users }}</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h6>Active Today</h6>
-                                    <h2>{{ active_today }}</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class-card-body">
-                                    <h6>Total Posts</h6>
-                                    <h2>{{ total_posts }}</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-danger text-white">
-                                <div class="card-body">
-                                    <h6>Spam Posts</h6>
-                                    <h2>{{ spam_posts }}</h2>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This page shows all content that has been flagged as spam or inappropriate.
                     </div>
+
+                    {% if posts %}
+                        {% for post in posts %}
+                        <div class="card mb-3 border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>{{ post.author.username }}</strong>
+                                        <span class="text-white-50 ms-2">
+                                            posted {{ moment(post.timestamp).fromNow() }}
+                                        </span>
+                                    </div>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-robot me-1"></i>Confidence: {{ (post.spam_confidence * 100)|round(1) }}%
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ post.body }}</p>
+                                {% if post.media_url %}
+                                    {% if post.media_type == 'image' %}
+                                        <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}"
+                                             class="img-fluid rounded mt-2" style="max-height: 200px;">
+                                    {% elif post.media_type == 'video' %}
+                                        <video controls class="mt-2" style="max-height: 200px;">
+                                            <source src="{{ url_for('static', filename='uploads/' + post.media_url) }}">
+                                        </video>
+                                    {% endif %}
+                                {% endif %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Flagged by AI spam detection system
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('main.approve_post', post_id=post.id) }}"
+                                   class="btn btn-success btn-sm">
+                                    <i class="fas fa-check me-1"></i> Approve
+                                </a>
+                                <a href="{{ url_for('main.reject_post', post_id=post.id) }}"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Delete this flagged content?')">
+                                    <i class="fas fa-trash me-1"></i> Delete
+                                </a>
+                                <a href="{{ url_for('main.user', username=post.author.username) }}"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-user me-1"></i> View Profile
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if next_url or prev_url %}
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                                    <a class="page-link" href="{{ prev_url or '#' }}">Previous</a>
+                                </li>
+                                <li class="page-item{% if not next_url %} disabled{% endif %}">
+                                    <a class="page-link" href="{{ next_url or '#' }}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5>No Flagged Content</h5>
+                            <p class="text-muted">All content has been reviewed and approved.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

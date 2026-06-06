@@ -89,15 +89,13 @@ def api_get_notifications():
                 'read': getattr(notif, 'read', False)
             })
 
-        unread_count = 0
-        for notif in current_user.notifications.all():
-            if not getattr(notif, 'read', False):
-                unread_count += 1
+        unread_count_query = current_user.notifications.select().where(Notification.read == False)
+        unread_count = db.session.scalar(sa.select(sa.func.count()).select_from(unread_count_query.subquery()))
 
         return jsonify({
             'success': True,
             'notifications': notifications_list,
-            'unread_count': unread_count,
+            'unread_count': unread_count or 0,
             'has_next': notifications.has_next,
             'total': notifications.total
         })
@@ -105,20 +103,19 @@ def api_get_notifications():
         current_app.logger.error(f"API notifications error: {e}")
         return jsonify({'success': False, 'error': str(e), 'notifications': [], 'unread_count': 0})
 
-
 @bp.route('/api/notifications/mark-read', methods=['POST'])
 @login_required
 def api_mark_notifications_read():
     try:
-        for notif in current_user.notifications.all():
-            if not getattr(notif, 'read', False):
-                notif.read = True
+        query = current_user.notifications.select().where(Notification.read == False)
+        notifications = db.session.scalars(query).all()
+        for notif in notifications:
+            notif.read = True
         db.session.commit()
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @bp.route('/api/notifications/<int:notif_id>/mark-read', methods=['POST'])
 @login_required
@@ -801,6 +798,7 @@ def edit_profile():
 
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
+
 @bp.route('/follow/<username>', methods=['POST'])
 @login_required
 def follow(username):
@@ -815,11 +813,22 @@ def follow(username):
             return redirect(url_for('main.user', username=username))
         current_user.follow(user)
         db.session.commit()
-        send_follow_notification(user.id, current_user.username)
+
+        from app.notification_helper import create_notification
+        create_notification(
+            user.id,
+            'follow',
+            {
+                'from_user': current_user.username,
+                'user_id': current_user.id,
+                'message': f'{current_user.username} started following you'
+            }
+        )
+        print(f"Created follow notification for user {user.id} from {current_user.username}")
+
         flash(f'You are following {username}!')
         return redirect(url_for('main.user', username=username))
     return redirect(url_for('main.index'))
-
 
 @bp.route('/unfollow/<username>', methods=['POST'])
 @login_required
@@ -851,13 +860,25 @@ def like_post(post_id):
         sa.select(Like).where(Like.user_id == current_user.id, Like.post_id == post_id)
     )
 
+    liked = False
+
     if not existing:
         like = Like(user_id=current_user.id, post_id=post_id)
         db.session.add(like)
         post.author.points += 1
         liked = True
         if post.author.id != current_user.id:
-            send_like_notification(post.author.id, current_user.username, post.id, post.body)
+            from app.notification_helper import create_notification
+            create_notification(
+                post.author.id,
+                'like',
+                {
+                    'from_user': current_user.username,
+                    'user_id': current_user.id,
+                    'post_id': post.id,
+                    'message': f'{current_user.username} liked your post'
+                }
+            )
     else:
         db.session.delete(existing)
         liked = False
@@ -865,7 +886,6 @@ def like_post(post_id):
     db.session.commit()
     like_count = post.like_count()
     return jsonify({'liked': liked, 'count': like_count})
-
 
 @bp.route('/post/<int:post_id>')
 @login_required
@@ -891,12 +911,25 @@ def add_comment(post_id):
         comment = Comment(body=body, user_id=current_user.id, post_id=post_id)
         db.session.add(comment)
         db.session.commit()
+
         if post.author.id != current_user.id:
-            send_comment_notification(post.author.id, current_user.username, post.id, body)
+            from app.notification_helper import create_notification
+            create_notification(
+                post.author.id,
+                'comment',
+                {
+                    'from_user': current_user.username,
+                    'user_id': current_user.id,
+                    'post_id': post.id,
+                    'comment': body[:100],
+                    'message': f'{current_user.username} commented on your post'
+                }
+            )
+            print(f"Created comment notification for user {post.author.id} from {current_user.username}")
+
         flash('Comment added.', 'success')
 
     return redirect(request.referrer or url_for('main.index'))
-
 
 @bp.route('/delete_comment/<int:comment_id>')
 @login_required
@@ -974,6 +1007,8 @@ def react_post(post_id, reaction):
         sa.select(PostReaction).where(PostReaction.user_id == current_user.id, PostReaction.post_id == post_id)
     )
 
+    reaction_set = False
+
     if existing:
         if existing.reaction == reaction:
             db.session.delete(existing)
@@ -987,6 +1022,23 @@ def react_post(post_id, reaction):
         reaction_set = True
 
     db.session.commit()
+
+    # Send notification if reaction was added and not reacting to own post
+    if reaction_set and post.author.id != current_user.id:
+        from app.notification_helper import create_notification
+        create_notification(
+            post.author.id,
+            'like',
+            {
+                'from_user': current_user.username,
+                'user_id': current_user.id,
+                'post_id': post.id,
+                'reaction': reaction,
+                'message': f'{current_user.username} reacted with {reaction} to your post'
+            }
+        )
+        print(f"Created reaction notification for user {post.author.id} from {current_user.username}")
+
     reaction_counts = post.get_reaction_counts()
     return jsonify({
         'reaction_set': reaction_set,
@@ -994,7 +1046,6 @@ def react_post(post_id, reaction):
         'counts': reaction_counts,
         'total': sum(reaction_counts.values())
     })
-
 
 @bp.route('/pin_post/<int:post_id>')
 @login_required
@@ -1258,42 +1309,43 @@ def view_story(story_id):
 @login_required
 def notifications():
     try:
-        unread_count = 0
-        for notif in current_user.notifications:
-            if not getattr(notif, 'read', False):
-                unread_count += 1
-        return jsonify({'count': unread_count})
+        query = current_user.notifications.select().where(Notification.read == False)
+        unread_count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
+        return jsonify({'count': unread_count or 0})
     except Exception as e:
         current_app.logger.error(f"Notification count error: {e}")
         return jsonify({'count': 0})
+
 
 @bp.route('/notifications-list')
 @login_required
 def notifications_list():
     try:
-        notifications = db.session.scalars(
-            current_user.notifications.select().order_by(
-                Notification.timestamp.desc()
-            ).limit(50)
-        )
+        query = current_user.notifications.select().order_by(Notification.timestamp.desc()).limit(50)
+        notifications = db.session.scalars(query).all()
 
         result = []
         for n in notifications:
             data = n.get_data()
+
+            # Extract the from_user correctly
+            from_user = data.get('from_user') or data.get('username') or 'Someone'
+
             result.append({
                 'id': n.id,
                 'name': n.name,
-                'from_user': data.get('from_user', 'Someone'),
+                'from_user': from_user,
                 'post_id': data.get('post_id'),
                 'comment': data.get('comment', ''),
                 'message': data.get('message', ''),
                 'timestamp': n.timestamp
             })
+
+        print(f"Returning {len(result)} notifications for user {current_user.id}")
         return jsonify(result)
     except Exception as e:
         current_app.logger.error(f"Notifications list error: {e}")
         return jsonify([])
-
 
 @bp.route('/clear-notifications', methods=['POST'])
 @login_required
@@ -1336,11 +1388,20 @@ def mark_all_notifications_read():
     except Exception as e:
         return jsonify({'success': False})
 
+
 @bp.route('/notifications-page')
 @login_required
 def notifications_page():
-    return render_template('notifications.html', title='Notifications')
+    try:
+        query = current_user.notifications.select().where(Notification.read == False)
+        notifications = db.session.scalars(query).all()
+        for notif in notifications:
+            notif.read = True
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(f"Error marking notifications as read: {e}")
 
+    return render_template('notifications.html', title='Activity')
 
 @bp.route('/test-notification')
 @login_required
@@ -2052,3 +2113,159 @@ def login_history():
     history = LoginHistory.query.filter_by(user_id=current_user.id).order_by(LoginHistory.timestamp.desc()).paginate(
         page=page, per_page=20)
     return render_template('security/login_history.html', title='Login History', history=history)
+
+
+@bp.route('/settings/account', methods=['GET', 'POST'])
+@login_required
+def account_settings():
+    if request.method == 'POST':
+        current_user.username = request.form.get('username')
+        current_user.about_me = request.form.get('about_me')
+        current_user.work = request.form.get('work')
+        current_user.education = request.form.get('education')
+        current_user.location = request.form.get('location')
+        current_user.website = request.form.get('website')
+        current_user.phone = request.form.get('phone')
+        current_user.birthday = request.form.get('birthday')
+        current_user.gender = request.form.get('gender')
+        current_user.relationship_status = request.form.get('relationship_status')
+        current_user.interested_in = request.form.get('interested_in')
+
+        if request.files.get('profile_pic') and request.files['profile_pic'].filename:
+            from app.profile_helpers import save_profile_picture
+            old_pic = current_user.profile_pic
+            current_user.profile_pic = save_profile_picture(request.files['profile_pic'], old_pic)
+
+        db.session.commit()
+        flash('Your changes have been saved.', 'success')
+        return redirect(url_for('main.account_settings'))
+
+    return render_template('security/account.html', title='Account Settings')
+
+
+@bp.route('/settings/blocked-users')
+@login_required
+def blocked_users_page():
+    blocked_list = BlockedUser.query.filter_by(blocker_id=current_user.id).all()
+    blocked_users = []
+    for b in blocked_list:
+        user = db.session.get(User, b.blocked_id)
+        if user:
+            user.blocked_at = b.timestamp
+            blocked_users.append(user)
+    return render_template('security/blocked_users.html', title='Blocked Users', blocked_users=blocked_users)
+
+
+@bp.route('/settings/appearance')
+@login_required
+def appearance_settings():
+    return render_template('security/appearance.html', title='Appearance Settings')
+
+
+@bp.route('/settings/screen-protection')
+@login_required
+def screen_protection():
+    return render_template('security/screen_protection.html', title='Screen Protection')
+
+
+@bp.route('/settings/export-data')
+@login_required
+def export_data():
+    import json
+    from datetime import datetime
+
+    user_data = {
+        'username': current_user.username,
+        'email': current_user.email,
+        'about_me': current_user.about_me,
+        'joined': current_user.last_seen.isoformat() if current_user.last_seen else None,
+        'posts': [{'body': p.body, 'timestamp': p.timestamp.isoformat()} for p in current_user.posts.select().all()],
+        'connections': [{'username': f.username} for f in current_user.get_friends()]
+    }
+
+    response = jsonify(user_data)
+    response.headers[
+        'Content-Disposition'] = f'attachment; filename=connecthub_export_{datetime.now().strftime("%Y%m%d")}.json'
+    return response
+
+
+@bp.route('/settings/request-deletion', methods=['POST'])
+@login_required
+def request_deletion():
+    from app.models import DataDeletionRequest
+
+    existing = DataDeletionRequest.query.filter_by(user_id=current_user.id, status='pending').first()
+    if existing:
+        return jsonify({'status': 'pending', 'message': 'Deletion request already pending'})
+
+    request_obj = DataDeletionRequest(
+        user_id=current_user.id,
+        request_ip=request.remote_addr,
+        status='pending'
+    )
+    db.session.add(request_obj)
+    db.session.commit()
+
+    return jsonify({'status': 'pending', 'message': 'Deletion request submitted. You will be notified once processed.'})
+
+
+@bp.route('/set-theme', methods=['POST'])
+@login_required
+def set_theme():
+    data = request.get_json()
+    theme = data.get('theme', 'light')
+    current_user.theme_preference = theme
+    db.session.commit()
+    return jsonify({'success': True})
+
+@bp.route('/settings/delete-account', methods=['POST'])
+@login_required
+def delete_account():
+    from app.models import DataDeletionRequest
+
+    existing = DataDeletionRequest.query.filter_by(user_id=current_user.id, status='pending').first()
+    if existing:
+        flash('Deletion request already pending.', 'warning')
+        return redirect(url_for('main.security_settings'))
+
+    request_obj = DataDeletionRequest(
+        user_id=current_user.id,
+        request_ip=request.remote_addr,
+        status='pending'
+    )
+    db.session.add(request_obj)
+    db.session.commit()
+
+    flash('Your account deletion request has been submitted. An admin will review it.', 'info')
+    return redirect(url_for('main.index'))
+
+
+@bp.route('/settings/update-privacy', methods=['POST'])
+@login_required
+def update_privacy_settings():
+    current_user.is_private = request.form.get('is_private') == 'on'
+    current_user.show_email = request.form.get('show_email') == 'on'
+    current_user.show_last_seen = request.form.get('show_last_seen') == 'on'
+    current_user.allow_comments = request.form.get('allow_comments') == 'on'
+    current_user.allow_messages = request.form.get('allow_messages') == 'on'
+
+    db.session.commit()
+    flash('Privacy settings updated successfully.', 'success')
+    return redirect(url_for('main.privacy_settings'))
+
+
+@bp.route('/settings/revoke-all-sessions', methods=['POST'])
+@login_required
+def revoke_all_sessions():
+    from app.models import UserSession
+    current_session_id = request.cookies.get('session')
+
+    sessions = UserSession.query.filter_by(user_id=current_user.id, is_active=True).all()
+    for session in sessions:
+        if session.id != current_session_id:
+            session.is_active = False
+
+    db.session.commit()
+    flash('All other sessions have been revoked.', 'success')
+    return jsonify({'success': True})
+

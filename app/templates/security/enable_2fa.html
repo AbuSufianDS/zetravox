@@ -1,31 +1,227 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-mobile-alt me-2 text-primary"></i>Enable Two-Factor Authentication</h5>
+<style>
+.enable-2fa-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.qr-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.qr-card-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+    text-align: center;
+}
+
+.qr-card-header h5 {
+    margin: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.qr-card-header h5 i {
+    color: #667eea;
+}
+
+.qr-card-body {
+    padding: 32px;
+}
+
+.qr-code-container {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.qr-code {
+    max-width: 200px;
+    height: auto;
+}
+
+.secret-code {
+    background: var(--hover-bg);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
+    word-break: break-all;
+    display: inline-block;
+    margin: 12px 0;
+}
+
+.input-group-custom {
+    margin: 20px 0;
+}
+
+.input-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+    text-align: left;
+}
+
+.otp-input {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 20px;
+    text-align: center;
+    letter-spacing: 8px;
+    font-family: monospace;
+    width: 100%;
+}
+
+.otp-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-verify {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-weight: 600;
+    color: white;
+    width: 100%;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.btn-verify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.back-link:hover {
+    color: #667eea;
+}
+
+.info-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.steps {
+    text-align: left;
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--hover-bg);
+    border-radius: 16px;
+}
+
+.steps h6 {
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.steps ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.steps li {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.steps li:last-child {
+    margin-bottom: 0;
+}
+</style>
+
+<div class="enable-2fa-container">
+    <div class="qr-card">
+        <div class="qr-card-header">
+            <h5>
+                <i class="fas fa-mobile-alt"></i>
+                Two-Factor Authentication
+            </h5>
+        </div>
+        <div class="qr-card-body text-center">
+            <div class="qr-code-container">
+                <img src="data:image/png;base64,{{ qr_code }}" class="qr-code" alt="QR Code">
+            </div>
+
+            <p class="text-muted small">Can't scan the QR code?</p>
+            <div class="secret-code">
+                <i class="fas fa-key me-2"></i>{{ secret }}
+            </div>
+
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="input-group-custom">
+                    <label class="input-label">
+                        <i class="fas fa-shield-alt me-1"></i> Verification Code
+                    </label>
+                    <input type="text" name="otp_code" class="otp-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autocomplete="off">
                 </div>
-                <div class="card-body text-center">
-                    <p>Scan this QR code with your authenticator app:</p>
-                    <img src="data:image/png;base64,{{ qr_code }}" class="img-fluid border p-3 rounded mb-3" style="max-width: 250px;">
-                    
-                    <p class="small text-muted">Or enter this code manually:</p>
-                    <code class="bg-light p-2 rounded d-inline-block mb-3">{{ secret }}</code>
-                    
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <div class="mb-3">
-                            <label class="form-label">Verification Code</label>
-                            <input type="text" name="otp_code" class="form-control text-center" placeholder="000000" pattern="[0-9]{6}" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Verify and Enable</button>
-                    </form>
-                </div>
+
+                <button type="submit" class="btn-verify">
+                    <i class="fas fa-check-circle me-2"></i>Verify & Enable
+                </button>
+            </form>
+
+            <a href="{{ url_for('main.security_settings') }}" class="back-link">
+                <i class="fas fa-arrow-left me-1"></i> Back to Security Settings
+            </a>
+
+            <div class="info-text">
+                <i class="fas fa-info-circle me-1"></i>
+                Use an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy
+            </div>
+
+            <div class="steps">
+                <h6><i class="fas fa-list-ol me-2"></i>Setup Instructions:</h6>
+                <ol>
+                    <li>Download an authenticator app on your phone</li>
+                    <li>Scan the QR code with the app</li>
+                    <li>Enter the 6-digit code from the app</li>
+                    <li>Click "Verify & Enable" to activate 2FA</li>
+                </ol>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+const otpInput = document.querySelector('.otp-input');
+if (otpInput) {
+    otpInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
+}
+</script>
 {% endblock %}

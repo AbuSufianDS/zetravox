@@ -5,22 +5,26 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">🔥 Trending Hashtags</h4>
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Trending Topics</h4>
                 </div>
                 <div class="card-body">
                     {% if hashtags %}
                         <div class="list-group">
                             {% for hashtag in hashtags %}
-                                <a href="{{ url_for('main.hashtag_posts', tag=hashtag.name) }}" 
+                                <a href="{{ url_for('main.hashtag_posts', tag=hashtag.name) }}"
                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                    <span>#{{ hashtag.name }}</span>
-                                    <span class="badge bg-primary rounded-pill">{{ hashtag.post_count }} posts</span>
+                                    <span><i class="fas fa-hashtag me-1 text-primary"></i>{{ hashtag.name }}</span>
+                                    <span class="badge bg-primary rounded-pill">{{ hashtag.post_count }} {{ 'post' if hashtag.post_count == 1 else 'posts' }}</span>
                                 </a>
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="text-center text-muted">No trending hashtags yet.</p>
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No trending topics yet</p>
+                            <small class="text-muted">Check back later for popular discussions</small>
+                        </div>
                     {% endif %}
                 </div>
             </div>

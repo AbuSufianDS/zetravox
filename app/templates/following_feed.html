@@ -6,18 +6,18 @@
         <div class="col-md-8 mx-auto">
             <div class="card mb-3">
                 <div class="card-body text-center">
-                    <h3><i class="fas fa-users text-primary"></i> Following</h3>
-                    <p class="text-muted">Posts from people you follow</p>
+                    <h3><i class="fas fa-rss text-primary"></i> Following</h3>
+                    <p class="text-muted">Updates from people you follow</p>
                 </div>
             </div>
-            
+
             {% if not posts %}
                 <div class="card">
                     <div class="card-body text-center py-5">
                         <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
                         <h5>No posts from people you follow</h5>
-                        <p class="text-muted">Follow more people to see their posts here!</p>
-                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">Discover People</a>
+                        <p class="text-muted">Follow more people to see their updates here!</p>
+                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">Find People</a>
                     </div>
                 </div>
             {% else %}

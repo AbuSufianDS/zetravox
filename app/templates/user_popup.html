@@ -1,25 +1,29 @@
 <div>
-  <img src="{{ user.avatar(64) }}" style="margin: 5px; float: left">
-  <p><a href="{{ url_for('main.user', username=user.username) }}">{{ user.username }}</a></p>
-  {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
+  <img src="{{ user.avatar(64) }}" class="rounded-circle" style="margin: 5px; float: left; width: 64px; height: 64px; object-fit: cover;">
+  <p><a href="{{ url_for('main.user', username=user.username) }}" class="fw-bold text-decoration-none">{{ user.username }}</a></p>
+  {% if user.about_me %}<p class="small text-muted">{{ user.about_me[:100] }}</p>{% endif %}
   <div class="clearfix"></div>
   {% if user.last_seen %}
-  <p>{{ _('Last seen on') }}: {{ moment(user.last_seen).format('lll') }}</p>
+  <p class="small text-muted"><i class="fas fa-clock me-1"></i>Active: {{ moment(user.last_seen).fromNow() }}</p>
   {% endif %}
-  <p>{{ _('%(count)d followers', count=user.followers_count()) }}, {{ _('%(count)d following', count=user.following_count()) }}</p>
+  <p class="small">{{ user.followers_count() }} followers, {{ user.following_count() }} following</p>
   {% if user != current_user %}
     {% if not current_user.is_following(user) %}
     <p>
       <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
         {{ form.hidden_tag() }}
-        {{ form.submit(value=_('Follow'), class_='btn btn-outline-primary btn-sm') }}
+        <button type="submit" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-user-plus me-1"></i>Follow
+        </button>
       </form>
     </p>
     {% else %}
     <p>
       <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post">
         {{ form.hidden_tag() }}
-        {{ form.submit(value=_('Unfollow'), class_='btn btn-outline-primary btn-sm') }}
+        <button type="submit" class="btn btn-outline-secondary btn-sm">
+          <i class="fas fa-user-minus me-1"></i>Unfollow
+        </button>
       </form>
     </p>
     {% endif %}

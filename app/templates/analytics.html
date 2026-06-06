@@ -2,13 +2,17 @@
 
 {% block content %}
 <div class="container mt-3">
-    <h1>📊 Analytics Dashboard</h1>
-    
+    <div class="card mb-3">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Analytics Dashboard</h4>
+        </div>
+    </div>
+
     <div class="row mt-4">
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Total Users</h5>
+                    <h5><i class="fas fa-users me-2"></i>Total Users</h5>
                     <h2>{{ total_users }}</h2>
                 </div>
             </div>
@@ -16,7 +20,7 @@
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Active Today</h5>
+                    <h5><i class="fas fa-clock me-2"></i>Active Today</h5>
                     <h2>{{ active_today }}</h2>
                 </div>
             </div>
@@ -24,7 +28,7 @@
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>New Users (Week)</h5>
+                    <h5><i class="fas fa-user-plus me-2"></i>New Users (Week)</h5>
                     <h2>{{ new_users_week }}</h2>
                 </div>
             </div>
@@ -32,17 +36,17 @@
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Total Posts</h5>
+                    <h5><i class="fas fa-newspaper me-2"></i>Total Posts</h5>
                     <h2>{{ total_posts }}</h2>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <div class="row mt-4">
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header">Posts Today</div>
+                <div class="card-header"><i class="fas fa-calendar-day me-2"></i>Posts Today</div>
                 <div class="card-body text-center">
                     <h3>{{ posts_today }}</h3>
                 </div>
@@ -50,7 +54,7 @@
         </div>
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header">Spam Posts</div>
+                <div class="card-header"><i class="fas fa-flag me-2"></i>Flagged Content</div>
                 <div class="card-body text-center">
                     <h3>{{ spam_posts }}</h3>
                 </div>
@@ -58,24 +62,24 @@
         </div>
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header">Total Likes</div>
+                <div class="card-header"><i class="fas fa-heart me-2"></i>Total Applauds</div>
                 <div class="card-body text-center">
                     <h3>{{ total_likes }}</h3>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <div class="row mt-4">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header">🏆 Top Users</div>
+                <div class="card-header"><i class="fas fa-trophy me-2"></i>Top Contributors</div>
                 <div class="card-body">
                     <ul class="list-group">
                         {% for user in top_users %}
-                            <li class="list-group-item d-flex justify-content-between">
-                                {{ user[0] }}
-                                <span class="badge bg-primary">{{ user[1] }} posts</span>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-user-circle me-2 text-primary"></i>{{ user[0] }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ user[1] }} posts</span>
                             </li>
                         {% endfor %}
                     </ul>
@@ -84,7 +88,7 @@
         </div>
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header">📈 Daily Activity</div>
+                <div class="card-header"><i class="fas fa-chart-line me-2"></i>Content Activity</div>
                 <div class="card-body">
                     <canvas id="activityChart"></canvas>
                 </div>
@@ -101,11 +105,21 @@ new Chart(ctx, {
     data: {
         labels: [{% for day in daily_activity %}'{{ day.date }}',{% endfor %}],
         datasets: [{
-            label: 'Posts',
+            label: 'Posts Created',
             data: [{% for day in daily_activity %}{{ day.posts }},{% endfor %}],
-            borderColor: 'rgb(59, 130, 246)',
-            tension: 0.1
+            borderColor: 'rgb(102, 126, 234)',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.3,
+            fill: true
         }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        }
     }
 });
 </script>

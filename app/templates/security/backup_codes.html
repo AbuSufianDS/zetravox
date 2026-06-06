@@ -1,33 +1,281 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-code me-2 text-warning"></i>Backup Codes</h5>
+<style>
+.backup-codes-container {
+    max-width: 550px;
+    margin: 0 auto;
+}
+
+.codes-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.codes-card-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+    text-align: center;
+}
+
+.codes-card-header h5 {
+    margin: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.codes-card-header h5 i {
+    color: #f59e0b;
+}
+
+.codes-card-body {
+    padding: 32px;
+}
+
+.warning-message {
+    background: #fff3e0;
+    border-left: 4px solid #ed6c02;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.warning-message i {
+    color: #ed6c02;
+    font-size: 20px;
+}
+
+.warning-message .text {
+    font-size: 13px;
+    color: #ed6c02;
+    font-weight: 500;
+}
+
+.codes-container {
+    background: linear-gradient(135deg, var(--hover-bg) 0%, var(--bg-card) 100%);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 2px dashed var(--border-color);
+}
+
+.codes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.code-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #667eea;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+}
+
+.code-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: #667eea;
+}
+
+.code-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    text-align: center;
+}
+
+.alert-custom {
+    background: #e8f5e9;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-custom i {
+    color: #2e7d32;
+    font-size: 20px;
+}
+
+.alert-custom .text {
+    font-size: 13px;
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 14px;
+    padding: 14px 28px;
+    font-weight: 600;
+    color: white;
+    width: 100%;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-outline-custom {
+    background: transparent;
+    border: 2px solid var(--border-color);
+    border-radius: 14px;
+    padding: 12px 24px;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.btn-outline-custom:hover {
+    background: var(--hover-bg);
+    border-color: #667eea;
+}
+
+.print-btn {
+    background: var(--hover-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.print-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+@media (max-width: 576px) {
+    .codes-grid {
+        grid-template-columns: 1fr;
+    }
+    .codes-card-body {
+        padding: 20px;
+    }
+}
+</style>
+
+<div class="backup-codes-container">
+    <div class="codes-card">
+        <div class="codes-card-header">
+            <h5>
+                <i class="fas fa-code"></i>
+                Backup Codes
+            </h5>
+        </div>
+        <div class="codes-card-body">
+            <div class="warning-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="text">Save these backup codes in a secure place. You'll need them to access your account if you lose your phone.</div>
+            </div>
+
+            <div class="codes-container">
+                <div class="codes-grid">
+                    {% for code in backup_codes %}
+                    <div class="code-item">{{ code }}</div>
+                    {% endfor %}
                 </div>
-                <div class="card-body text-center">
-                    <p>Save these backup codes in a safe place. You can use them to access your account if you lose your phone.</p>
-                    
-                    <div class="bg-light p-3 rounded mb-3">
-                        {% for code in backup_codes %}
-                        <code class="d-block mb-1">{{ code }}</code>
-                        {% endfor %}
-                    </div>
-                    
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Each code can only be used once.
-                    </div>
-                    
-                    <a href="{{ url_for('security.security_settings') }}" class="btn btn-primary">
-                        <i class="fas fa-check me-2"></i>I've Saved My Codes
-                    </a>
+                <div class="code-label">
+                    <i class="fas fa-shield-alt me-1"></i>One-time use only
                 </div>
             </div>
+
+            <div class="alert-custom">
+                <i class="fas fa-info-circle"></i>
+                <div class="text">Each code can only be used once. After using a code, it will be invalidated.</div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="window.print()" class="print-btn">
+                    <i class="fas fa-print"></i> Print Codes
+                </button>
+                <button onclick="copyCodes()" class="print-btn">
+                    <i class="fas fa-copy"></i> Copy Codes
+                </button>
+            </div>
+
+            <a href="{{ url_for('main.security_settings') }}" class="btn-primary-gradient mt-3">
+                <i class="fas fa-check-circle me-2"></i>I've Saved My Codes
+            </a>
+
+            <a href="{{ url_for('main.security_settings') }}" class="btn-outline-custom">
+                <i class="fas fa-arrow-left me-2"></i>Back to Security Settings
+            </a>
         </div>
     </div>
 </div>
+
+<script>
+function copyCodes() {
+    const codes = document.querySelectorAll('.code-item');
+    let codesText = '';
+    codes.forEach(code => {
+        codesText += code.innerText + '\n';
+    });
+
+    navigator.clipboard.writeText(codesText).then(() => {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
+        toast.style.zIndex = '9999';
+        toast.style.minWidth = '250px';
+        toast.style.borderRadius = '12px';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        toast.innerHTML = '<i class="fas fa-check-circle me-2"></i>Backup codes copied to clipboard!';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }).catch(() => {
+        alert('Failed to copy codes. Please copy them manually.');
+    });
+}
+
+window.onbeforeprint = function() {
+    document.body.style.background = 'white';
+};
+
+window.onafterprint = function() {
+    document.body.style.background = '';
+};
+</script>
 {% endblock %}

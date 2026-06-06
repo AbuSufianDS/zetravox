@@ -30,37 +30,37 @@
         <i class="fas fa-edit me-2"></i>Edit
     </a></li>
     <li><a class="dropdown-item" href="{{ url_for('main.pin_post', post_id=post.id) }}">
-        <i class="fas fa-thumbtack me-2"></i>Pin
+        <i class="fas fa-thumbtack me-2"></i>Pin to Profile
     </a></li>
-    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareStoryModal{{ post.id }}">
-        <i class="fas fa-plus-circle me-2"></i>Share to Story
+    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareMomentModal{{ post.id }}">
+        <i class="fas fa-plus-circle me-2"></i>Add to Moment
     </a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ post.id }}">
-        <i class="fas fa-trash me-2"></i>Delete
+        <i class="fas fa-trash me-2"></i>Remove
     </a></li>
     {% else %}
-    <li><a class="dropdown-item" href="#" onclick="savePost({{ post.id }})" id="saveBtn{{ post.id }}">
-        <i class="far fa-bookmark me-2"></i>Save
+    <li><a class="dropdown-item" href="#" onclick="bookmarkPost({{ post.id }})" id="saveBtn{{ post.id }}">
+        <i class="far fa-bookmark me-2"></i>Bookmark
     </a></li>
     <li><a class="dropdown-item" href="#" onclick="interestedPost({{ post.id }})">
-        <i class="fas fa-thumbs-up me-2"></i>Interested
+        <i class="fas fa-thumbs-up me-2"></i>Show Interest
     </a></li>
     <li><a class="dropdown-item" href="#" onclick="notInterested({{ post.id }})">
-        <i class="fas fa-eye-slash me-2"></i>Not Interested
+        <i class="fas fa-eye-slash me-2"></i>Not For Me
     </a></li>
     <li><a class="dropdown-item" href="#" onclick="hidePost({{ post.id }})">
-        <i class="fas fa-ban me-2"></i>Hide Post
+        <i class="fas fa-ban me-2"></i>Dismiss
     </a></li>
     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal{{ post.id }}">
-        <i class="fas fa-flag me-2"></i>Report
+        <i class="fas fa-flag me-2"></i>Flag Content
     </a></li>
     <li><a class="dropdown-item" href="#" onclick="blockUser({{ post.author.id }})">
         <i class="fas fa-user-slash me-2"></i>Block @{{ post.author.username }}
     </a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareStoryModal{{ post.id }}">
-        <i class="fas fa-plus-circle me-2"></i>Share to Story
+    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareMomentModal{{ post.id }}">
+        <i class="fas fa-plus-circle me-2"></i>Add to Moment
     </a></li>
     {% endif %}
 </ul>
@@ -135,21 +135,21 @@
                     {% endif %}
                 </button>
                 <div class="reaction-picker">
-                    <button class="reaction-option" onclick="reactPost({{ post.id }}, 'like')" title="Like"><i class="fas fa-thumbs-up"></i></button>
-                    <button class="reaction-option" onclick="reactPost({{ post.id }}, 'love')" title="Love"><i class="fas fa-heart text-danger"></i></button>
-                    <button class="reaction-option" onclick="reactPost({{ post.id }}, 'haha')" title="Haha"><i class="fas fa-laugh-squint"></i></button>
-                    <button class="reaction-option" onclick="reactPost({{ post.id }}, 'wow')" title="Wow"><i class="fas fa-surprise"></i></button>
-                    <button class="reaction-option" onclick="reactPost({{ post.id }}, 'sad')" title="Sad"><i class="fas fa-sad-tear"></i></button>
-                    <button class="reaction-option" onclick="reactPost({{ post.id }}, 'angry')" title="Angry"><i class="fas fa-angry"></i></button>
+                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'like')" title="Applaud"><i class="fas fa-thumbs-up"></i></button>
+                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'love')" title="Love"><i class="fas fa-heart text-danger"></i></button>
+                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'haha')" title="Funny"><i class="fas fa-laugh-squint"></i></button>
+                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'wow')" title="Wow"><i class="fas fa-surprise"></i></button>
+                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'sad')" title="Sad"><i class="fas fa-sad-tear"></i></button>
+                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'angry')" title="Angry"><i class="fas fa-angry"></i></button>
                 </div>
             </div>
-            <button class="action-icon" data-bs-toggle="collapse" data-bs-target="#comments{{ post.id }}" title="Comment">
+            <button class="action-icon" data-bs-toggle="collapse" data-bs-target="#comments{{ post.id }}" title="Reply">
                 <i class="far fa-comment"></i>
                 {% if post.comment_count() > 0 %}
                 <span class="count-badge">{{ post.comment_count() }}</span>
                 {% endif %}
             </button>
-            <button class="action-icon" onclick="sharePost({{ post.id }})" title="Share">
+            <button class="action-icon" onclick="repostPost({{ post.id }})" title="Repost">
                 <i class="fas fa-share-alt"></i>
                 {% if post.share_count > 0 %}
                 <span class="count-badge">{{ post.share_count }}</span>
@@ -174,14 +174,14 @@
                     {% endif %}
                 </div>
                 {% else %}
-                <p class="text-muted text-center small mb-0">No comments yet. Be the first to comment!</p>
+                <p class="text-muted text-center small mb-0">No replies yet. Start the conversation!</p>
                 {% endfor %}
 
                 <form action="{{ url_for('main.add_comment', post_id=post.id) }}" method="post" class="mt-3">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
                     <div class="d-flex gap-2">
                         <img src="{{ current_user.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px;">
-                        <input type="text" name="body" class="form-control form-control-sm" placeholder="Write a comment..." required>
+                        <input type="text" name="body" class="form-control form-control-sm" placeholder="Write a reply..." required>
                         <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </form>
@@ -189,9 +189,10 @@
         </div>
     </div>
 </div>
+
 <script>
 function notInterested(postId) {
-    if(confirm('Mark this post as not interested? We\'ll show fewer posts like this.')) {
+    if(confirm('Hide this from your stream? We will show fewer posts like this.')) {
         fetch(`/not-interested/${postId}`, {
             method: 'GET',
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -205,7 +206,7 @@ function notInterested(postId) {
 }
 
 function hidePost(postId) {
-    if(confirm('Hide this post? You won\'t see it again.')) {
+    if(confirm('Dismiss this post? You won\'t see it again in your stream.')) {
         fetch(`/hide-post/${postId}`, {
             method: 'GET',
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -217,6 +218,7 @@ function hidePost(postId) {
         });
     }
 }
+
 function interestedPost(postId) {
     fetch(`/interested/${postId}`, {
         method: 'GET',
@@ -225,16 +227,16 @@ function interestedPost(postId) {
     .then(response => response.json())
     .then(data => {
         if(data.interested) {
-            alert('You marked this post as interested!');
+            alert('This post has been added to your interests!');
         } else {
-            alert('Removed from interested');
+            alert('Removed from your interests');
         }
         location.reload();
     });
 }
 
 function blockUser(userId) {
-    if(confirm('Block this user? They will not be able to interact with you.')) {
+    if(confirm('Block this person? They will not be able to see your profile or interact with you.')) {
         fetch(`/block-user/${userId}`, {
             method: 'POST',
             headers: {
@@ -250,22 +252,23 @@ function blockUser(userId) {
     }
 }
 </script>
+
 <style>
 .post-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 16px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow);
     transition: all 0.2s ease;
 }
 
 .post-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    box-shadow: var(--shadow-hover);
 }
 
 .post-text {
     font-size: 15px;
-    color: #1a1a2e;
+    color: var(--text-primary);
     line-height: 1.5;
 }
 
@@ -273,7 +276,7 @@ function blockUser(userId) {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-top: 1px solid #e4e6eb;
+    border-top: 1px solid var(--border-color);
     padding-top: 8px;
 }
 
@@ -283,7 +286,7 @@ function blockUser(userId) {
     border: none;
     padding: 8px 12px;
     border-radius: 8px;
-    color: #65676b;
+    color: var(--text-secondary);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -293,16 +296,16 @@ function blockUser(userId) {
 }
 
 .action-icon i { font-size: 18px; }
-.action-icon:hover { background-color: #f0f2f5; color: #667eea; }
+.action-icon:hover { background-color: var(--hover-bg); color: #667eea; }
 .action-icon:active { transform: scale(0.96); }
 
 .count-badge {
-    background: #e4e6eb;
+    background: var(--border-color);
     padding: 2px 6px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--text-secondary);
 }
 
 .reaction-container {
@@ -315,7 +318,7 @@ function blockUser(userId) {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: white;
+    background: var(--bg-card);
     border-radius: 40px;
     padding: 8px 12px;
     display: flex;
@@ -326,7 +329,7 @@ function blockUser(userId) {
     transition: all 0.2s ease;
     z-index: 1000;
     margin-bottom: 8px;
-    border: 1px solid #e4e6eb;
+    border: 1px solid var(--border-color);
 }
 
 .reaction-container:hover .reaction-picker {
@@ -349,7 +352,7 @@ function blockUser(userId) {
 .reaction-option i { font-size: 18px; }
 .reaction-option:hover {
     transform: scale(1.2);
-    background: #f0f2f5;
+    background: var(--hover-bg);
 }
 
 .reaction-icons {

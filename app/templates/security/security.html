@@ -1,132 +1,486 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
+<style>
+.security-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.settings-sidebar {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 8px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 80px;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.settings-nav-item i {
+    width: 24px;
+    font-size: 18px;
+    color: #667eea;
+}
+
+.settings-nav-item:hover {
+    background: var(--hover-bg);
+    transform: translateX(4px);
+}
+
+.settings-nav-item.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+    border-left: 3px solid #667eea;
+}
+
+.security-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.security-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.security-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.security-card-body {
+    padding: 24px;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge-enabled {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge-disabled {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 500;
+    color: white;
+    transition: all 0.3s;
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline-danger-custom {
+    border: 2px solid #ef4444;
+    background: transparent;
+    border-radius: 12px;
+    padding: 10px 20px;
+    color: #ef4444;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-outline-danger-custom:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.password-form {
+    display: none;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.password-form.active {
+    display: block;
+}
+
+.info-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.security-event-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.security-event-item:last-child {
+    border-bottom: none;
+}
+
+.event-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--hover-bg);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.event-details {
+    flex: 1;
+    margin-left: 15px;
+}
+
+.event-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.event-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.event-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+</style>
+
+<div class="security-container">
+    <div class="row g-4">
         <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
-                        <h5>{{ current_user.username }}</h5>
-                        <p class="text-muted small">{{ current_user.email }}</p>
-                    </div>
-                    <hr>
-                    <div class="list-group list-group-flush">
-                        <a href="{{ url_for('main.edit_profile') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-user fa-fw" style="width: 24px;"></i>
-                            <span>Account</span>
-                        </a>
-                        <a href="{{ url_for('main.security_settings') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
-                            <i class="fas fa-shield-alt fa-fw text-success" style="width: 24px;"></i>
-                            <span>Security</span>
-                        </a>
-                        <a href="{{ url_for('main.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-lock fa-fw text-warning" style="width: 24px;"></i>
-                            <span>Privacy</span>
-                        </a>
-                        <a href="{{ url_for('main.session_management') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-desktop fa-fw text-info" style="width: 24px;"></i>
-                            <span>Sessions</span>
-                        </a>
-                        <a href="{{ url_for('main.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-history fa-fw text-secondary" style="width: 24px;"></i>
-                            <span>Login History</span>
-                        </a>
-                        <a href="{{ url_for('main.notification_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-bell fa-fw text-warning" style="width: 24px;"></i>
-                            <span>Notifications</span>
-                        </a>
-                    </div>
-                </div>
+            <div class="settings-sidebar">
+                <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Account</span>
+                </a>
+                <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item active">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </a>
+                <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-lock"></i>
+                    <span>Privacy</span>
+                </a>
+                <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
+                    <i class="fas fa-desktop"></i>
+                    <span>Sessions</span>
+                </a>
+                <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Login History</span>
+                </a>
+                <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
+                    <i class="fas fa-ban"></i>
+                    <span>Blocked Users</span>
+                </a>
+                <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-palette"></i>
+                    <span>Appearance</span>
+                </a>
             </div>
         </div>
 
         <div class="col-md-9">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-key me-2 text-primary"></i>Password</h5>
+            <!-- Password Card -->
+            <div class="security-card">
+                <div class="security-card-header">
+                    <h5>
+                        <i class="fas fa-key" style="color: #667eea;"></i>
+                        Password
+                    </h5>
+                    <button class="btn-primary-gradient" id="showPasswordFormBtn">
+                        <i class="fas fa-edit me-2"></i>Change Password
+                    </button>
                 </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('main.change_password') }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <div class="mb-3">
-                            <label class="form-label">Current Password</label>
-                            <input type="password" name="current_password" class="form-control" required>
+                <div class="security-card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">Password Strength</div>
+                            <div class="info-text">Last changed: {{ current_user.last_password_change.strftime('%B %d, %Y') if current_user.last_password_change else 'Never' }}</div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">New Password</label>
-                            <input type="password" name="new_password" class="form-control" required>
+                        <div>
+                            <span class="status-badge status-badge-enabled">
+                                <i class="fas fa-shield-alt me-1"></i>Protected
+                            </span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Confirm New Password</label>
-                            <input type="password" name="confirm_password" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Change Password
-                        </button>
-                    </form>
+                    </div>
+
+                    <div id="passwordForm" class="password-form">
+                        <form method="POST" action="{{ url_for('main.change_password') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Current Password</label>
+                                <input type="password" name="current_password" class="form-control-custom" placeholder="Enter your current password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">New Password</label>
+                                <input type="password" name="new_password" class="form-control-custom" id="newPassword" placeholder="Enter new password" required>
+                                <div class="info-text">Minimum 8 characters with mix of letters and numbers</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Confirm New Password</label>
+                                <input type="password" name="confirm_password" class="form-control-custom" id="confirmPassword" placeholder="Confirm your new password" required>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn-primary-gradient">
+                                    <i class="fas fa-save me-2"></i>Update Password
+                                </button>
+                                <button type="button" class="btn-outline-danger-custom" id="hidePasswordFormBtn">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-mobile-alt me-2 text-primary"></i>Two-Factor Authentication</h5>
+            <!-- Two-Factor Authentication Card -->
+            <div class="security-card">
+                <div class="security-card-header">
+                    <h5>
+                        <i class="fas fa-mobile-alt" style="color: #667eea;"></i>
+                        Two-Factor Authentication
+                    </h5>
                     {% if current_user.two_factor_enabled %}
-                    <span class="badge bg-success">Enabled</span>
+                    <span class="status-badge status-badge-enabled">
+                        <i class="fas fa-check-circle me-1"></i>Enabled
+                    </span>
                     {% else %}
-                    <span class="badge bg-secondary">Disabled</span>
+                    <span class="status-badge status-badge-disabled">
+                        <i class="fas fa-exclamation-circle me-1"></i>Disabled
+                    </span>
                     {% endif %}
                 </div>
-                <div class="card-body">
+                <div class="security-card-body">
                     {% if current_user.two_factor_enabled %}
-                    <p class="text-success">✅ Two-factor authentication is enabled on your account</p>
-                    <form action="{{ url_for('main.disable_2fa') }}" method="POST" class="mt-3">
+                    <div class="alert alert-success">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Your account is protected with two-factor authentication. This adds an extra layer of security.
+                    </div>
+                    <form method="POST" action="{{ url_for('main.disable_2fa') }}" class="mt-3">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <div class="mb-3">
-                            <label class="form-label">Enter OTP to disable</label>
-                            <input type="text" name="otp_code" class="form-control" placeholder="6-digit code" required pattern="[0-9]{6}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Enter OTP to disable</label>
+                                <input type="text" name="otp_code" class="form-control-custom" placeholder="6-digit code" required pattern="[0-9]{6}">
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-danger">
+                        <button type="submit" class="btn-outline-danger-custom mt-3">
                             <i class="fas fa-times me-2"></i>Disable 2FA
                         </button>
                     </form>
                     {% else %}
-                    <p>Add an extra layer of security to your account by requiring a verification code from your phone when you log in.</p>
-                    <a href="{{ url_for('main.enable_2fa') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Enable Two-Factor Authentication
-                    </a>
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="fas fa-shield-alt fa-2x" style="color: #667eea;"></i>
+                        <div>
+                            <p>Add an extra layer of security to your account. Two-factor authentication requires a verification code from your phone when you log in.</p>
+                            <a href="{{ url_for('main.enable_2fa') }}" class="btn-primary-gradient">
+                                <i class="fas fa-plus me-2"></i>Enable Two-Factor Authentication
+                            </a>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Recent Security Events</h5>
+            <!-- Security Events Card -->
+            <div class="security-card">
+                <div class="security-card-header">
+                    <h5>
+                        <i class="fas fa-history" style="color: #667eea;"></i>
+                        Recent Security Events
+                    </h5>
+                    <a href="{{ url_for('main.login_history') }}" class="btn-primary-gradient" style="padding: 8px 16px; font-size: 13px;">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr><th>Event</th><th>IP Address</th><th>Time</th></tr>
-                            </thead>
-                            <tbody>
-                                {% for event in security_events %}
-                                <tr>
-                                    <td>{{ event.event_type.replace('_', ' ').title() }}</td>
-                                    <td><code>{{ event.ip_address }}</code></td>
-                                    <td>{{ event.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="3" class="text-center text-muted">No security events recorded</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <div class="security-card-body">
+                    {% if security_events %}
+                        {% for event in security_events[:5] %}
+                        <div class="security-event-item">
+                            <div class="event-icon">
+                                <i class="fas fa-{{ 'check-circle' if event.success else 'exclamation-triangle' }}" style="color: {{ '#10b981' if event.success else '#ef4444' }};"></i>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">{{ event.event_type.replace('_', ' ').title() }}</div>
+                                <div class="event-meta">
+                                    <i class="fas fa-map-marker-alt me-1"></i> {{ event.ip_address }}
+                                </div>
+                            </div>
+                            <div class="event-time">
+                                {{ event.timestamp.strftime('%b %d, %H:%M') }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No security events recorded</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Data & Privacy Card -->
+            <div class="security-card">
+                <div class="security-card-header">
+                    <h5>
+                        <i class="fas fa-database" style="color: #667eea;"></i>
+                        Data & Privacy
+                    </h5>
+                </div>
+                <div class="security-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <div>
+                            <div class="fw-semibold">Export Your Data</div>
+                            <div class="info-text">Download a copy of your ConnectHub data in JSON format</div>
+                        </div>
+                        <a href="{{ url_for('main.export_posts') }}" class="btn-primary-gradient" style="padding: 8px 20px;">
+                            <i class="fas fa-download me-2"></i>Export
+                        </a>
                     </div>
-                    <a href="{{ url_for('main.login_history') }}" class="btn btn-sm btn-outline-primary mt-2">View Full History</a>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold text-danger">Delete Account</div>
+                            <div class="info-text">Permanently delete your account and all associated data</div>
+                        </div>
+                        <button class="btn-outline-danger-custom" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <i class="fas fa-trash me-2"></i>Delete Account
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <p>Are you absolutely sure you want to delete your account?</p>
+                    <p class="text-muted small">This action <strong>cannot be undone</strong>. All your posts, connections, messages, and data will be permanently removed.</p>
+                </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Type <strong class="text-danger">DELETE</strong> to confirm
+                </div>
+                <input type="text" id="confirmDelete" class="form-control-custom" placeholder="DELETE">
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-outline-danger-custom" id="confirmDeleteBtn" disabled>Permanently Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('showPasswordFormBtn')?.addEventListener('click', function() {
+    document.getElementById('passwordForm').classList.add('active');
+});
+
+document.getElementById('hidePasswordFormBtn')?.addEventListener('click', function() {
+    document.getElementById('passwordForm').classList.remove('active');
+});
+
+const confirmInput = document.getElementById('confirmDelete');
+const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+if (confirmInput) {
+    confirmInput.addEventListener('input', function() {
+        confirmBtn.disabled = this.value !== 'DELETE';
+    });
+}
+
+confirmBtn?.addEventListener('click', function() {
+    window.location.href = "{{ url_for('main.delete_account') }}";
+});
+</script>
+
+<style>
+.form-control-custom {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.2s;
+    color: var(--text-primary);
+    width: 100%;
+}
+
+.form-control-custom:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.alert {
+    border-radius: 12px;
+    border: none;
+}
+
+.alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.alert-warning {
+    background: #fff3e0;
+    color: #ed6c02;
+}
+</style>
 {% endblock %}

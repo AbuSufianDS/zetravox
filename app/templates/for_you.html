@@ -7,16 +7,20 @@
             <div class="card mb-3">
                 <div class="card-body text-center">
                     <h3><i class="fas fa-star text-warning"></i> For You</h3>
-                    <p class="text-muted">Recommended posts based on your interests</p>
+                    <p class="text-muted">Personalized recommendations just for you</p>
+                    {% if is_personalized %}
+                    <span class="badge bg-primary">AI Powered</span>
+                    {% endif %}
                 </div>
             </div>
 
             {% if not posts %}
                 <div class="card">
                     <div class="card-body text-center py-5">
-                        <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                        <i class="fas fa-magic fa-3x text-muted mb-3"></i>
                         <h5>No recommendations yet</h5>
-                        <p class="text-muted">Start liking posts to see personalized recommendations!</p>
+                        <p class="text-muted">Follow more people and interact with content to get better recommendations!</p>
+                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">Discover People</a>
                     </div>
                 </div>
             {% else %}

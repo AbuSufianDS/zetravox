@@ -5,16 +5,19 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card text-center">
-                <div class="card-body">
+                <div class="card-body py-5">
+                    <i class="fas fa-lock fa-3x text-muted mb-3"></i>
                     <img src="{{ user.avatar(100) }}" class="rounded-circle mb-3" style="width: 100px; height: 100px;">
                     <h4>{{ user.username }}</h4>
-                    <p class="text-muted">This account is private.</p>
-                    <p>Follow to see their posts.</p>
-                    
+                    <p class="text-muted mt-3">This profile is private</p>
+                    <p>Follow to see their posts and connect with them.</p>
+
                     {% if not current_user.is_following(user) and user != current_user %}
-                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
+                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post" class="mt-3">
                             {{ form.hidden_tag() }}
-                            <button type="submit" class="btn btn-primary">Follow</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Follow
+                            </button>
                         </form>
                     {% endif %}
                 </div>

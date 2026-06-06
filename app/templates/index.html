@@ -69,25 +69,25 @@
     .photo-icon { color: #45bd62; }
     .feeling-icon { color: #f7b928; }
 
-    .story-circles {
+    .moment-circles {
         display: flex;
         gap: 12px;
         overflow-x: auto;
         padding: 8px 0;
     }
 
-    .story-circle {
+    .moment-circle {
         text-align: center;
         cursor: pointer;
     }
 
-    .story-avatar {
+    .moment-avatar {
         position: relative;
         width: 70px;
         height: 70px;
     }
 
-    .story-avatar img {
+    .moment-avatar img {
         width: 70px;
         height: 70px;
         border-radius: 50%;
@@ -96,7 +96,7 @@
         padding: 2px;
     }
 
-    .story-avatar .story-text-badge {
+    .moment-avatar .moment-text-badge {
         position: absolute;
         bottom: 0;
         right: 0;
@@ -112,7 +112,7 @@
         border: 2px solid white;
     }
 
-    .story-name {
+    .moment-name {
         font-size: 11px;
         color: var(--text-secondary);
         margin-top: 4px;
@@ -173,7 +173,7 @@
         margin: 16px 0 8px 12px;
     }
 
-    .birthday-item {
+    .celebration-item {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -181,7 +181,7 @@
         border-radius: 10px;
     }
 
-    .birthday-icon {
+    .celebration-icon {
         width: 36px;
         height: 36px;
         background: var(--hover-bg);
@@ -311,28 +311,28 @@
     <div class="col-lg-3 d-none d-lg-block">
         <div class="left-sidebar">
             <div class="sidebar-card mb-3">
-                <div class="section-title">Stories</div>
-                <div class="story-circles">
-                    <div class="story-circle" data-bs-toggle="modal" data-bs-target="#storyModal">
-                        <div class="story-avatar">
+                <div class="section-title">Moments</div>
+                <div class="moment-circles">
+                    <div class="moment-circle" data-bs-toggle="modal" data-bs-target="#momentModal">
+                        <div class="moment-avatar">
                             <img src="{{ current_user.avatar(70) }}" class="rounded-circle">
-                            <div class="story-text-badge">
+                            <div class="moment-text-badge">
                                 <i class="fas fa-plus"></i>
                             </div>
                         </div>
-                        <div class="story-name">Your Story</div>
+                        <div class="moment-name">Your Moment</div>
                     </div>
                     {% for story in stories_data %}
-                    <div class="story-circle" onclick="openStoryViewer({{ story.id }})">
-                        <div class="story-avatar">
+                    <div class="moment-circle" onclick="openMomentViewer({{ story.id }})">
+                        <div class="moment-avatar">
                             <img src="{{ story.author_avatar }}" class="rounded-circle">
                             {% if story.media_type == 'text' %}
-                            <div class="story-text-badge">
+                            <div class="moment-text-badge">
                                 <i class="fas fa-plus-circle"></i>
                             </div>
                             {% endif %}
                         </div>
-                        <div class="story-name">{{ story.author_name[:10] }}</div>
+                        <div class="moment-name">{{ story.author_name[:10] }}</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -348,45 +348,45 @@
             <ul class="left-sidebar-menu">
                 <li><a href="{{ url_for('main.friends') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-user-friends"></i></div>
-                    <span class="left-sidebar-text">Friends</span>
+                    <span class="left-sidebar-text">Connections</span>
                 </a></li>
                 <li><a href="{{ url_for('main.saved_posts') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-bookmark"></i></div>
-                    <span class="left-sidebar-text">Saved</span>
+                    <span class="left-sidebar-text">Bookmarks</span>
                 </a></li>
                 <li><a href="{{ url_for('main.feeds') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-rss"></i></div>
-                    <span class="left-sidebar-text">Feeds</span>
+                    <span class="left-sidebar-text">Your Stream</span>
                 </a></li>
                 <li><a href="{{ url_for('main.memories') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-history"></i></div>
-                    <span class="left-sidebar-text">Memories</span>
+                    <span class="left-sidebar-text">Flashbacks</span>
                 </a></li>
             </ul>
 
             <div class="sidebar-divider"></div>
 
-            <div class="section-title">Groups</div>
+            <div class="section-title">Entertainment</div>
             <ul class="left-sidebar-menu">
                 <li><a href="{{ url_for('main.reels') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-video"></i></div>
-                    <span class="left-sidebar-text">Reels</span>
+                    <span class="left-sidebar-text">Short Clips</span>
                 </a></li>
                 <li><a href="{{ url_for('main.events') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <span class="left-sidebar-text">Events</span>
+                    <span class="left-sidebar-text">Happenings</span>
                 </a></li>
                 <li><a href="{{ url_for('main.ads_manager') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-chart-line"></i></div>
-                    <span class="left-sidebar-text">Ads Manager</span>
+                    <span class="left-sidebar-text">Promotions</span>
                 </a></li>
                 <li><a href="{{ url_for('main.birthdays') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-birthday-cake"></i></div>
-                    <span class="left-sidebar-text">Birthdays</span>
+                    <span class="left-sidebar-text">Celebrations</span>
                 </a></li>
                 <li><a href="{{ url_for('main.gaming') }}" class="left-sidebar-item">
                     <div class="left-sidebar-icon"><i class="fas fa-gamepad"></i></div>
-                    <span class="left-sidebar-text">Gaming Video</span>
+                    <span class="left-sidebar-text">Gaming Hub</span>
                 </a></li>
             </ul>
         </div>
@@ -397,18 +397,18 @@
             <div class="d-flex gap-3">
                 <img src="{{ current_user.avatar(40) }}" class="rounded-circle" style="width: 40px; height: 40px;">
                 <div class="create-post-input">
-                    What's on your mind, {{ current_user.username }}?
+                    Share your thoughts, {{ current_user.username }}?
                 </div>
             </div>
             <div class="post-actions-bar">
                 <button class="post-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                    <i class="fas fa-video live-icon"></i> Live
+                    <i class="fas fa-video live-icon"></i> Go Live
                 </button>
                 <button class="post-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                    <i class="fas fa-image photo-icon"></i> Photo/Video
+                    <i class="fas fa-image photo-icon"></i> Upload Media
                 </button>
                 <button class="post-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                    <i class="fas fa-smile feeling-icon"></i> Feeling
+                    <i class="fas fa-smile feeling-icon"></i> Add Emoji
                 </button>
             </div>
         </div>
@@ -419,7 +419,7 @@
         <div class="card text-center">
             <div class="card-body py-5">
                 <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No posts yet. Follow people to see their posts!</p>
+                <p class="text-muted">No updates yet. Follow people to see their activity!</p>
             </div>
         </div>
         {% endfor %}
@@ -428,12 +428,12 @@
         <div class="d-flex justify-content-between mt-3">
             {% if prev_url %}
             <a href="{{ prev_url }}" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-left"></i> Previous
             </a>
             {% endif %}
             {% if next_url %}
             <a href="{{ next_url }}" class="btn btn-outline-primary ms-auto">
-                <i class="fas fa-arrow-right"></i>
+                Next <i class="fas fa-arrow-right"></i>
             </a>
             {% endif %}
         </div>
@@ -444,12 +444,12 @@
         <div class="right-sidebar">
             {% if upcoming_birthdays %}
                 {% for birthday in upcoming_birthdays[:3] %}
-                <div class="birthday-item">
-                    <div class="birthday-icon">
+                <div class="celebration-item">
+                    <div class="celebration-icon">
                         <i class="fas fa-birthday-cake"></i>
                     </div>
                     <div>
-                        <div class="fw-semibold small">Birthday</div>
+                        <div class="fw-semibold small">Birthday Alert</div>
                         <div class="small text-muted">
                             <a href="{{ url_for('main.user', username=birthday.user.username) }}" class="text-decoration-none">
                                 {{ birthday.user.username }}
@@ -464,13 +464,13 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="birthday-item">
-                    <div class="birthday-icon">
+                <div class="celebration-item">
+                    <div class="celebration-icon">
                         <i class="fas fa-birthday-cake"></i>
                     </div>
                     <div>
                         <div class="fw-semibold small">Birthdays</div>
-                        <div class="small text-muted">No upcoming birthdays</div>
+                        <div class="small text-muted">No celebrations today</div>
                     </div>
                 </div>
             {% endif %}
@@ -478,13 +478,13 @@
             <div class="sidebar-divider"></div>
 
             <div class="px-2 mb-3">
-                <div class="fw-semibold small text-muted mb-2">Sponsored</div>
+                <div class="fw-semibold small text-muted mb-2">Sponsored Content</div>
                 <div class="bg-light rounded p-2 mb-2">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fab fa-whatsapp fa-2x text-success"></i>
                         <div>
-                            <div class="fw-semibold small">WhatsApp Business</div>
-                            <div class="small text-muted">Connect with customers</div>
+                            <div class="fw-semibold small">Business Suite</div>
+                            <div class="small text-muted">Reach more customers</div>
                         </div>
                     </div>
                 </div>
@@ -493,7 +493,7 @@
             <div class="sidebar-divider"></div>
 
             <div class="d-flex justify-content-between align-items-center px-2 mb-2">
-                <span class="fw-semibold small text-muted">Active Contacts ({{ active_contacts|length }})</span>
+                <span class="fw-semibold small text-muted">Online Now ({{ active_contacts|length }})</span>
                 <i class="fas fa-search small text-muted"></i>
             </div>
 
@@ -512,7 +512,7 @@
                 {% endfor %}
             {% else %}
                 <div class="text-center text-muted small py-3">
-                    No active contacts online
+                    No one is online right now
                 </div>
             {% endif %}
         </div>
@@ -523,7 +523,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Create Post</h5>
+                <h5 class="modal-title">Create New Post</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ url_for('main.index') }}" method="post" enctype="multipart/form-data">
@@ -535,9 +535,9 @@
                             <div class="fw-semibold">{{ current_user.username }}</div>
                             <div class="small text-muted">
                                 <select name="privacy" class="form-select form-select-sm" style="width: auto; display: inline-block;">
-                                    <option value="public">🌍 Public</option>
-                                    <option value="followers">👥 Followers</option>
-                                    <option value="only_me">🔒 Only Me</option>
+                                    <option value="public">🌍 Everyone</option>
+                                    <option value="followers">👥 Followers Only</option>
+                                    <option value="only_me">🔒 Just Me</option>
                                 </select>
                             </div>
                         </div>
@@ -547,36 +547,35 @@
 
                     <div class="media-buttons">
                         <button type="button" class="media-btn photo" onclick="document.getElementById('postMedia').click()">
-                            <i class="fas fa-images"></i> Photo/Video
+                            <i class="fas fa-images"></i> Add Media
                         </button>
                         <button type="button" class="media-btn feeling" onclick="insertEmoji()">
-                            <i class="fas fa-smile"></i> Feeling
+                            <i class="fas fa-smile"></i> Insert Emoji
                         </button>
                     </div>
 
                     <div class="px-3 pb-3">
-    <input type="file" name="media_files" id="postMedia" class="form-control"
-           accept="image/*,video/*" multiple style="display: none;"
-           onchange="previewMultipleMedia(this)">
-    <div id="mediaPreview" class="row g-2 mt-2"></div>
-    {{ form.schedule_date(class="form-control mb-2", placeholder="Schedule for later (optional)") }}
-</div>
-
+                        <input type="file" name="media_files" id="postMedia" class="form-control"
+                               accept="image/*,video/*" multiple style="display: none;"
+                               onchange="previewMultipleMedia(this)">
+                        <div id="mediaPreview" class="row g-2 mt-2"></div>
+                        {{ form.schedule_date(class="form-control mb-2", placeholder="Schedule for later (optional)") }}
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" name="submit_post" class="btn btn-primary">Post</button>
+                    <button type="submit" name="submit_post" class="btn btn-primary">Publish</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="storyModal" tabindex="-1">
+<div class="modal fade" id="momentModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add to Story</h5>
+                <h5 class="modal-title">Add to Moments</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ url_for('main.add_story') }}" method="post" enctype="multipart/form-data">
@@ -587,13 +586,13 @@
                         <input type="file" name="media" class="form-control" accept="image/*,video/*">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Caption</label>
-                        <textarea name="caption" class="form-control" rows="2" placeholder="Add a caption..."></textarea>
+                        <label class="form-label">Description</label>
+                        <textarea name="caption" class="form-control" rows="2" placeholder="Add a description..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Share</button>
+                    <button type="submit" class="btn btn-primary">Share Moment</button>
                 </div>
             </form>
         </div>
@@ -603,13 +602,13 @@
 <script>
 function insertEmoji() {
     const textarea = document.querySelector('.create-post-textarea');
-    const emojis = ['😊', '😂', '❤️', '👍', '🎉', '😢', '😡', '🥰', '🤔', '🔥'];
+    const emojis = ['😊', '😂', '❤️', '👍', '🎉', '😢', '😡', '🥰', '🤔', '🔥', '✨', '💯'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     textarea.value += randomEmoji;
     textarea.focus();
 }
 
-function openStoryViewer(storyId) {
+function openMomentViewer(storyId) {
     window.location.href = '/view_story/' + storyId;
 }
 

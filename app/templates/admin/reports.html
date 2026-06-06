@@ -5,13 +5,13 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card">
-                <div class="card-header bg-danger text-white">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                     <h4 class="mb-0">
-                        <i class="fas fa-flag me-2"></i>User Reports
+                        <i class="fas fa-flag me-2"></i>Content Flags
                     </h4>
                 </div>
                 <div class="card-body">
-                    <p>All reports submitted by users.</p>
+                    <p><i class="fas fa-info-circle me-2"></i>All content flags submitted by users.</p>
                 </div>
             </div>
 
@@ -19,8 +19,8 @@
                 <div class="card mt-3">
                     <div class="card-body text-center py-5">
                         <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <h5>No Reports</h5>
-                        <p class="text-muted">No user reports to review.</p>
+                        <h5>All Clear</h5>
+                        <p class="text-muted">No content flags to review.</p>
                     </div>
                 </div>
             {% else %}
@@ -29,7 +29,7 @@
                     <div class="card-header bg-light">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <strong>Report #{{ report.id }}</strong>
+                                <strong>Flag #{{ report.id }}</strong>
                                 <span class="text-muted ms-2">
                                     {{ moment(report.timestamp).fromNow() }}
                                 </span>
@@ -42,7 +42,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <strong>Reported by:</strong>
+                                <strong>Flagged by:</strong>
                                 <div class="mt-1">
                                     <img src="{{ report.reporter.avatar(30) }}" class="rounded-circle me-2">
                                     {{ report.reporter.username }}
@@ -53,10 +53,10 @@
                                 <p class="mt-1">{{ report.reason }}</p>
                             </div>
                         </div>
-                        
+
                         <hr>
-                        
-                        <strong>Reported Post:</strong>
+
+                        <strong>Flagged Content:</strong>
                         <div class="card mt-2 bg-light">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
@@ -68,19 +68,19 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ url_for('main.approve_post', post_id=report.post_id) }}" 
+                        <a href="{{ url_for('main.approve_post', post_id=report.post_id) }}"
                            class="btn btn-success btn-sm">
-                            <i class="fas fa-check me-1"></i> Keep Post
+                            <i class="fas fa-check me-1"></i> Keep Content
                         </a>
-                        <a href="{{ url_for('main.reject_post', post_id=report.post_id) }}" 
+                        <a href="{{ url_for('main.reject_post', post_id=report.post_id) }}"
                            class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash me-1"></i> Delete Post
+                            <i class="fas fa-trash me-1"></i> Delete Content
                         </a>
-                        <form action="{{ url_for('main.dismiss_report', report_id=report.id) }}" 
+                        <form action="{{ url_for('main.dismiss_report', report_id=report.id) }}"
                               method="post" class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
                             <button type="submit" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-times me-1"></i> Dismiss Report
+                                <i class="fas fa-times me-1"></i> Dismiss Flag
                             </button>
                         </form>
                     </div>

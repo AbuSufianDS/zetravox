@@ -12,11 +12,10 @@
                 </div>
             </div>
 
-            <!-- Users Results -->
             {% if users %}
             <div class="card mb-3">
                 <div class="card-header bg-info text-white">
-                    <i class="fas fa-users me-2"></i>Users ({{ users|length }})
+                    <i class="fas fa-users me-2"></i>People ({{ users|length }})
                 </div>
                 <div class="list-group list-group-flush">
                     {% for user in users %}

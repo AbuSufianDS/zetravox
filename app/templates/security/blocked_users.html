@@ -1,76 +1,327 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
+<style>
+.blocked-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.settings-sidebar {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 8px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 80px;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.settings-nav-item i {
+    width: 24px;
+    font-size: 18px;
+    color: #667eea;
+}
+
+.settings-nav-item:hover {
+    background: var(--hover-bg);
+    transform: translateX(4px);
+}
+
+.settings-nav-item.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+    border-left: 3px solid #667eea;
+}
+
+.blocked-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.blocked-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+
+.blocked-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.blocked-card-body {
+    padding: 24px;
+}
+
+.blocked-user-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.2s;
+}
+
+.blocked-user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.user-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.user-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.verified-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 2px 8px;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.blocked-date {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.btn-unblock {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-unblock:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 24px;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.empty-state h6 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.info-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-top: 24px;
+}
+
+.info-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+
+.info-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-card-body {
+    padding: 24px;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.info-list i {
+    width: 24px;
+    font-size: 16px;
+}
+
+.text-danger-icon {
+    color: #ef4444;
+}
+
+.text-success-icon {
+    color: #10b981;
+}
+
+.alert-warning-custom {
+    background: #fff3e0;
+    border-left: 4px solid #ed6c02;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-warning-custom i {
+    color: #ed6c02;
+    font-size: 20px;
+}
+
+.alert-warning-custom .text {
+    font-size: 13px;
+    color: #ed6c02;
+    font-weight: 500;
+}
+</style>
+
+<div class="blocked-container">
+    <div class="row g-4">
         <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <img src="{{ current_user.avatar(80) }}" class="rounded-circle mb-3" style="width: 80px; height: 80px;">
-                        <h5>{{ current_user.username }}</h5>
-                        <p class="text-muted small">{{ current_user.email }}</p>
-                    </div>
-                    <hr>
-                    <div class="list-group list-group-flush">
-                        <a href="{{ url_for('security.account_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-user fa-fw" style="width: 24px;"></i>
-                            <span>Account</span>
-                        </a>
-                        <a href="{{ url_for('security.security_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-shield-alt fa-fw text-success" style="width: 24px;"></i>
-                            <span>Security</span>
-                        </a>
-                        <a href="{{ url_for('security.privacy_settings') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-lock fa-fw text-warning" style="width: 24px;"></i>
-                            <span>Privacy</span>
-                        </a>
-                        <a href="{{ url_for('security.blocked_users') }}" class="list-group-item list-group-item-action active d-flex align-items-center gap-3">
-                            <i class="fas fa-user-slash fa-fw text-danger" style="width: 24px;"></i>
-                            <span>Blocked Users</span>
-                        </a>
-                        <a href="{{ url_for('security.session_management') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-desktop fa-fw text-info" style="width: 24px;"></i>
-                            <span>Sessions</span>
-                        </a>
-                        <a href="{{ url_for('security.login_history') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                            <i class="fas fa-history fa-fw text-secondary" style="width: 24px;"></i>
-                            <span>Login History</span>
-                        </a>
-                    </div>
-                </div>
+            <div class="settings-sidebar">
+                <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Account</span>
+                </a>
+                <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </a>
+                <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-lock"></i>
+                    <span>Privacy</span>
+                </a>
+                <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
+                    <i class="fas fa-desktop"></i>
+                    <span>Sessions</span>
+                </a>
+                <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Login History</span>
+                </a>
+                <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item active">
+                    <i class="fas fa-ban"></i>
+                    <span>Blocked Users</span>
+                </a>
+                <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
+                    <i class="fas fa-palette"></i>
+                    <span>Appearance</span>
+                </a>
             </div>
         </div>
-        
+
         <div class="col-md-9">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user-slash me-2 text-danger"></i>Blocked Users</h5>
-                    <small class="text-muted">Users you have blocked cannot interact with you</small>
+            <div class="blocked-card">
+                <div class="blocked-card-header">
+                    <h5>
+                        <i class="fas fa-user-slash" style="color: #ef4444;"></i>
+                        Blocked Users
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="blocked-card-body">
                     {% if blocked_users %}
                         <div class="row g-3">
                             {% for blocked_user in blocked_users %}
                             <div class="col-md-6">
-                                <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
+                                <div class="blocked-user-card">
                                     <div class="d-flex align-items-center gap-3">
-                                        <img src="{{ blocked_user.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                                        <div>
-                                            <a href="{{ url_for('main.user', username=blocked_user.username) }}" class="fw-semibold text-decoration-none">
+                                        <img src="{{ blocked_user.avatar(56) }}" class="user-avatar">
+                                        <div class="user-info">
+                                            <div class="user-name">
                                                 {{ blocked_user.username }}
-                                            </a>
-                                            <div class="small text-muted">
                                                 {% if blocked_user.is_verified %}
-                                                <i class="fas fa-check-circle text-primary"></i> Verified
+                                                <span class="verified-badge">
+                                                    <i class="fas fa-check-circle me-1"></i>Verified
+                                                </span>
                                                 {% endif %}
                                             </div>
+                                            <div class="user-meta">
+                                                <span>
+                                                    <i class="fas fa-calendar-alt me-1"></i>
+                                                    Blocked: {{ blocked_user.blocked_at.strftime('%b %d, %Y') if blocked_user.blocked_at else 'Recently' }}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <form action="{{ url_for('security.unblock', user_id=blocked_user.id) }}" method="POST">
+                                        <form action="{{ url_for('main.unblock_user', user_id=blocked_user.id) }}" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Unblock {{ blocked_user.username }}? They will be able to interact with you again.')">
+                                            <button type="submit" class="btn-unblock" onclick="return confirm('Unblock {{ blocked_user.username }}? They will be able to interact with you again.')">
                                                 <i class="fas fa-user-check me-1"></i>Unblock
                                             </button>
                                         </form>
@@ -80,26 +331,49 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
-                            <p class="text-muted mb-3">You haven't blocked any users.</p>
-                            <p class="small text-muted">When you block someone, they will appear here.</p>
+                        <div class="empty-state">
+                            <i class="fas fa-user-slash"></i>
+                            <h6>No Blocked Users</h6>
+                            <p>You haven't blocked anyone yet</p>
+                            <small class="text-muted">When you block someone, they will appear here</small>
                         </div>
                     {% endif %}
                 </div>
             </div>
-            
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>About Blocking</h5>
+
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5>
+                        <i class="fas fa-info-circle" style="color: #667eea;"></i>
+                        About Blocking
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><i class="fas fa-ban text-danger me-2"></i> Blocked users cannot follow you</li>
-                        <li class="mb-2"><i class="fas fa-envelope text-danger me-2"></i> Blocked users cannot send you messages</li>
-                        <li class="mb-2"><i class="fas fa-comment text-danger me-2"></i> Blocked users cannot comment on your posts</li>
-                        <li class="mb-2"><i class="fas fa-eye-slash text-danger me-2"></i> You won't see their posts in your feed</li>
-                        <li class="mb-2"><i class="fas fa-user-check text-success me-2"></i> Unblocking restores normal interaction</li>
+                <div class="info-card-body">
+                    <div class="alert-warning-custom">
+                        <i class="fas fa-shield-alt"></i>
+                        <div class="text">Blocked users will not be notified that you have blocked them.</div>
+                    </div>
+                    <ul class="info-list">
+                        <li>
+                            <i class="fas fa-ban text-danger-icon"></i>
+                            <span>Blocked users cannot follow you or view your profile</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope text-danger-icon"></i>
+                            <span>Blocked users cannot send you messages</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-comment text-danger-icon"></i>
+                            <span>Blocked users cannot reply to your posts</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-eye-slash text-danger-icon"></i>
+                            <span>You won't see their posts in your stream</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-user-check text-success-icon"></i>
+                            <span>Unblocking restores normal interaction immediately</span>
+                        </li>
                     </ul>
                 </div>
             </div>

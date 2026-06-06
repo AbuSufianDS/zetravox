@@ -26,6 +26,11 @@ def fix_database():
         ('notify_email_shares', 'BOOLEAN', '0'),
         ('notify_email_friend_requests', 'BOOLEAN', '0'),
         ('notify_email_messages', 'BOOLEAN', '0'),
+        ('show_email', 'BOOLEAN', '0'),
+        ('show_last_seen', 'BOOLEAN', '1'),
+        ('allow_comments', 'BOOLEAN', '1'),
+        ('allow_messages', 'BOOLEAN', '1'),
+        ('theme_preference', 'VARCHAR(20)', "'light'"),
     ]
 
     for col_name, col_type, default_value in new_columns:

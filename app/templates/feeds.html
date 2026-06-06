@@ -1,41 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card mb-3">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-rss me-2 text-primary"></i>Friends Feed</h4>
-                <small class="text-muted">Posts from your friends</small>
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">
+                        {% if feed_type == 'for_you' %}
+                            <i class="fas fa-star text-warning"></i> For You
+                            {% if is_personalized %}
+                                <small class="text-muted">(AI Curated)</small>
+                            {% endif %}
+                        {% elif feed_type == 'trending' %}
+                            <i class="fas fa-fire text-danger"></i> Trending Now
+                        {% else %}
+                            <i class="fas fa-compass text-primary"></i> Explore
+                        {% endif %}
+                    </h3>
+                    <p class="text-muted">
+                        {% if feed_type == 'for_you' %}
+                            Personalized recommendations based on your activity
+                        {% elif feed_type == 'trending' %}
+                            Popular content from the last 7 days
+                        {% else %}
+                            Discover content from people you haven't connected with yet
+                        {% endif %}
+                    </p>
+                </div>
             </div>
+
+            {% if not posts %}
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-stream fa-3x text-muted mb-3"></i>
+                        <h5>No posts yet</h5>
+                        <p class="text-muted">
+                            {% if feed_type == 'for_you' %}
+                                Engage with posts to get personalized recommendations
+                            {% else %}
+                                Check back later for more content
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                {% for post in posts %}
+                    {% include '_post.html' %}
+                {% endfor %}
+            {% endif %}
+
+            {% if next_url or prev_url %}
+            <nav aria-label="Post navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ prev_url or '#' }}">
+                            <i class="fas fa-arrow-left me-1"></i>Newer
+                        </a>
+                    </li>
+                    <li class="page-item{% if not next_url %} disabled{% endif %}">
+                        <a class="page-link" href="{{ next_url or '#' }}">
+                            Older<i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+
         </div>
-        
-        {% for post in posts.items %}
-            {% include '_post.html' %}
-        {% else %}
-        <div class="card text-center">
-            <div class="card-body py-5">
-                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
-                <p class="text-muted mb-3">No posts from your friends yet</p>
-                <a href="{{ url_for('main.discover') }}" class="btn btn-primary">
-                    <i class="fas fa-user-plus me-2"></i>Add Friends
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-        
-        {% if posts.pages > 1 %}
-        <nav class="mt-3">
-            <ul class="pagination justify-content-center">
-                {% if posts.has_prev %}
-                <li class="page-item"><a class="page-link" href="{{ url_for('main.feeds', page=posts.prev_num) }}">Previous</a></li>
-                {% endif %}
-                {% if posts.has_next %}
-                <li class="page-item"><a class="page-link" href="{{ url_for('main.feeds', page=posts.next_num) }}">Next</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -202,7 +202,11 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     notify_email_friend_requests = db.Column(db.Boolean, default=False)
     notify_email_messages = db.Column(db.Boolean, default=False)
 
-
+    show_email = db.Column(db.Boolean, default=False)
+    show_last_seen = db.Column(db.Boolean, default=True)
+    allow_comments = db.Column(db.Boolean, default=True)
+    allow_messages = db.Column(db.Boolean, default=True)
+    theme_preference = db.Column(db.String(20), default='light')
     def increment_login_attempts(self):
         self.login_attempts += 1
         if self.login_attempts >= 5:
@@ -802,6 +806,7 @@ class Notification(db.Model):
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
     timestamp: so.Mapped[float] = so.mapped_column(index=True, default=time)
     payload_json: so.Mapped[str] = so.mapped_column(sa.Text)
+    read: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False)
 
     user: so.Mapped[User] = so.relationship(back_populates='notifications')
 

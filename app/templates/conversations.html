@@ -4,7 +4,7 @@
 <div class="container mt-3">
     <div class="card">
         <div class="card-header">
-            <h5>💬 Messages</h5>
+            <h5><i class="fas fa-comments me-2"></i>Direct Messages</h5>
         </div>
         <div class="list-group list-group-flush">
             {% for conv in conversations %}
@@ -17,7 +17,7 @@
                                 <span class="badge bg-danger rounded-pill">{{ conv.unread_count }}</span>
                             {% endif %}
                             <div class="text-muted small">
-                                {{ conv.last_message.message[:50] if conv.last_message else 'No messages' }}
+                                {{ conv.last_message.message[:50] if conv.last_message else 'No messages yet' }}
                             </div>
                         </div>
                         <small class="text-muted">
@@ -27,7 +27,8 @@
                 </a>
             {% else %}
                 <div class="text-center text-muted p-5">
-                    No conversations yet. Start chatting with someone!
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <p>No conversations yet. Start a chat with someone!</p>
                 </div>
             {% endfor %}
         </div>
