@@ -24,7 +24,6 @@ from app.models import (User, Post, Message, Notification, Like, Comment, SpamRe
 import time
 lastNotificationTime = 0
 
-
 @bp.route('/settings/notifications', methods=['GET', 'POST'])
 @login_required
 def notification_settings():
@@ -1122,29 +1121,6 @@ def edit_post(post_id):
     form.post.data = post.body
     return render_template('edit_post.html', title='Edit Post', form=form, post=post)
 
-@bp.route('/chat/<username>')
-@login_required
-def chat(username):
-    other_user = db.first_or_404(sa.select(User).where(User.username == username))
-
-    messages = db.session.scalars(
-        sa.select(ChatMessage).where(
-            ((ChatMessage.sender_id == current_user.id) & (ChatMessage.recipient_id == other_user.id)) |
-            ((ChatMessage.sender_id == other_user.id) & (ChatMessage.recipient_id == current_user.id))
-        ).order_by(ChatMessage.timestamp.asc())
-    ).all()
-
-    db.session.execute(
-        sa.update(ChatMessage).where(
-            ChatMessage.sender_id == other_user.id,
-            ChatMessage.recipient_id == current_user.id,
-            ChatMessage.is_read == False
-        ).values(is_read=True)
-    )
-    db.session.commit()
-
-    return render_template('chat.html', title='Chat', other_user=other_user, messages=messages)
-
 
 @bp.route('/send_chat_message', methods=['POST'])
 @login_required
@@ -1153,7 +1129,7 @@ def send_chat_message():
         recipient_id = request.form.get('recipient_id', type=int)
         message = request.form.get('message', '').strip()
 
-        if not message:
+        if not message and not request.files.get('image'):
             return jsonify({'error': 'Message cannot be empty'}), 400
 
         if not recipient_id:
@@ -1163,19 +1139,45 @@ def send_chat_message():
         if recipient is None:
             return jsonify({'error': 'User not found'}), 404
 
+        # Handle image upload
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                from app.media_helpers import save_media
+                filename, media_type = save_media(file, 'chat')
+                if filename:
+                    image_url = filename
+
         chat_message = ChatMessage(
             sender_id=current_user.id,
             recipient_id=recipient_id,
             message=message,
+            image_url=image_url,
             is_read=False,
+            is_delivered=False,
             timestamp=datetime.now(timezone.utc)
         )
         db.session.add(chat_message)
         db.session.commit()
 
+        # Send notification to recipient
+        from app.notification_helper import create_notification
+        create_notification(
+            recipient_id,
+            'message',
+            {
+                'from_user': current_user.username,
+                'user_id': current_user.id,
+                'message': message[:50] if message else 'Sent a photo',
+                'type': 'private_message'
+            }
+        )
+
         return jsonify({
             'success': True,
             'message': message,
+            'image_url': image_url,
             'timestamp': chat_message.timestamp.timestamp(),
             'message_id': chat_message.id,
             'sender_id': current_user.id
@@ -1183,6 +1185,7 @@ def send_chat_message():
     except Exception as e:
         current_app.logger.error(f"Send message error: {e}")
         return jsonify({'error': str(e)}), 500
+
 
 @bp.route('/get_chat_messages/<int:other_user_id>')
 @login_required
@@ -1197,57 +1200,27 @@ def get_chat_messages(other_user_id):
         ).order_by(ChatMessage.timestamp.asc())
     ).all()
 
+    # Mark messages as read
+    db.session.execute(
+        sa.update(ChatMessage)
+        .where(
+            ChatMessage.sender_id == other_user_id,
+            ChatMessage.recipient_id == current_user.id,
+            ChatMessage.is_read == False
+        )
+        .values(is_read=True, is_delivered=True)
+    )
+    db.session.commit()
+
     return jsonify([{
         'id': m.id,
         'sender_id': m.sender_id,
         'message': m.message,
+        'image_url': m.image_url,
         'timestamp': m.timestamp.timestamp(),
-        'is_mine': m.sender_id == current_user.id
+        'is_mine': m.sender_id == current_user.id,
+        'status': 'seen' if m.is_read else ('delivered' if m.is_delivered else 'sent')
     } for m in messages])
-
-
-@bp.route('/conversations')
-@login_required
-def conversations():
-    sent_messages = db.session.scalars(
-        sa.select(ChatMessage).where(ChatMessage.sender_id == current_user.id)
-    ).all()
-    received_messages = db.session.scalars(
-        sa.select(ChatMessage).where(ChatMessage.recipient_id == current_user.id)
-    ).all()
-
-    user_ids = set()
-    for msg in sent_messages:
-        user_ids.add(msg.recipient_id)
-    for msg in received_messages:
-        user_ids.add(msg.sender_id)
-
-    conversations = []
-    for user_id in user_ids:
-        other_user = db.session.get(User, user_id)
-        if other_user:
-            last_message = db.session.scalar(
-                sa.select(ChatMessage).where(
-                    ((ChatMessage.sender_id == current_user.id) & (ChatMessage.recipient_id == user_id)) |
-                    ((ChatMessage.sender_id == user_id) & (ChatMessage.recipient_id == current_user.id))
-                ).order_by(ChatMessage.timestamp.desc())
-            )
-            unread_count = db.session.query(ChatMessage).filter(
-                ChatMessage.sender_id == user_id,
-                ChatMessage.recipient_id == current_user.id,
-                ChatMessage.is_read == False
-            ).count()
-
-            conversations.append({
-                'user': other_user,
-                'last_message': last_message,
-                'unread_count': unread_count
-            })
-
-    conversations.sort(key=lambda x: x['last_message'].timestamp if x['last_message'] else datetime.min, reverse=True)
-
-    return render_template('conversations.html', title='Conversations', conversations=conversations)
-
 
 @bp.route('/send_message/<recipient>', methods=['GET', 'POST'])
 @login_required
@@ -2273,3 +2246,215 @@ def revoke_all_sessions():
     flash('All other sessions have been revoked.', 'success')
     return jsonify({'success': True})
 
+@bp.route('/mark-messages-delivered/<int:sender_id>', methods=['POST'])
+@login_required
+def mark_messages_delivered(sender_id):
+    try:
+        db.session.execute(
+            sa.update(ChatMessage)
+            .where(
+                ChatMessage.sender_id == sender_id,
+                ChatMessage.recipient_id == current_user.id,
+                ChatMessage.is_delivered == False
+            )
+            .values(is_delivered=True)
+        )
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False}), 500
+
+@bp.route('/mark-messages-seen/<int:sender_id>', methods=['POST'])
+@login_required
+def mark_messages_seen(sender_id):
+    try:
+        db.session.execute(
+            sa.update(ChatMessage)
+            .where(
+                ChatMessage.sender_id == sender_id,
+                ChatMessage.recipient_id == current_user.id,
+                ChatMessage.is_read == False
+            )
+            .values(is_read=True)
+        )
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False}), 500
+
+
+@bp.route('/conversations-list-api')
+@login_required
+def conversations_list_api():
+    try:
+        # Get all users the current user has chatted with
+        sent = db.session.execute(
+            sa.select(ChatMessage.recipient_id)
+            .where(ChatMessage.sender_id == current_user.id)
+            .distinct()
+        ).scalars().all()
+
+        received = db.session.execute(
+            sa.select(ChatMessage.sender_id)
+            .where(ChatMessage.recipient_id == current_user.id)
+            .distinct()
+        ).scalars().all()
+
+        user_ids = set(sent) | set(received)
+
+        conversations = []
+        for uid in user_ids:
+            user = db.session.get(User, uid)
+            if user:
+                # Get last message
+                last_msg = db.session.scalar(
+                    sa.select(ChatMessage)
+                    .where(
+                        ((ChatMessage.sender_id == current_user.id) & (ChatMessage.recipient_id == uid)) |
+                        ((ChatMessage.sender_id == uid) & (ChatMessage.recipient_id == current_user.id))
+                    )
+                    .order_by(ChatMessage.timestamp.desc())
+                    .limit(1)
+                )
+
+                # Count unread
+                unread = db.session.scalar(
+                    sa.select(sa.func.count())
+                    .select_from(ChatMessage)
+                    .where(
+                        ChatMessage.sender_id == uid,
+                        ChatMessage.recipient_id == current_user.id,
+                        ChatMessage.is_read == False
+                    )
+                ) or 0
+
+                conversations.append({
+                    'user_id': user.id,
+                    'username': user.username,
+                    'avatar': user.avatar(50),
+                    'is_online': user.is_online,
+                    'last_message': last_msg.message[:50] if last_msg else 'No messages yet',
+                    'last_message_time': last_msg.timestamp.timestamp() if last_msg else 0,
+                    'unread_count': unread
+                })
+
+        # Sort by last message time (most recent first)
+        conversations.sort(key=lambda x: x['last_message_time'], reverse=True)
+
+        return jsonify(conversations)
+    except Exception as e:
+        current_app.logger.error(f"Conversations API error: {e}")
+        return jsonify([])
+
+@bp.route('/clear-chat/<int:user_id>', methods=['POST'])
+@login_required
+def clear_chat(user_id):
+    try:
+        db.session.execute(
+            sa.delete(ChatMessage)
+            .where(
+                ((ChatMessage.sender_id == current_user.id) & (ChatMessage.recipient_id == user_id)) |
+                ((ChatMessage.sender_id == user_id) & (ChatMessage.recipient_id == current_user.id))
+            )
+        )
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/unread-messages-count')
+@login_required
+def unread_messages_count():
+    try:
+        count = db.session.scalar(
+            sa.select(sa.func.count())
+            .select_from(ChatMessage)
+            .where(
+                ChatMessage.recipient_id == current_user.id,
+                ChatMessage.is_read == False
+            )
+        ) or 0
+        return jsonify({'count': count})
+    except Exception as e:
+        return jsonify({'count': 0})
+
+
+@bp.route('/chat/<username>')
+@login_required
+def chat(username):
+    other_user = db.first_or_404(sa.select(User).where(User.username == username))
+
+    messages = db.session.scalars(
+        sa.select(ChatMessage).where(
+            ((ChatMessage.sender_id == current_user.id) & (ChatMessage.recipient_id == other_user.id)) |
+            ((ChatMessage.sender_id == other_user.id) & (ChatMessage.recipient_id == current_user.id))
+        ).order_by(ChatMessage.timestamp.asc())
+    ).all()
+
+    # Mark messages as read
+    db.session.execute(
+        sa.update(ChatMessage).where(
+            ChatMessage.sender_id == other_user.id,
+            ChatMessage.recipient_id == current_user.id,
+            ChatMessage.is_read == False
+        ).values(is_read=True)
+    )
+    db.session.commit()
+
+    return render_template('chat.html', title='Chat', other_user=other_user, messages=messages)
+
+
+@bp.route('/conversations')
+@login_required
+def conversations():
+    # Get all users the current user has chatted with
+    sent = db.session.execute(
+        sa.select(ChatMessage.recipient_id)
+        .where(ChatMessage.sender_id == current_user.id)
+        .distinct()
+    ).scalars().all()
+
+    received = db.session.execute(
+        sa.select(ChatMessage.sender_id)
+        .where(ChatMessage.recipient_id == current_user.id)
+        .distinct()
+    ).scalars().all()
+
+    user_ids = set(sent) | set(received)
+
+    conversation_list = []
+    for uid in user_ids:
+        user = db.session.get(User, uid)
+        if user:
+            # Get last message
+            last_msg = db.session.scalar(
+                sa.select(ChatMessage)
+                .where(
+                    ((ChatMessage.sender_id == current_user.id) & (ChatMessage.recipient_id == uid)) |
+                    ((ChatMessage.sender_id == uid) & (ChatMessage.recipient_id == current_user.id))
+                )
+                .order_by(ChatMessage.timestamp.desc())
+                .limit(1)
+            )
+
+            # Count unread
+            unread = db.session.scalar(
+                sa.select(sa.func.count())
+                .select_from(ChatMessage)
+                .where(
+                    ChatMessage.sender_id == uid,
+                    ChatMessage.recipient_id == current_user.id,
+                    ChatMessage.is_read == False
+                )
+            ) or 0
+
+            conversation_list.append({
+                'user': user,
+                'last_message': last_msg,
+                'unread_count': unread
+            })
+
+    conversation_list.sort(key=lambda x: x['last_message'].timestamp if x['last_message'] else datetime.min,
+                           reverse=True)
+
+    return render_template('conversations.html', title='Messages', conversations=conversation_list)

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-comments me-2 text-primary"></i>Conversations</h5>
+                </div>
+                <div class="list-group list-group-flush" id="conversationsList">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white" id="chatHeader" style="display: none;">
+                    <div class="d-flex align-items-center gap-3">
+                        <img id="chatAvatar" src="" class="rounded-circle" style="width: 40px; height: 40px;">
+                        <div>
+                            <h6 id="chatUsername" class="mb-0"></h6>
+                            <small id="chatStatus" class="text-muted"></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="chatBody" style="display: none; height: 400px; overflow-y: auto;">
+                    <div id="messagesList">
+                        <div class="text-center text-muted">Select a conversation to start messaging</div>
+                    </div>
+                </div>
+                <div class="card-footer" id="chatFooter" style="display: none;">
+                    <form id="messageForm" class="d-flex gap-2">
+                        <input type="hidden" id="recipientId">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Type a private message...">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRecipientId = null;
+let messageInterval = null;
+let lastMessageTime = 0;
+
+function loadConversations() {
+    fetch('/conversations-list-api')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('conversationsList');
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">No conversations yet</p>
+                        <small class="text-muted">Message someone to start a conversation</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = data.map(conv => `
+                <a href="#" class="list-group-item list-group-item-action" onclick="loadChat(${conv.user_id}, '${conv.username}', '${conv.avatar}'); return false;">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="${conv.avatar}" class="rounded-circle" style="width: 40px; height: 40px;">
+                        <div class="flex-grow-1">
+                            <strong>${escapeHtml(conv.username)}</strong>
+                            <div class="small text-muted">${escapeHtml(conv.last_message)}</div>
+                        </div>
+                        ${conv.unread_count > 0 ? `<span class="badge bg-danger rounded-pill">${conv.unread_count}</span>` : ''}
+                    </div>
+                </a>
+            `).join('');
+        });
+}
+
+function loadChat(userId, username, avatar) {
+    currentRecipientId = userId;
+    document.getElementById('chatHeader').style.display = 'block';
+    document.getElementById('chatBody').style.display = 'block';
+    document.getElementById('chatFooter').style.display = 'block';
+    document.getElementById('chatUsername').innerHTML = username;
+    document.getElementById('chatAvatar').src = avatar;
+    document.getElementById('recipientId').value = userId;
+    
+    fetchMessages();
+    
+    if (messageInterval) clearInterval(messageInterval);
+    messageInterval = setInterval(fetchNewMessages, 3000);
+}
+
+function fetchMessages() {
+    if (!currentRecipientId) return;
+    
+    fetch(`/get_private_messages/${currentRecipientId}`)
+        .then(response => response.json())
+        .then(messages => {
+            const container = document.getElementById('messagesList');
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted">No messages yet. Send a message!</div>';
+                return;
+            }
+            
+            container.innerHTML = messages.map(msg => `
+                <div class="d-flex ${msg.is_mine ? 'justify-content-end' : 'justify-content-start'} mb-3">
+                    <div class="message-bubble ${msg.is_mine ? 'bg-primary text-white' : 'bg-light'} rounded-3 p-2 px-3" style="max-width: 70%;">
+                        <p class="mb-0 small">${escapeHtml(msg.message)}</p>
+                        <small class="${msg.is_mine ? 'text-white-50' : 'text-muted'}" style="font-size: 10px;">
+                            ${new Date(msg.timestamp * 1000).toLocaleTimeString()}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+            scrollToBottom();
+        });
+}
+
+function fetchNewMessages() {
+    if (!currentRecipientId) return;
+    
+    fetch(`/get_private_messages/${currentRecipientId}`)
+        .then(response => response.json())
+        .then(messages => {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg && lastMsg.timestamp > lastMessageTime) {
+                fetchMessages();
+                lastMessageTime = lastMsg.timestamp;
+            }
+        });
+}
+
+function sendPrivateMessage(e) {
+    e.preventDefault();
+    const message = document.getElementById('messageInput').value.trim();
+    if (!message || !currentRecipientId) return;
+    
+    const formData = new URLSearchParams();
+    formData.append('message', message);
+    
+    fetch(`/send_private_message/${currentRecipientId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('messageInput').value = '';
+            fetchMessages();
+            lastMessageTime = data.timestamp;
+        } else {
+            alert(data.error || 'Failed to send message');
+        }
+    });
+}
+
+function scrollToBottom() {
+    const container = document.getElementById('chatBody');
+    container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+document.getElementById('messageForm')?.addEventListener('submit', sendPrivateMessage);
+
+loadConversations();
+setInterval(loadConversations, 10000);
+</script>
+
+<style>
+.message-bubble {
+    word-wrap: break-word;
+}
+.list-group-item {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.list-group-item:hover {
+    background: var(--hover-bg);
+}
+</style>
+{% endblock %}

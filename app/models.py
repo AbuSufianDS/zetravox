@@ -632,12 +632,13 @@ class ChatMessage(db.Model):
     sender_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
     recipient_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
     message: so.Mapped[str] = so.mapped_column(sa.String(1000))
+    image_url: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
     is_read: so.Mapped[bool] = so.mapped_column(default=False)
+    is_delivered: so.Mapped[bool] = so.mapped_column(default=False)
     timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
 
     sender: so.Mapped[User] = so.relationship(foreign_keys=[sender_id])
     recipient: so.Mapped[User] = so.relationship(foreign_keys=[recipient_id])
-
 
 class Post(SearchableMixin, db.Model):
     __tablename__ = 'post'
@@ -946,8 +947,25 @@ class DataDeletionRequest(db.Model):
 
     user = db.relationship('User', foreign_keys=[user_id])
 
+
+class PasswordResetOTP(db.Model):
+    __tablename__ = 'password_reset_otp'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
+    otp_code: so.Mapped[str] = so.mapped_column(sa.String(6))
+    expires_at: so.Mapped[datetime] = so.mapped_column()
+    is_used: so.Mapped[bool] = so.mapped_column(default=False)
+    created_at: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+
+    user: so.Mapped[User] = so.relationship(foreign_keys=[user_id])
+
+    def is_valid(self):
+        return not self.is_used and self.expires_at > datetime.now(timezone.utc)
+
 @login.user_loader
 def load_user(id):
     return db.session.get(User, int(id))
+
+
 
 

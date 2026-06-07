@@ -1,36 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="card">
-        <div class="card-header">
-            <h5><i class="fas fa-comments me-2"></i>Direct Messages</h5>
-        </div>
-        <div class="list-group list-group-flush">
-            {% for conv in conversations %}
-                <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="list-group-item list-group-item-action">
-                    <div class="d-flex">
-                        <img src="{{ conv.user.avatar(40) }}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
-                        <div class="flex-grow-1">
-                            <strong>{{ conv.user.username }}</strong>
-                            {% if conv.unread_count > 0 %}
-                                <span class="badge bg-danger rounded-pill">{{ conv.unread_count }}</span>
-                            {% endif %}
-                            <div class="text-muted small">
-                                {{ conv.last_message.message[:50] if conv.last_message else 'No messages yet' }}
-                            </div>
-                        </div>
-                        <small class="text-muted">
-                            {{ moment(conv.last_message.timestamp).fromNow() if conv.last_message else '' }}
-                        </small>
-                    </div>
-                </a>
-            {% else %}
-                <div class="text-center text-muted p-5">
-                    <i class="fas fa-inbox fa-3x mb-3"></i>
-                    <p>No conversations yet. Start a chat with someone!</p>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-comments me-2 text-primary"></i>Messages</h5>
                 </div>
-            {% endfor %}
+                <div class="list-group list-group-flush">
+                    {% if conversations %}
+                        {% for conv in conversations %}
+                        <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="{{ conv.user.avatar(48) }}" class="rounded-circle" style="width: 48px; height: 48px;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>{{ conv.user.username }}</strong>
+                                        {% if conv.unread_count > 0 %}
+                                        <span class="badge bg-danger rounded-pill">{{ conv.unread_count }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="small text-muted">
+                                        {{ conv.last_message.message[:50] if conv.last_message else 'No messages yet' }}
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    {% if conv.last_message %}
+                                        {{ conv.last_message.timestamp.strftime('%H:%M') }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center p-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No messages yet</p>
+                            <a href="{{ url_for('main.discover') }}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Find People
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

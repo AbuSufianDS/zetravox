@@ -60,3 +60,11 @@ def send_follow_notification(user_id, follower_username):
         'type': 'follow',
         'message': f'{follower_username} started following you'
     })
+
+def send_message_notification(user_id, from_username, message_preview):
+    create_notification(user_id, 'message', {
+        'from_user': from_username,
+        'type': 'private_message',
+        'message': message_preview,
+        'notification_type': 'message'
+    })

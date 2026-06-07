@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.verify-container {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.verify-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 40px;
+    max-width: 450px;
+    width: 100%;
+}
+.otp-input-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 30px 0;
+}
+.otp-input {
+    width: 50px;
+    height: 60px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+.otp-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+.timer-text {
+    text-align: center;
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 15px;
+}
+.resend-link {
+    text-align: center;
+    margin-top: 20px;
+}
+.resend-link a {
+    color: #667eea;
+    text-decoration: none;
+}
+</style>
+
+<div class="verify-container">
+    <div class="verify-card">
+        <div class="text-center mb-4">
+            <i class="fas fa-envelope-open-text fa-3x" style="color: #667eea;"></i>
+            <h3 class="mt-3">Verify Your Identity</h3>
+            <p class="text-muted">We sent a 6-digit code to <strong>{{ email }}</strong></p>
+        </div>
+        
+        <form method="POST" id="otpForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="otp_code" id="otpCode">
+            
+            <div class="otp-input-group">
+                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="moveToNext(this, 0)">
+                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="moveToNext(this, 1)">
+                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="moveToNext(this, 2)">
+                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="moveToNext(this, 3)">
+                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="moveToNext(this, 4)">
+                <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="moveToNext(this, 5)">
+            </div>
+            
+            <div class="timer-text" id="timer">Code expires in 10:00</div>
+            
+            <button type="submit" class="btn-gradient mt-3">
+                <i class="fas fa-check-circle me-2"></i>Verify Code
+            </button>
+        </form>
+        
+        <div class="resend-link">
+            <a href="#" onclick="resendCode()">Didn't receive code? Resend</a>
+        </div>
+        
+        <div class="back-link text-center mt-3">
+            <a href="{{ url_for('auth.forgot_password') }}">← Back</a>
+        </div>
+    </div>
+</div>
+
+<script>
+let timerInterval;
+let timeLeft = 600; // 10 minutes in seconds
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('timer').innerHTML = 'Code expired. Please request a new one.';
+            document.getElementById('timer').style.color = '#e74c3c';
+        } else {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').innerHTML = `Code expires in ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timeLeft--;
+        }
+    }, 1000);
+}
+
+function moveToNext(input, index) {
+    if (input.value.length === 1) {
+        const nextInput = document.querySelectorAll('.otp-input')[index + 1];
+        if (nextInput) {
+            nextInput.focus();
+        } else {
+            // Auto-submit when all digits are entered
+            const allInputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            allInputs.forEach(inp => otp += inp.value);
+            if (otp.length === 6) {
+                document.getElementById('otpCode').value = otp;
+                document.getElementById('otpForm').submit();
+            }
+        }
+    }
+}
+
+function resendCode() {
+    fetch('/auth/resend-otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reset timer
+            clearInterval(timerInterval);
+            timeLeft = 600;
+            startTimer();
+            
+            // Clear OTP inputs
+            document.querySelectorAll('.otp-input').forEach(inp => inp.value = '');
+            document.querySelectorAll('.otp-input')[0].focus();
+            
+            alert('New OTP sent to your email!');
+        } else {
+            alert('Failed to resend OTP. Please try again.');
+        }
+    });
+}
+
+// Add event listeners for paste
+document.querySelectorAll('.otp-input').forEach((input, idx) => {
+    input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text');
+        if (pastedData.length === 6 && /^\d+$/.test(pastedData)) {
+            const inputs = document.querySelectorAll('.otp-input');
+            for (let i = 0; i < 6; i++) {
+                inputs[i].value = pastedData[i];
+            }
+            document.getElementById('otpCode').value = pastedData;
+            document.getElementById('otpForm').submit();
+        }
+    });
+});
+
+startTimer();
+</script>
+{% endblock %}

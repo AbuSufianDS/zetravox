@@ -36,3 +36,8 @@ class Config:
     DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
     OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
     OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['on', 'true', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')

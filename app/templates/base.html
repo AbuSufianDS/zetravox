@@ -244,15 +244,14 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}" title="Login"><i class="fas fa-sign-in-alt"></i></a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}" title="Register"><i class="fas fa-user-plus"></i></a></li>
             {% else %}
+            <!-- Private Messages Icon -->
             <li class="nav-item">
-              <a class="nav-link position-relative" href="{{ url_for('main.messages') }}" title="Messages">
-                <i class="fas fa-envelope"></i>
-                {% set unread_count = current_user.unread_message_count() %}
-                {% if unread_count > 0 %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px;">{{ unread_count }}</span>
-                {% endif %}
-              </a>
-            </li>
+    <a class="nav-link position-relative" href="/conversations" title="Private Messages">
+        <i class="fas fa-envelope"></i>
+        <span id="unreadMessagesBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; display: none;">0</span>
+    </a>
+</li>
+            <!-- Connection Requests -->
             <li class="nav-item">
               <a class="nav-link position-relative" href="{{ url_for('main.friend_requests_page') }}" title="Connection Requests">
                 <i class="fas fa-user-plus"></i>
@@ -262,12 +261,8 @@
                 {% endif %}
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('main.conversations') }}" title="Conversations">
-                <i class="fas fa-comments"></i>
-              </a>
-            </li>
 
+            <!-- Notifications Bell -->
             <li class="nav-item dropdown">
               <a class="nav-link position-relative dropdown-toggle" href="#" id="notificationBell" data-bs-toggle="dropdown" aria-expanded="false" title="Activity">
                 <i class="fas fa-bell"></i>
@@ -281,6 +276,7 @@
               </div>
             </li>
 
+            <!-- Profile Dropdown -->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" title="Profile">
                 <img src="{{ current_user.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
@@ -337,19 +333,41 @@
     <script>
     let notificationInterval = null;
 
-    function applySavedTheme() {
-    const savedTheme = localStorage.getItem('selected_theme');
-    if (savedTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else if (savedTheme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-    } else if (savedTheme === 'system') {
-        document.documentElement.removeAttribute('data-theme');
+    // Update unread messages count
+    function updateUnreadMessagesCount() {
+        fetch('/unread-messages-count')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('unreadMessagesBadge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.style.display = 'inline-block';
+                        badge.innerText = data.count > 99 ? '99+' : data.count;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching unread count:', error));
     }
-}
 
-applySavedTheme();
+    setInterval(updateUnreadMessagesCount, 30000);
+    updateUnreadMessagesCount();
 
+    // Apply saved theme
+    function applySavedTheme() {
+        const savedTheme = localStorage.getItem('selected_theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else if (savedTheme === 'system') {
+            document.documentElement.removeAttribute('data-theme');
+        }
+    }
+    applySavedTheme();
+
+    // Notification functions
     function updateNotificationBadge(count) {
         const badge = document.getElementById('notification-count');
         if (badge) {
@@ -381,7 +399,8 @@ applySavedTheme();
             'share': '<i class="fas fa-share-alt text-info"></i>',
             'friend_request': '<i class="fas fa-user-friends text-primary"></i>',
             'friend_accepted': '<i class="fas fa-check-circle text-success"></i>',
-            'test': '<i class="fas fa-bell text-warning"></i>'
+            'test': '<i class="fas fa-bell text-warning"></i>',
+            'message': '<i class="fas fa-envelope text-info"></i>'
         };
         return icons[name] || '<i class="fas fa-bell text-secondary"></i>';
     }
@@ -394,6 +413,7 @@ applySavedTheme();
             case 'share': return `<strong>${escapeHtml(notif.from_user)}</strong> reposted your content`;
             case 'friend_request': return `<strong>${escapeHtml(notif.from_user)}</strong> wants to connect with you`;
             case 'friend_accepted': return `<strong>${escapeHtml(notif.from_user)}</strong> accepted your connection request`;
+            case 'message': return `<strong>${escapeHtml(notif.from_user)}</strong> sent you a private message`;
             case 'test': return `🔔 ${escapeHtml(notif.message || 'Test notification')}`;
             default: return escapeHtml(notif.message || 'You have new activity');
         }
@@ -406,6 +426,8 @@ applySavedTheme();
             return `/user/${notif.from_user}`;
         } else if (notif.name === 'friend_request' || notif.name === 'friend_accepted') {
             return `/friend-requests`;
+        } else if (notif.name === 'message') {
+            return `/conversations`;
         }
         return '#';
     }
@@ -505,6 +527,7 @@ applySavedTheme();
     notificationInterval = setInterval(checkNewNotifications, 30000);
     checkNewNotifications();
 
+    // Post interaction functions
     function applaudPost(postId, reaction) {
         fetch(`/react_post/${postId}/${reaction}`)
             .then(response => response.json())

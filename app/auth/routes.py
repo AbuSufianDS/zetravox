@@ -1,17 +1,18 @@
-from flask import render_template, redirect, url_for, flash, request, session
 from urllib.parse import urlsplit
-from datetime import datetime
-from flask_login import login_user, logout_user, current_user
 from flask_babel import _
-import sqlalchemy as sa
-from app import db
-from app.auth import bp
-from app.auth.forms import LoginForm, RegistrationForm, \
-    ResetPasswordRequestForm, ResetPasswordForm
-from app.models import User
 from app.auth.email import send_password_reset_email
 from app.models import LoginHistory, SecurityEvent, UserSession
 import hashlib
+from flask import render_template, flash, redirect, url_for, request, jsonify, session
+from flask_login import current_user, login_user, logout_user, login_required
+from datetime import datetime, timezone
+import sqlalchemy as sa
+from app import db
+from app.auth import bp
+from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.models import User
+from app.otp_helper import create_password_reset_otp, send_otp_email, verify_otp
+from functools import wraps
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -131,34 +132,116 @@ def register():
                            form=form)
 
 
-@bp.route('/reset_password_request', methods=['GET', 'POST'])
-def reset_password_request():
+@bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+
     form = ResetPasswordRequestForm()
+
     if form.validate_on_submit():
-        user = db.session.scalar(
-            sa.select(User).where(User.email == form.email.data))
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+
         if user:
-            send_password_reset_email(user)
-        flash(
-            _('Check your email for the instructions to reset your password'))
-        return redirect(url_for('auth.login'))
-    return render_template('auth/reset_password_request.html',
-                           title=_('Reset Password'), form=form)
+            # Create OTP
+            otp_code = create_password_reset_otp(user.id)
+
+            # Send email
+            if send_otp_email(email, otp_code, user.username):
+                session['reset_email'] = email
+                session['reset_user_id'] = user.id
+                flash('OTP sent to your email address. Please check your inbox.', 'success')
+                return redirect(url_for('auth.verify_otp'))
+            else:
+                flash('Failed to send OTP. Please try again later.', 'danger')
+        else:
+            flash('No account found with this email address.', 'danger')
+
+        return redirect(url_for('auth.forgot_password'))
+
+    return render_template('auth/forgot_password.html', title='Forgot Password', form=form)
 
 
-@bp.route('/reset_password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
+@bp.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
-    user = User.verify_reset_password_token(token)
-    if not user:
+
+    if 'reset_email' not in session:
+        flash('Please start the password reset process again.', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+
+    if request.method == 'POST':
+        otp_code = request.form.get('otp_code', '').strip()
+        user_id = session.get('reset_user_id')
+
+        if not user_id:
+            flash('Session expired. Please try again.', 'danger')
+            return redirect(url_for('auth.forgot_password'))
+
+        if verify_otp(user_id, otp_code):
+            session['otp_verified'] = True
+            flash('OTP verified! Please create your new password.', 'success')
+            return redirect(url_for('auth.reset_password'))
+        else:
+            flash('Invalid or expired OTP. Please try again.', 'danger')
+
+    return render_template('auth/verify_otp.html', title='Verify OTP', email=session.get('reset_email'))
+
+
+@bp.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+
+    if not session.get('otp_verified'):
+        flash('Please verify your OTP first.', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+
+    user_id = session.get('reset_user_id')
+    if not user_id:
+        flash('Session expired. Please try again.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+
+    user = User.query.get(user_id)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+
     form = ResetPasswordForm()
+
     if form.validate_on_submit():
         user.set_password(form.password.data)
         db.session.commit()
-        flash(_('Your password has been reset.'))
+
+        # Clear session
+        session.pop('reset_email', None)
+        session.pop('reset_user_id', None)
+        session.pop('otp_verified', None)
+
+        flash('Your password has been reset successfully! Please login with your new password.', 'success')
         return redirect(url_for('auth.login'))
-    return render_template('auth/reset_password.html', form=form)
+
+    return render_template('auth/reset_password_new.html', title='Reset Password', form=form)
+
+
+@bp.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    try:
+        email = session.get('reset_email')
+        if not email:
+            return jsonify({'success': False, 'error': 'Session expired'})
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({'success': False, 'error': 'User not found'})
+
+        otp_code = create_password_reset_otp(user.id)
+
+        if send_otp_email(email, otp_code, user.username):
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to send email'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
