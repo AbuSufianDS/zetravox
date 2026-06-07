@@ -4,7 +4,8 @@ services:
     env: python
     buildCommand: |
       pip install -r requirements_render.txt
-    startCommand: gunicorn microblog:app --workers 1 --threads 2 --timeout 120
+      echo "Build complete"
+    startCommand: gunicorn microblog_render:app --workers 1 --threads 1 --timeout 120 --max-requests 10
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -16,6 +17,12 @@ services:
           property: connectionString
       - key: SPAM_DETECTION_DISABLED
         value: true
+      - key: RENDER
+        value: true
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 10000
     plan: free
 
 databases:
