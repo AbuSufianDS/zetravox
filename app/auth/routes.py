@@ -11,8 +11,7 @@ from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
-from app.otp_helper import create_password_reset_otp, send_otp_email, check_otp
-from functools import wraps
+from app.otp_helper import create_password_reset_otp, send_otp_email
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -163,6 +162,11 @@ def forgot_password():
     return render_template('auth/forgot_password.html', title='Forgot Password', form=form)
 
 
+# Import with the new name
+from app.otp_helper import create_password_reset_otp, send_otp_email, check_otp_code
+
+
+# Then in the route, use check_otp_code
 @bp.route('/verify-otp', methods=['GET', 'POST'])
 def verify_otp():
     if current_user.is_authenticated:
@@ -180,7 +184,7 @@ def verify_otp():
             flash('Session expired. Please try again.', 'danger')
             return redirect(url_for('auth.forgot_password'))
 
-        if verify_otp(user_id, otp_code):
+        if check_otp_code(user_id, otp_code):  # Use the renamed function
             session['otp_verified'] = True
             flash('OTP verified! Please create your new password.', 'success')
             return redirect(url_for('auth.reset_password'))
@@ -188,8 +192,6 @@ def verify_otp():
             flash('Invalid or expired OTP. Please try again.', 'danger')
 
     return render_template('auth/verify_otp.html', title='Verify OTP', email=session.get('reset_email'))
-
-
 @bp.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
     if current_user.is_authenticated:
