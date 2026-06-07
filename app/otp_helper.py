@@ -1,10 +1,11 @@
 import random
 import requests
 from datetime import datetime, timedelta, timezone
+import os
 from app import db
 from app.models import PasswordResetOTP
 
-BREVO_API_KEY = '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'
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
 
 
 def generate_otp():
@@ -12,6 +13,11 @@ def generate_otp():
 
 
 def send_otp_email(email, otp_code, username):
+    if not BREVO_API_KEY:
+        print(" BREVO_API_KEY not set. OTP printed below only.")
+        print(f" OTP for {email}: {otp_code}")
+        return True
+
     print(f"\n📧 Attempting to send OTP to {email}...")
 
     try:
@@ -29,12 +35,12 @@ def send_otp_email(email, otp_code, username):
         }
         response = requests.post(url, json=data, headers=headers)
         if response.status_code == 201:
-            print(f"✅ Email sent to {email}")
+            print(f" Email sent to {email}")
             return True
     except Exception as e:
         print(f"Email error: {e}")
 
-    print(f"📝 OTP for {email}: {otp_code}")
+    print(f" OTP for {email}: {otp_code}")
     return True
 
 
@@ -50,7 +56,7 @@ def create_password_reset_otp(user_id):
     )
     db.session.add(otp_record)
     db.session.commit()
-    print(f"✅ OTP created: {otp_code}")
+    print(f"OTP created: {otp_code}")
     return otp_code
 
 
@@ -72,11 +78,11 @@ def check_otp_code(user_id, otp_code):
         if expires_at > now:
             otp_record.is_used = True
             db.session.commit()
-            print(f"✅ OTP verified for user {user_id}")
+            print(f" OTP verified for user {user_id}")
             return True
         else:
-            print(f"❌ OTP expired for user {user_id}")
+            print(f" OTP expired for user {user_id}")
     else:
-        print(f"❌ OTP not found for user {user_id}")
+        print(f" OTP not found for user {user_id}")
 
     return False
