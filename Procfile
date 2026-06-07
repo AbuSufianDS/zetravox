@@ -1,1 +1,1 @@
-web: python add_read_column.py && gunicorn microblog:app --workers 2 --threads 4 --timeout 120
+web: gunicorn wsgi:app --workers 1 --threads 2 --timeout 120
