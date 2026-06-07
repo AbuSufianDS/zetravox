@@ -11,7 +11,7 @@ from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
-from app.otp_helper import create_password_reset_otp, send_otp_email, verify_otp
+from app.otp_helper import create_password_reset_otp, send_otp_email, check_otp
 from functools import wraps
 
 
