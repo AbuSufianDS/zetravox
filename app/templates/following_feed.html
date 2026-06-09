@@ -1,44 +1,187 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    <h3><i class="fas fa-rss text-primary"></i> Following</h3>
-                    <p class="text-muted">Updates from people you follow</p>
-                </div>
-            </div>
+<style>
+.following-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-            {% if not posts %}
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
-                        <h5>No posts from people you follow</h5>
-                        <p class="text-muted">Follow more people to see their updates here!</p>
-                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">Find People</a>
-                    </div>
-                </div>
-            {% else %}
-                {% for post in posts %}
-                    {% include '_post.html' %}
-                {% endfor %}
-            {% endif %}
-            
-            {% if next_url or prev_url %}
-            <nav>
-                <ul class="pagination justify-content-center">
-                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ prev_url or '#' }}">← Newer</a>
-                    </li>
-                    <li class="page-item{% if not next_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ next_url or '#' }}">Older →</a>
-                    </li>
-                </ul>
-            </nav>
-            {% endif %}
+.following-hero {
+    background: linear-gradient(135deg, #3b82f608, #2563eb08);
+    border-radius: 32px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(59,130,246,0.1);
+}
+
+.following-hero-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.following-hero-icon i {
+    font-size: 32px;
+    color: white;
+    animation: counter-spin 3s linear infinite;
+}
+
+@keyframes counter-spin {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+}
+
+.following-hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.following-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--hover-bg);
+    padding: 8px 20px;
+    border-radius: 40px;
+    margin-top: 16px;
+}
+
+.following-stats i {
+    color: #3b82f6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #3b82f610, #2563eb10);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #3b82f6;
+}
+
+.btn-discover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    transition: all 0.3s;
+}
+
+.btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59,130,246,0.4);
+    color: white;
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+</style>
+
+<div class="following-premium">
+
+    <div class="following-hero">
+        <div class="following-hero-icon">
+            <i class="fas fa-rss"></i>
+        </div>
+        <h1>Following Feed</h1>
+        <p>Posts from people you follow</p>
+        <div class="following-stats">
+            <i class="fas fa-user-check"></i>
+            <span>{{ current_user.following_count() }} Following</span>
         </div>
     </div>
+
+    {% if posts %}
+    <div class="posts-container">
+        {% for post in posts %}
+            {% include '_post.html' %}
+        {% endfor %}
+    </div>
+
+    {% if next_url or prev_url %}
+    <div class="pagination" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+        {% if prev_url %}
+        <a href="{{ prev_url }}" class="pagination-btn"><i class="fas fa-arrow-left"></i> Newer</a>
+        {% endif %}
+        {% if next_url %}
+        <a href="{{ next_url }}" class="pagination-btn">Older <i class="fas fa-arrow-right"></i></a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-rss"></i>
+        </div>
+        <h4>No posts from people you follow</h4>
+        <p class="text-muted">Follow people to see their updates here</p>
+        <a href="{{ url_for('main.discover') }}" class="btn-discover">
+            <i class="fas fa-compass"></i> Discover People
+        </a>
+    </div>
+    {% endif %}
+
 </div>
+
+<style>
+.pagination-btn {
+    padding: 8px 20px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+</style>
 {% endblock %}

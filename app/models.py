@@ -247,12 +247,30 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return self.friends.count()
 
     def send_friend_request(self, user):
-        if not self.has_friend_request_pending(user) and user != self:
-            request = FriendRequest(from_user_id=self.id, to_user_id=user.id)
-            db.session.add(request)
-            db.session.commit()
-            return True
-        return False
+        if user == self:
+            return False
+
+        existing = FriendRequest.query.filter(
+            ((FriendRequest.from_user_id == self.id) & (FriendRequest.to_user_id == user.id)) |
+            ((FriendRequest.from_user_id == user.id) & (FriendRequest.to_user_id == self.id))
+        ).first()
+
+        if existing:
+            return False
+
+        if self.is_friend_with(user):
+            return False
+
+        friend_request = FriendRequest(
+            from_user_id=self.id,
+            to_user_id=user.id,
+            status='pending',
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        db.session.add(friend_request)
+        db.session.commit()
+        return True
 
     def has_friend_request_pending(self, user):
         return FriendRequest.query.filter_by(
@@ -530,6 +548,7 @@ class PostMedia(db.Model):
 
     post = db.relationship('Post', backref=db.backref('media_items', lazy='dynamic', cascade='all, delete-orphan'))
 
+
 class Like(db.Model):
     __tablename__ = 'like'
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -539,19 +558,8 @@ class Like(db.Model):
 
     __table_args__ = (sa.UniqueConstraint('user_id', 'post_id', name='unique_like'),)
 
-
-class Comment(db.Model):
-    __tablename__ = 'comment'
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    body: so.Mapped[str] = so.mapped_column(sa.String(500))
-    timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
-    post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('post.id', ondelete='CASCADE'), index=True)
-    is_hidden: so.Mapped[bool] = so.mapped_column(default=False)
-
-    author: so.Mapped[User] = so.relationship(foreign_keys=[user_id])
-    post: so.Mapped['Post'] = so.relationship(foreign_keys=[post_id], back_populates='comments')
-
+    user = db.relationship('User', backref=db.backref('likes', lazy='dynamic'))
+    post = db.relationship('Post', backref=db.backref('likes_ref', lazy='dynamic'))
 
 class SharedPost(db.Model):
     __tablename__ = 'shared_post'
@@ -628,18 +636,62 @@ class StoryView(db.Model):
 
 class ChatMessage(db.Model):
     __tablename__ = 'chat_message'
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    sender_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
-    recipient_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
-    message: so.Mapped[str] = so.mapped_column(sa.String(1000))
-    image_url: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
-    is_read: so.Mapped[bool] = so.mapped_column(default=False)
-    is_delivered: so.Mapped[bool] = so.mapped_column(default=False)
-    timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    message = db.Column(db.String(1000))
+    image_url = db.Column(db.String(500))
+    is_read = db.Column(db.Boolean, default=False)
+    is_delivered = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    reply_to_id = db.Column(db.Integer, db.ForeignKey('chat_message.id'), nullable=True)
+    reactions = db.Column(db.Text, default='{}')
 
-    sender: so.Mapped[User] = so.relationship(foreign_keys=[sender_id])
-    recipient: so.Mapped[User] = so.relationship(foreign_keys=[recipient_id])
+    @property
+    def reaction_summary(self):
+        from collections import Counter
+        reactions = self.reaction_list.all()
+        if not reactions:
+            return {}
 
+        reaction_counts = Counter([r.reaction for r in reactions])
+        return dict(reaction_counts)
+
+    def get_user_reaction(self, user_id):
+        reaction = MessageReaction.query.filter_by(
+            message_id=self.id,
+            user_id=user_id
+        ).first()
+        return reaction.reaction if reaction else None
+
+    def add_reaction(self, user_id, reaction):
+        existing = MessageReaction.query.filter_by(
+            message_id=self.id,
+            user_id=user_id
+        ).first()
+
+        if existing:
+            if existing.reaction == reaction:
+                db.session.delete(existing)
+                db.session.commit()
+                return {'action': 'removed', 'reaction': reaction}
+            else:
+                existing.reaction = reaction
+                db.session.commit()
+                return {'action': 'updated', 'reaction': reaction}
+        else:
+            new_reaction = MessageReaction(
+                message_id=self.id,
+                user_id=user_id,
+                reaction=reaction
+            )
+            db.session.add(new_reaction)
+            db.session.commit()
+            return {'action': 'added', 'reaction': reaction}
+
+    sender = db.relationship('User', foreign_keys=[sender_id])
+    recipient = db.relationship('User', foreign_keys=[recipient_id])
+    reply_to = db.relationship('ChatMessage', remote_side=[id], backref='replies')
 class Post(SearchableMixin, db.Model):
     __tablename__ = 'post'
     __searchable__ = ['body']
@@ -661,7 +713,7 @@ class Post(SearchableMixin, db.Model):
     share_count: so.Mapped[int] = so.mapped_column(default=0)
 
     author: so.Mapped[User] = so.relationship(back_populates='posts')
-    comments: so.WriteOnlyMapped['Comment'] = so.relationship(back_populates='post', passive_deletes=True)
+    comments = db.relationship('Comment', back_populates='post', lazy='dynamic', cascade='all, delete-orphan')
     likes: so.WriteOnlyMapped['Like'] = so.relationship(passive_deletes=True)
     reactions: so.WriteOnlyMapped['PostReaction'] = so.relationship(passive_deletes=True)
     hashtags: so.WriteOnlyMapped['PostHashtag'] = so.relationship(passive_deletes=True)
@@ -707,9 +759,19 @@ class Post(SearchableMixin, db.Model):
             self.comments.select().where(Comment.is_hidden == False).subquery()))
 
     def get_comments(self):
-        return db.session.scalars(
-            self.comments.select().where(Comment.is_hidden == False).order_by(Comment.timestamp.asc())
-        ).all()
+        try:
+            if hasattr(self.comments, 'filter'):
+                return self.comments.filter(Comment.is_hidden == False).order_by(Comment.timestamp.asc()).all()
+            else:
+                return db.session.query(Comment).filter(
+                    Comment.post_id == self.id,
+                    Comment.is_hidden == False
+                ).order_by(Comment.timestamp.asc()).all()
+        except Exception:
+            return db.session.query(Comment).filter(
+                Comment.post_id == self.id,
+                Comment.is_hidden == False
+            ).order_by(Comment.timestamp.asc()).all()
 
     def get_reaction_counts(self):
         reactions = db.session.execute(
@@ -734,6 +796,21 @@ class Post(SearchableMixin, db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.body[:50])
+
+    def comment_count(self):
+        try:
+            if hasattr(self.comments, 'count'):
+                return self.comments.filter(Comment.is_hidden == False).count()
+            else:
+                return db.session.query(Comment).filter(
+                    Comment.post_id == self.id,
+                    Comment.is_hidden == False
+                ).count()
+        except Exception:
+            return db.session.query(Comment).filter(
+                Comment.post_id == self.id,
+                Comment.is_hidden == False
+            ).count()
 
 
 class HiddenPost(db.Model):
@@ -945,7 +1022,7 @@ class DataDeletionRequest(db.Model):
     status = db.Column(db.String(20), default='pending')
     request_ip = db.Column(db.String(45))
 
-    user = db.relationship('User', foreign_keys=[user_id])
+    user = db.relationship('User', foreign_keys=[user_id], overlaps="login_history,user_rel")
 
 
 class PasswordResetOTP(db.Model):
@@ -961,6 +1038,112 @@ class PasswordResetOTP(db.Model):
 
     def is_valid(self):
         return not self.is_used and self.expires_at > datetime.now(timezone.utc)
+
+
+class MessageReaction(db.Model):
+    __tablename__ = 'message_reaction'
+
+    id = db.Column(db.Integer, primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('chat_message.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    reaction = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    message = db.relationship('ChatMessage',
+                              backref=db.backref('reaction_list', lazy='dynamic', cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('chat_reactions', lazy='dynamic'))
+
+    __table_args__ = (
+        db.UniqueConstraint('message_id', 'user_id', name='unique_user_message_reaction'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'message_id': self.message_id,
+            'user_id': self.user_id,
+            'reaction': self.reaction,
+            'username': self.user.username if self.user else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+
+class Comment(db.Model):
+    __tablename__ = 'comment'
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    body: so.Mapped[str] = so.mapped_column(sa.String(500))
+    timestamp: so.Mapped[datetime] = so.mapped_column(default=lambda: datetime.now(timezone.utc))
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
+    post_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('post.id', ondelete='CASCADE'), index=True)
+    is_hidden: so.Mapped[bool] = so.mapped_column(default=False)
+
+    parent_id = db.Column(db.Integer, db.ForeignKey('comment.id', ondelete='CASCADE'), nullable=True)
+    replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
+
+    author: so.Mapped[User] = so.relationship(foreign_keys=[user_id])
+    post: so.Mapped['Post'] = so.relationship(foreign_keys=[post_id], back_populates='comments')
+
+    @property
+    def reaction_summary(self):
+        from collections import Counter
+        reactions = self.reaction_list.all()
+        if not reactions:
+            return {}
+        reaction_counts = Counter([r.reaction for r in reactions])
+        return dict(reaction_counts)
+
+    def get_user_reaction(self, user_id):
+        reaction = CommentReaction.query.filter_by(
+            comment_id=self.id,
+            user_id=user_id
+        ).first()
+        return reaction.reaction if reaction else None
+
+    def add_reaction(self, user_id, reaction):
+        from app.models import CommentReaction
+        existing = CommentReaction.query.filter_by(
+            comment_id=self.id,
+            user_id=user_id
+        ).first()
+
+        if existing:
+            if existing.reaction == reaction:
+                db.session.delete(existing)
+                db.session.commit()
+                return {'action': 'removed', 'reaction': reaction}
+            else:
+                existing.reaction = reaction
+                db.session.commit()
+                return {'action': 'updated', 'reaction': reaction}
+        else:
+            new_reaction = CommentReaction(
+                comment_id=self.id,
+                user_id=user_id,
+                reaction=reaction
+            )
+            db.session.add(new_reaction)
+            db.session.commit()
+            return {'action': 'added', 'reaction': reaction}
+
+
+class CommentReaction(db.Model):
+    __tablename__ = 'comment_reaction'
+
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    reaction = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    comment = db.relationship('Comment',
+                              backref=db.backref('reaction_list', lazy='dynamic', cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('comment_reaction_list', lazy='dynamic'))
+
+    __table_args__ = (
+        db.UniqueConstraint('comment_id', 'user_id', name='unique_user_comment_reaction'),
+    )
+
 
 @login.user_loader
 def load_user(id):

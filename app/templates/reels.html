@@ -1,19 +1,165 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-video me-2 text-danger"></i>Short Clips</h4>
-                <small class="text-muted">Quick videos from your network</small>
-            </div>
-            <div class="card-body text-center py-5">
-                <i class="fas fa-video fa-3x text-muted mb-3"></i>
-                <p class="text-muted">Short Clips feature coming soon!</p>
-                <p class="small text-muted">Watch short, entertaining videos from people you follow.</p>
+<style>
+.reels-premium {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.reels-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.reels-header-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: pulse 2s infinite;
+}
+
+.reels-header-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.reels-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.reels-preview {
+    background: linear-gradient(135deg, #ef444408, #dc262608);
+    border-radius: 28px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 2px dashed var(--border-color);
+}
+
+.preview-player {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.preview-placeholder {
+    aspect-ratio: 9/16;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: white;
+}
+
+.preview-placeholder i {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.feature-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: #ef4444;
+}
+
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #ef444420, #dc262620);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+}
+
+.feature-icon i {
+    font-size: 24px;
+    color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .reels-premium { padding: 12px; }
+    .feature-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="reels-premium">
+
+    <div class="reels-header">
+        <div class="reels-header-icon">
+            <i class="fas fa-video"></i>
+        </div>
+        <h1>Short Clips</h1>
+        <p class="text-muted">Coming Soon</p>
+    </div>
+
+    <div class="reels-preview">
+        <div class="preview-player">
+            <div class="preview-placeholder">
+                <i class="fas fa-video"></i>
+                <p>Preview Mode</p>
+                <small>Short-form videos coming soon</small>
             </div>
         </div>
+    </div>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-music"></i>
+            </div>
+            <h6>Music Library</h6>
+            <small class="text-muted">Add trending tracks</small>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-filter"></i>
+            </div>
+            <h6>Creative Effects</h6>
+            <small class="text-muted">Filters & transitions</small>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h6>Trending Feed</h6>
+            <small class="text-muted">Viral content</small>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <small class="text-muted"><i class="fas fa-clock me-1"></i> Feature in development • Launching soon</small>
     </div>
 </div>
 {% endblock %}

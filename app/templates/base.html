@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {% if title %}
-    <title>{{ title }} - ConnectHub</title>
+    <title>{{ title }} - Zetravox</title>
     {% else %}
-    <title>ConnectHub - Connect with the world</title>
+    <title>Zetravox - Connect the World • Share Your Voice</title>
     {% endif %}
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
     :root {
@@ -22,10 +22,13 @@
         --text-primary: #1a1a2e;
         --text-secondary: #65676b;
         --border-color: #e4e6eb;
-        --navbar-bg: #ffffff;
+        --navbar-bg: rgba(255, 255, 255, 0.95);
         --hover-bg: #f0f2f5;
         --shadow: 0 1px 3px rgba(0,0,0,0.08);
         --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-gold: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
     }
 
     [data-theme="dark"] {
@@ -34,10 +37,16 @@
         --text-primary: #e4e6eb;
         --text-secondary: #b0b3b8;
         --border-color: #3e4042;
-        --navbar-bg: #242526;
+        --navbar-bg: rgba(36, 37, 38, 0.95);
         --hover-bg: #3a3b3c;
         --shadow: 0 1px 3px rgba(0,0,0,0.3);
         --shadow-hover: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     body {
@@ -47,124 +56,605 @@
         transition: background 0.3s ease, color 0.3s ease;
     }
 
-    .navbar {
-        background: var(--navbar-bg) !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        padding: 0.75rem 0;
-        transition: background 0.3s ease;
+    .premium-navbar {
+        background: var(--navbar-bg);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        padding: 0.5rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
     }
 
-    .navbar-brand {
+    .premium-nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .zetravox-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .zetravox-logo:hover {
+        transform: scale(1.02);
+    }
+
+    .logo-container {
+        position: relative;
+        width: 48px;
+        height: 48px;
+    }
+
+    .logo-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+        transition: all 0.3s;
+        filter: drop-shadow(0 4px 8px rgba(102,126,234,0.2));
+    }
+
+    .logo-glow-ring {
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: -1;
+    }
+
+    .zetravox-logo:hover .logo-glow-ring {
+        opacity: 0.6;
+        animation: rotateRing 2s linear infinite;
+    }
+
+    @keyframes rotateRing {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .logo-text-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .logo-brand {
+        font-size: 22px;
         font-weight: 800;
-        font-size: 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
+        letter-spacing: -0.5px;
+        animation: textShine 3s infinite;
     }
 
-    .nav-link {
+    @keyframes textShine {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .logo-tagline {
+        font-size: 8px;
         font-weight: 500;
         color: var(--text-secondary);
-        transition: color 0.2s ease;
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.5rem;
+        letter-spacing: 0.3px;
+        margin-top: -2px;
+        white-space: nowrap;
+    }
+
+    .logo-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #667eea;
+        border-radius: 50%;
+        opacity: 0;
+        animation: floatParticle 3s infinite;
+    }
+
+    .particle:nth-child(1) { top: -5px; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { top: -3px; right: 15%; animation-delay: 0.5s; }
+    .particle:nth-child(3) { bottom: -5px; left: 20%; animation-delay: 1s; }
+    .particle:nth-child(4) { bottom: -3px; right: 25%; animation-delay: 1.5s; }
+    .particle:nth-child(5) { top: 50%; left: -8px; animation-delay: 2s; }
+
+    @keyframes floatParticle {
+        0% { opacity: 0; transform: translateY(0) scale(1); }
+        50% { opacity: 0.8; transform: translateY(-8px) scale(1.5); }
+        100% { opacity: 0; transform: translateY(-15px) scale(0.5); }
+    }
+
+    [data-theme="dark"] .logo-image {
+        filter: brightness(0) invert(1) drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+
+    @media (max-width: 768px) {
+        .logo-container {
+            width: 38px;
+            height: 38px;
+        }
+        .logo-brand {
+            font-size: 16px;
+        }
+        .logo-tagline {
+            font-size: 6px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .logo-tagline {
+            display: none;
+        }
+    }
+
+    .premium-search {
+        flex: 1;
+        max-width: 400px;
         position: relative;
     }
 
-    .nav-link:hover {
-        color: #667eea;
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 14px;
+        z-index: 1;
+        transition: all 0.3s;
+    }
+
+    .premium-search-input {
+        width: 100%;
+        padding: 12px 20px 12px 44px;
         background: var(--hover-bg);
-    }
-
-    .nav-link.active {
-        color: #667eea;
-        background: rgba(102, 126, 234, 0.15);
-    }
-
-    .nav-link i {
-        font-size: 1.2rem;
-    }
-
-    .dropdown-menu {
-        background: var(--bg-card);
-        border: none;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        border-radius: 1rem;
-        padding: 0.5rem;
-    }
-
-    .dropdown-item {
-        border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-        transition: all 0.2s;
+        border: 1px solid var(--border-color);
+        border-radius: 40px;
+        font-size: 14px;
         color: var(--text-primary);
+        transition: all 0.3s;
     }
 
-    .dropdown-item:hover {
+    .premium-search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: var(--bg-card);
+    }
+
+    .search-shortcut {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--border-color);
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-family: monospace;
+    }
+
+    .premium-nav-icons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nav-icon {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent;
+    }
+
+    .nav-icon i {
+        font-size: 20px;
+        transition: all 0.3s;
+    }
+
+    .nav-icon:hover {
+        background: var(--gradient-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .nav-icon:hover i {
+        transform: scale(1.1);
+    }
+
+    .nav-icon.active {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .nav-icon .nav-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ef4444;
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 20px;
+        min-width: 18px;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        animation: pulse 1.5s infinite;
+    }
+
+    .nav-icon .nav-badge.pulse {
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    .nav-tooltip {
+        position: absolute;
+        bottom: -35px;
+        left: 50%;
+        transform: translateX(-50%) scale(0.8);
+        background: #1a1a2e;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+        pointer-events: none;
+        z-index: 100;
+    }
+
+    .nav-icon:hover .nav-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) scale(1);
+    }
+
+    .premium-user-menu {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .user-avatar-ring {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: rotateRing 3s linear infinite;
+    }
+
+    @keyframes rotateRing {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--bg-card);
+    }
+
+    .user-online-dot {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        background: #10b981;
+        border-radius: 50%;
+        border: 2px solid var(--bg-card);
+        animation: pulse 2s infinite;
+    }
+
+    .premium-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 12px;
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        min-width: 280px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s;
+        z-index: 1000;
+        border: 1px solid var(--border-color);
+    }
+
+    .premium-user-menu:hover .premium-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .dropdown-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dropdown-header img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
+
+    .dropdown-header-info h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .dropdown-header-info p {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .dropdown-item-custom {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    .dropdown-item-custom:hover {
         background: var(--hover-bg);
+        transform: translateX(5px);
+    }
+
+    .dropdown-item-custom i {
+        width: 20px;
         color: #667eea;
+    }
+
+    .dropdown-divider {
+        margin: 8px 0;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .dropdown-item-custom.text-danger i {
+        color: #ef4444;
+    }
+
+    .premium-notif-dropdown {
+        width: 380px;
+        max-height: 480px;
+        overflow-y: auto;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 12px;
+        background: var(--bg-card);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s;
+        z-index: 1000;
+        border: 1px solid var(--border-color);
+    }
+
+    .nav-icon.dropdown-toggle.show + .premium-notif-dropdown,
+    .premium-notif-dropdown:hover {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .notif-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .notif-header h6 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .notif-header a {
+        font-size: 12px;
+        text-decoration: none;
+        color: #667eea;
+    }
+
+    .notif-item {
+        padding: 14px 16px;
+        display: flex;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .notif-item:hover {
+        background: var(--hover-bg);
+        transform: translateX(3px);
+    }
+
+    .notif-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #667eea20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .notif-content {
+        flex: 1;
+    }
+
+    .notif-message {
+        font-size: 13px;
+        margin-bottom: 4px;
+        line-height: 1.4;
+    }
+
+    .notif-time {
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 992px) {
+        .premium-nav-container {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .premium-search {
+            order: 3;
+            max-width: 100%;
+            width: 100%;
+        }
+        .premium-nav-icons {
+            order: 2;
+        }
+        .nav-icon span:not(.nav-badge) {
+            display: none;
+        }
+        .premium-notif-dropdown {
+            width: 320px;
+            right: -100px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .nav-icon {
+            width: 38px;
+            height: 38px;
+        }
+        .nav-icon i {
+            font-size: 16px;
+        }
+        .user-avatar-ring {
+            width: 38px;
+            height: 38px;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+        }
+        .premium-notif-dropdown {
+            width: 300px;
+            right: -60px;
+        }
     }
 
     .card {
         background: var(--bg-card);
         border: none;
-        border-radius: 1rem;
+        border-radius: 20px;
         box-shadow: var(--shadow);
-        transition: box-shadow 0.2s;
+        transition: all 0.3s;
     }
 
     .card:hover {
         box-shadow: var(--shadow-hover);
+        transform: translateY(-2px);
     }
 
-    .notif-dropdown {
-        width: 360px;
-        max-height: 450px;
-        overflow-y: auto;
-        padding: 0;
-    }
-
-    .notification-item {
-        transition: background 0.2s;
-        cursor: pointer;
-    }
-
-    .notification-item:hover {
-        background: var(--hover-bg);
-    }
-
-    .post-card {
-        background: var(--bg-card);
+    .alert {
         border-radius: 16px;
-        margin-bottom: 20px;
+        border: none;
+        background: var(--bg-card);
+        border-left: 4px solid;
         box-shadow: var(--shadow);
-        transition: box-shadow 0.2s;
     }
 
-    .post-card:hover {
-        box-shadow: var(--shadow-hover);
+    .alert-success { border-left-color: #10b981; }
+    .alert-danger { border-left-color: #ef4444; }
+    .alert-warning { border-left-color: #f59e0b; }
+    .alert-info { border-left-color: #667eea; }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
     }
 
-    @media (max-width: 768px) {
-        .navbar-brand {
-            font-size: 1.25rem;
-        }
-        .nav-link {
-            padding: 0.5rem;
-        }
-        .nav-link i {
-            font-size: 1rem;
-        }
-        .notif-dropdown {
-            width: 300px;
-        }
+    ::-webkit-scrollbar-track {
+        background: var(--hover-bg);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #764ba2;
     }
     </style>
-  </head>
-  <body>
-  <script>
+</head>
+<body>
+
+<script>
 (function() {
     const savedTheme = localStorage.getItem('selected_theme') || 'light';
     if (savedTheme === 'dark') {
@@ -176,441 +666,444 @@
     }
 })();
 </script>
-    {% if request.endpoint not in ['auth.login', 'auth.register', 'auth.reset_password_request', 'auth.reset_password'] %}
-    <nav class="navbar navbar-expand-lg sticky-top">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">
-          <i class="fas fa-share-alt me-2"></i>ConnectHub
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}" title="Home">
-                <i class="fas fa-home"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.for_you' %}active{% endif %}" href="{{ url_for('main.for_you') }}" title="For You">
-                <i class="fas fa-star"></i>
-                <span class="badge bg-primary ms-1" style="font-size: 8px; padding: 2px 4px;">AI</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.discover' %}active{% endif %}" href="{{ url_for('main.discover') }}" title="Discover">
-                <i class="fas fa-compass"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'main.trending_feed' %}active{% endif %}" href="{{ url_for('main.trending_feed') }}" title="Trending">
-                <i class="fas fa-fire"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('main.explore') }}" title="Explore">
-                <i class="fas fa-globe"></i>
-              </a>
-            </li>
-            {% if current_user.is_authenticated and current_user.is_admin %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" title="Admin">
-                <i class="fas fa-shield-alt"></i>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{ url_for('main.moderation') }}"><i class="fas fa-flag"></i> Moderation</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.report_dashboard') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.view_reports') }}"><i class="fas fa-list"></i> User Reports</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.analytics') }}"><i class="fas fa-chart-line"></i> Analytics</a></li>
-              </ul>
-            </li>
-            {% endif %}
-          </ul>
 
-          {% if g.search_form %}
-          <form class="d-flex me-3" method="get" action="{{ url_for('main.search') }}">
-            <div class="input-group">
-              <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ g.search_form.q.data or '' }}" style="width: 200px;">
-              <button class="btn btn-outline-primary" type="submit" title="Search">
-                <i class="fas fa-search"></i>
-              </button>
+<!-- ONLY SHOW NAVBAR ON NON-AUTH PAGES -->
+{% if request.endpoint not in ['auth.login', 'auth.register', 'auth.forgot_password', 'auth.reset_password', 'auth.verify_otp', 'auth.verify_2fa', 'auth.reset_password_request'] %}
+<nav class="premium-navbar">
+    <div class="premium-nav-container">
+
+        <a href="{{ url_for('main.index') }}" class="zetravox-logo">
+            <div class="logo-container">
+                <div class="logo-glow-ring"></div>
+                <img src="{{ url_for('static', filename='images/zetravox-logo.png') }}"
+                     alt="Zetravox"
+                     class="logo-image"
+                     id="mainLogo">
+                <div class="logo-particles">
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                    <span class="particle"></span>
+                </div>
             </div>
-          </form>
-          {% endif %}
+            <div class="logo-text-wrapper">
+                <span class="logo-brand">Zetravox</span>
+                <span class="logo-tagline">Connect the World • Share Your Voice</span>
+            </div>
+        </a>
 
-          <ul class="navbar-nav">
-            {% if current_user.is_anonymous %}
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}" title="Login"><i class="fas fa-sign-in-alt"></i></a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}" title="Register"><i class="fas fa-user-plus"></i></a></li>
-            {% else %}
-            <!-- Private Messages Icon -->
-            <li class="nav-item">
-    <a class="nav-link position-relative" href="/conversations" title="Private Messages">
-        <i class="fas fa-envelope"></i>
-        <span id="unreadMessagesBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; display: none;">0</span>
-    </a>
-</li>
-            <!-- Connection Requests -->
-            <li class="nav-item">
-              <a class="nav-link position-relative" href="{{ url_for('main.friend_requests_page') }}" title="Connection Requests">
+        <div class="premium-search">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="premiumSearchInput" class="premium-search-input"
+                       placeholder="Search people, posts, hashtags...">
+                <span class="search-shortcut">⌘K</span>
+            </div>
+        </div>
+
+        <div class="premium-nav-icons">
+            <a href="{{ url_for('main.index') }}" class="nav-icon {% if request.endpoint == 'main.index' %}active{% endif %}" title="Home">
+                <i class="fas fa-home"></i>
+                <span class="nav-tooltip">Home</span>
+            </a>
+
+            <a href="{{ url_for('main.for_you') }}" class="nav-icon {% if request.endpoint == 'main.for_you' %}active{% endif %}" title="For You">
+                <i class="fas fa-magic"></i>
+                <span class="nav-tooltip">For You</span>
+            </a>
+
+            <a href="{{ url_for('main.discover') }}" class="nav-icon {% if request.endpoint == 'main.discover' %}active{% endif %}" title="Discover">
+                <i class="fas fa-compass"></i>
+                <span class="nav-tooltip">Discover</span>
+            </a>
+
+            <a href="{{ url_for('main.explore') }}" class="nav-icon {% if request.endpoint == 'main.explore' %}active{% endif %}" title="Explore">
+                <i class="fas fa-globe"></i>
+                <span class="nav-tooltip">Explore</span>
+            </a>
+
+            <a href="{{ url_for('main.conversations') }}" class="nav-icon position-relative" title="Messages">
+                <i class="fas fa-comment-dots"></i>
+                <span id="unreadMessagesBadge" class="nav-badge" style="display: none;">0</span>
+                <span class="nav-tooltip">Messages</span>
+            </a>
+
+            <a href="{{ url_for('main.friend_requests_page') }}" class="nav-icon position-relative" title="Requests">
                 <i class="fas fa-user-plus"></i>
+                {% if current_user.is_authenticated %}
                 {% set pending_count = current_user.get_pending_friend_requests()|length %}
                 {% if pending_count > 0 %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size: 9px;">{{ pending_count }}</span>
+                <span class="nav-badge pulse">{{ pending_count }}</span>
                 {% endif %}
-              </a>
-            </li>
+                {% endif %}
+                <span class="nav-tooltip">Requests</span>
+            </a>
 
-            <!-- Notifications Bell -->
-            <li class="nav-item dropdown">
-              <a class="nav-link position-relative dropdown-toggle" href="#" id="notificationBell" data-bs-toggle="dropdown" aria-expanded="false" title="Activity">
-                <i class="fas fa-bell"></i>
-                <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; display: none;">0</span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-end notif-dropdown" id="notificationsDropdown">
-                <div class="text-center p-3">
-                  <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                  <p class="small mt-2 text-muted">Loading activity...</p>
+            <div class="premium-user-menu" style="position: relative;">
+                <a href="#" class="nav-icon position-relative dropdown-toggle" id="notificationBell" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-count" class="nav-badge" style="display: none;">0</span>
+                    <span class="nav-tooltip">Notifications</span>
+                </a>
+
+                <div class="premium-notif-dropdown" id="notificationsDropdown">
+                    <div class="notif-header">
+                        <h6>Notifications</h6>
+                        <a href="{{ url_for('main.notifications_page') }}">View all</a>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <p class="small mt-2 text-muted">Loading...</p>
+                    </div>
                 </div>
-              </div>
-            </li>
+            </div>
 
-            <!-- Profile Dropdown -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" title="Profile">
-                <img src="{{ current_user.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ url_for('main.user', username=current_user.username) }}"><i class="fas fa-user me-2"></i>Profile</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.saved_posts') }}"><i class="fas fa-bookmark me-2"></i>Bookmarks</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}"><i class="fas fa-edit me-2"></i>Edit Profile</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('main.account_settings') }}"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-              </ul>
-            </li>
+            {% if current_user.is_authenticated %}
+            <div class="premium-user-menu">
+                <div class="user-avatar-ring">
+                    <img src="{{ current_user.avatar(38) }}" class="user-avatar">
+                </div>
+                <span class="user-online-dot"></span>
+
+                <div class="premium-dropdown">
+                    <div class="dropdown-header">
+                        <img src="{{ current_user.avatar(48) }}">
+                        <div class="dropdown-header-info">
+                            <h4>{{ current_user.username }}</h4>
+                            <p>@{{ current_user.username }}</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('main.user', username=current_user.username) }}" class="dropdown-item-custom">
+                        <i class="fas fa-user-circle"></i> Profile
+                    </a>
+                    <a href="{{ url_for('main.saved_posts') }}" class="dropdown-item-custom">
+                        <i class="fas fa-bookmark"></i> Saved
+                    </a>
+                    <a href="{{ url_for('main.edit_profile') }}" class="dropdown-item-custom">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    <a href="{{ url_for('main.account_settings') }}" class="dropdown-item-custom">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item-custom text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="nav-link" title="Login"><i class="fas fa-sign-in-alt"></i></a>
+            <a href="{{ url_for('auth.register') }}" class="nav-link" title="Register"><i class="fas fa-user-plus"></i></a>
             {% endif %}
-          </ul>
         </div>
-      </div>
-    </nav>
-    {% endif %}
+    </div>
+</nav>
+{% endif %}
 
-    <div class="container mt-4">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
+<div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
         {% for category, message in messages %}
         <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
-          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'info-circle' if category == 'info' else 'exclamation-triangle' }} me-2"></i>
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'info-circle' if category == 'info' else 'exclamation-triangle' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
-      {% endif %}
-      {% endwith %}
+    {% endif %}
+    {% endwith %}
 
-      {% if current_user.is_authenticated %}
-      {% with tasks = current_user.get_tasks_in_progress() %}
-      {% if tasks %}
-        {% for task in tasks %}
-        <div class="alert alert-success" role="alert">
-          {{ task.description }}
-          <span id="{{ task.id }}-progress">{{ task.get_progress() }}</span>%
-        </div>
-        {% endfor %}
-      {% endif %}
-      {% endwith %}
-      {% endif %}
+    {% block content %}{% endblock %}
+</div>
 
-      {% block content %}{% endblock %}
-    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{{ moment.include_moment() }}
+{{ moment.lang(g.locale) }}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    {{ moment.include_moment() }}
-    {{ moment.lang(g.locale) }}
+<script>
+let notificationInterval = null;
 
-    <script>
-    let notificationInterval = null;
-
-    // Update unread messages count
-    function updateUnreadMessagesCount() {
-        fetch('/unread-messages-count')
-            .then(response => response.json())
-            .then(data => {
-                const badge = document.getElementById('unreadMessagesBadge');
-                if (badge) {
-                    if (data.count > 0) {
-                        badge.style.display = 'inline-block';
-                        badge.innerText = data.count > 99 ? '99+' : data.count;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-            })
-            .catch(error => console.error('Error fetching unread count:', error));
-    }
-
-    setInterval(updateUnreadMessagesCount, 30000);
-    updateUnreadMessagesCount();
-
-    // Apply saved theme
-    function applySavedTheme() {
-        const savedTheme = localStorage.getItem('selected_theme');
-        if (savedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else if (savedTheme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'light');
-        } else if (savedTheme === 'system') {
-            document.documentElement.removeAttribute('data-theme');
-        }
-    }
-    applySavedTheme();
-
-    // Notification functions
-    function updateNotificationBadge(count) {
-        const badge = document.getElementById('notification-count');
-        if (badge) {
-            if (count > 0) {
-                badge.style.display = 'inline-block';
-                badge.innerText = count > 99 ? '99+' : count;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-    }
-
-    function formatTimeAgo(timestamp) {
-        const date = new Date(timestamp * 1000);
-        const now = new Date();
-        const diff = Math.floor((now - date) / 1000);
-        if (diff < 60) return 'Just now';
-        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-        if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
-        return date.toLocaleDateString();
-    }
-
-    function getNotificationIcon(name) {
-        const icons = {
-            'like': '<i class="fas fa-heart text-danger"></i>',
-            'comment': '<i class="fas fa-comment text-primary"></i>',
-            'follow': '<i class="fas fa-user-plus text-success"></i>',
-            'share': '<i class="fas fa-share-alt text-info"></i>',
-            'friend_request': '<i class="fas fa-user-friends text-primary"></i>',
-            'friend_accepted': '<i class="fas fa-check-circle text-success"></i>',
-            'test': '<i class="fas fa-bell text-warning"></i>',
-            'message': '<i class="fas fa-envelope text-info"></i>'
-        };
-        return icons[name] || '<i class="fas fa-bell text-secondary"></i>';
-    }
-
-    function getNotificationMessage(notif) {
-        switch(notif.name) {
-            case 'like': return `<strong>${escapeHtml(notif.from_user)}</strong> applauded your post`;
-            case 'comment': return `<strong>${escapeHtml(notif.from_user)}</strong> replied to your post`;
-            case 'follow': return `<strong>${escapeHtml(notif.from_user)}</strong> started following you`;
-            case 'share': return `<strong>${escapeHtml(notif.from_user)}</strong> reposted your content`;
-            case 'friend_request': return `<strong>${escapeHtml(notif.from_user)}</strong> wants to connect with you`;
-            case 'friend_accepted': return `<strong>${escapeHtml(notif.from_user)}</strong> accepted your connection request`;
-            case 'message': return `<strong>${escapeHtml(notif.from_user)}</strong> sent you a private message`;
-            case 'test': return `🔔 ${escapeHtml(notif.message || 'Test notification')}`;
-            default: return escapeHtml(notif.message || 'You have new activity');
-        }
-    }
-
-    function getNotificationLink(notif) {
-        if (notif.name === 'like' || notif.name === 'comment' || notif.name === 'share') {
-            return `/post/${notif.post_id}`;
-        } else if (notif.name === 'follow') {
-            return `/user/${notif.from_user}`;
-        } else if (notif.name === 'friend_request' || notif.name === 'friend_accepted') {
-            return `/friend-requests`;
-        } else if (notif.name === 'message') {
-            return `/conversations`;
-        }
-        return '#';
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function markNotificationRead(notifId) {
-        fetch(`/api/notifications/${notifId}/mark-read`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-            }
-        }).then(() => {
-            checkNewNotifications();
-        }).catch(error => console.error('Error marking read:', error));
-    }
-
-    function loadNotificationsDropdown() {
-        fetch('/notifications-list')
-            .then(response => response.json())
-            .then(notifications => {
-                const dropdown = document.getElementById('notificationsDropdown');
-                if (!dropdown) return;
-
-                if (notifications && notifications.length > 0) {
-                    let html = '';
-                    notifications.slice(0, 10).forEach(notif => {
-                        html += `
-                            <div class="notification-item p-3 border-bottom" data-id="${notif.id}" onclick="markNotificationRead(${notif.id}); window.location.href='${getNotificationLink(notif)}'">
-                                <div class="d-flex gap-3">
-                                    <div class="flex-shrink-0">${getNotificationIcon(notif.name)}</div>
-                                    <div class="flex-grow-1">
-                                        <p class="mb-1 small">${getNotificationMessage(notif)}</p>
-                                        <small class="text-muted">${formatTimeAgo(notif.timestamp)}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += '<div class="text-center p-2 border-top"><a href="/notifications-page" class="small text-decoration-none">View all activity</a></div>';
-                    dropdown.innerHTML = html;
+function updateUnreadMessagesCount() {
+    fetch('/unread-messages-count')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('unreadMessagesBadge');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.innerText = data.count > 99 ? '99+' : data.count;
                 } else {
-                    dropdown.innerHTML = `
-                        <div class="text-center p-4">
-                            <i class="fas fa-bell-slash fa-2x text-muted mb-2 d-block"></i>
-                            <p class="text-muted small mb-0">No activity yet</p>
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching unread count:', error));
+}
+
+setInterval(updateUnreadMessagesCount, 30000);
+updateUnreadMessagesCount();
+
+function applySavedTheme() {
+    const savedTheme = localStorage.getItem('selected_theme');
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else if (savedTheme === 'system') {
+        document.documentElement.removeAttribute('data-theme');
+    }
+}
+applySavedTheme();
+
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('notification-count');
+    if (badge) {
+        if (count > 0) {
+            badge.style.display = 'inline-block';
+            badge.innerText = count > 99 ? '99+' : count;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function formatTimeAgo(timestamp) {
+    const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+    return date.toLocaleDateString();
+}
+
+function getNotificationIcon(name) {
+    const icons = {
+        'like': '❤️',
+        'comment': '💬',
+        'follow': '👥',
+        'share': '🔄',
+        'friend_request': '🤝',
+        'friend_accepted': '✅',
+        'message': '💌'
+    };
+    return icons[name] || '🔔';
+}
+
+function getNotificationMessage(notif) {
+    switch(notif.name) {
+        case 'like': return `<strong>${escapeHtml(notif.from_user)}</strong> liked your post`;
+        case 'comment': return `<strong>${escapeHtml(notif.from_user)}</strong> commented on your post`;
+        case 'follow': return `<strong>${escapeHtml(notif.from_user)}</strong> started following you`;
+        case 'share': return `<strong>${escapeHtml(notif.from_user)}</strong> shared your post`;
+        case 'friend_request': return `<strong>${escapeHtml(notif.from_user)}</strong> sent you a friend request`;
+        case 'friend_accepted': return `<strong>${escapeHtml(notif.from_user)}</strong> accepted your friend request`;
+        case 'message': return `<strong>${escapeHtml(notif.from_user)}</strong> sent you a message`;
+        default: return escapeHtml(notif.message || 'You have new activity');
+    }
+}
+
+function getNotificationLink(notif) {
+    if (notif.name === 'like' || notif.name === 'comment' || notif.name === 'share') {
+        return `/post/${notif.post_id}`;
+    } else if (notif.name === 'follow') {
+        return `/user/${notif.from_user}`;
+    } else if (notif.name === 'friend_request' || notif.name === 'friend_accepted') {
+        return `/friend-requests`;
+    } else if (notif.name === 'message') {
+        return `/conversations`;
+    }
+    return '#';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function markNotificationRead(notifId) {
+    fetch(`/api/notifications/${notifId}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        }
+    }).then(() => {
+        checkNewNotifications();
+    }).catch(error => console.error('Error marking read:', error));
+}
+
+function loadNotificationsDropdown() {
+    fetch('/notifications-list')
+        .then(response => response.json())
+        .then(notifications => {
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (!dropdown) return;
+
+            if (notifications && notifications.length > 0) {
+                let html = '<div class="notif-header"><h6>Notifications</h6><a href="/notifications-page">View all</a></div>';
+                notifications.slice(0, 8).forEach(notif => {
+                    html += `
+                        <div class="notif-item" data-id="${notif.id}" onclick="markNotificationRead(${notif.id}); window.location.href='${getNotificationLink(notif)}'">
+                            <div class="notif-icon">${getNotificationIcon(notif.name)}</div>
+                            <div class="notif-content">
+                                <div class="notif-message">${getNotificationMessage(notif)}</div>
+                                <div class="notif-time">${formatTimeAgo(notif.timestamp)}</div>
+                            </div>
                         </div>
                     `;
-                }
-            })
-            .catch(error => {
-                console.error('Error loading notifications:', error);
-                const dropdown = document.getElementById('notificationsDropdown');
-                if (dropdown) {
-                    dropdown.innerHTML = `
-                        <div class="text-center p-3">
-                            <i class="fas fa-exclamation-triangle text-warning mb-2 d-block"></i>
-                            <p class="small text-muted">Failed to load activity</p>
-                            <button class="btn btn-sm btn-primary" onclick="loadNotificationsDropdown()">Retry</button>
-                        </div>
-                    `;
-                }
+                });
+                dropdown.innerHTML = html;
+            } else {
+                dropdown.innerHTML = `
+                    <div class="notif-header"><h6>Notifications</h6><a href="/notifications-page">View all</a></div>
+                    <div class="text-center p-4">
+                        <i class="fas fa-bell-slash fa-2x text-muted mb-2 d-block"></i>
+                        <p class="text-muted small mb-0">No notifications yet</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading notifications:', error);
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (dropdown) {
+                dropdown.innerHTML = `
+                    <div class="notif-header"><h6>Notifications</h6><a href="/notifications-page">View all</a></div>
+                    <div class="text-center p-3">
+                        <i class="fas fa-exclamation-triangle text-warning mb-2 d-block"></i>
+                        <p class="small text-muted">Failed to load</p>
+                    </div>
+                `;
+            }
+        });
+}
+
+function checkNewNotifications() {
+    fetch('/notifications')
+        .then(response => response.json())
+        .then(data => {
+            if (data.count !== undefined) {
+                updateNotificationBadge(data.count);
+            }
+        })
+        .catch(error => console.error('Notification check failed:', error));
+}
+
+const notificationBell = document.getElementById('notificationBell');
+if (notificationBell) {
+    notificationBell.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = document.getElementById('notificationsDropdown');
+        if (dropdown) {
+            const isVisible = dropdown.style.opacity === '1';
+            document.querySelectorAll('.premium-notif-dropdown').forEach(d => {
+                d.style.opacity = '0';
+                d.style.visibility = 'hidden';
             });
-    }
-
-    function checkNewNotifications() {
-        fetch('/notifications')
-            .then(response => response.json())
-            .then(data => {
-                if (data.count !== undefined) {
-                    updateNotificationBadge(data.count);
-                }
-            })
-            .catch(error => console.error('Notification check failed:', error));
-    }
-
-    document.getElementById('notificationBell')?.addEventListener('shown.bs.dropdown', function() {
-        loadNotificationsDropdown();
+            if (!isVisible) {
+                dropdown.style.opacity = '1';
+                dropdown.style.visibility = 'visible';
+                loadNotificationsDropdown();
+            }
+        }
     });
+}
 
-    if (window.location.pathname === '/notifications-page') {
-        fetch('/api/notifications/mark-read', {
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.premium-user-menu') && !e.target.closest('.premium-notif-dropdown')) {
+        document.querySelectorAll('.premium-dropdown, .premium-notif-dropdown').forEach(dropdown => {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+        });
+    }
+});
+
+if (notificationInterval) clearInterval(notificationInterval);
+notificationInterval = setInterval(checkNewNotifications, 30000);
+checkNewNotifications();
+
+const searchInput = document.getElementById('premiumSearchInput');
+if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            window.location.href = `/search?q=${encodeURIComponent(this.value)}`;
+        }
+    });
+}
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('premiumSearchInput')?.focus();
+    }
+});
+
+function applaudPost(postId, reaction) {
+    fetch(`/react_post/${postId}/${reaction}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.reaction_set !== undefined) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function repostPost(postId) {
+    if (confirm('Repost this content to your stream?')) {
+        fetch(`/share_post/${postId}`, {
             method: 'POST',
-            headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
-        }).then(() => {
-            checkNewNotifications();
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+        }).then(response => { if (response.ok) location.reload(); });
+    }
+}
+
+function bookmarkPost(postId) {
+    fetch(`/save_post/${postId}`)
+        .then(response => response.json())
+        .then(data => {
+            const btn = document.getElementById(`saveBtn${postId}`);
+            if (btn) btn.innerHTML = data.saved ? '<i class="fas fa-bookmark me-2"></i>Saved' : '<i class="far fa-bookmark me-2"></i>Save';
         });
+}
+
+function notInterested(postId) {
+    if (confirm('Mark this post as not interested?')) {
+        fetch(`/not-interested/${postId}`).then(response => { if (response.ok) location.reload(); });
     }
+}
 
-    if (notificationInterval) clearInterval(notificationInterval);
-    notificationInterval = setInterval(checkNewNotifications, 30000);
-    checkNewNotifications();
-
-    // Post interaction functions
-    function applaudPost(postId, reaction) {
-        fetch(`/react_post/${postId}/${reaction}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.reaction_set !== undefined) {
-                    const trigger = document.getElementById(`reactionTrigger${postId}`);
-                    if (trigger && data.reaction) {
-                        const reactionMap = {'like': '👍', 'love': '❤️', 'haha': '😂', 'wow': '😮', 'sad': '😢', 'angry': '😠'};
-                        trigger.innerHTML = reactionMap[data.reaction] || '<i class="far fa-smile fa-lg"></i>';
-                        trigger.classList.add('active');
-                    } else if (trigger) {
-                        trigger.innerHTML = '<i class="far fa-thumbs-up"></i>';
-                        trigger.classList.remove('active');
-                    }
-                    const reactionSummary = document.getElementById(`reactionSummary${postId}`);
-                    if (reactionSummary && data.counts) {
-                        const icons = [];
-                        for (const [key, value] of Object.entries(data.counts)) {
-                            if (value > 0 && icons.length < 3) {
-                                if (key === 'like') icons.push('👍');
-                                else if (key === 'love') icons.push('❤️');
-                                else if (key === 'haha') icons.push('😂');
-                                else if (key === 'wow') icons.push('😮');
-                                else if (key === 'sad') icons.push('😢');
-                                else if (key === 'angry') icons.push('😠');
-                            }
-                        }
-                        const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
-                        reactionSummary.innerHTML = `<div class="d-flex align-items-center gap-2"><div class="reaction-icons">${icons.join(' ')}</div><small class="text-muted">${total}</small></div>`;
-                    }
-                }
-            })
-            .catch(error => console.error('Error:', error));
+function hidePost(postId) {
+    if (confirm('Hide this post?')) {
+        fetch(`/hide-post/${postId}`).then(response => { if (response.ok) location.reload(); });
     }
+}
 
-    function repostPost(postId) {
-        if (confirm('Repost this content to your stream?')) {
-            fetch(`/share_post/${postId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
-            }).then(response => { if (response.ok) location.reload(); });
-        }
+function blockUser(userId) {
+    if (confirm('Block this user?')) {
+        fetch(`/block-user/${userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+        }).then(response => { if (response.ok) location.reload(); });
     }
+}
 
-    function bookmarkPost(postId) {
-        fetch(`/save_post/${postId}`)
-            .then(response => response.json())
-            .then(data => {
-                const btn = document.getElementById(`saveBtn${postId}`);
-                if (btn) btn.innerHTML = data.saved ? '<i class="fas fa-bookmark me-2"></i>Bookmarked' : '<i class="far fa-bookmark me-2"></i>Bookmark';
-            });
-    }
+setTimeout(function() {
+    document.querySelectorAll('.alert').forEach(function(alert) {
+        let bsAlert = bootstrap.Alert.getInstance(alert);
+        if (bsAlert) bsAlert.close();
+    });
+}, 5000);
+</script>
 
-    function notInterested(postId) {
-        if (confirm('Mark this post as not interested? We\'ll show fewer posts like this.')) {
-            fetch(`/not-interested/${postId}`).then(response => { if (response.ok) location.reload(); });
-        }
-    }
+{% include '_story_viewer.html' %}
+<input type="hidden" name="csrf_token" id="csrfToken" value="{{ csrf_token() if csrf_token else '' }}">
 
-    function hidePost(postId) {
-        if (confirm('Hide this post? You won\'t see it again.')) {
-            fetch(`/hide-post/${postId}`).then(response => { if (response.ok) location.reload(); });
-        }
-    }
-
-    function blockUser(userId) {
-        if (confirm('Block this user? They will not be able to interact with you.')) {
-            fetch(`/block-user/${userId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
-            }).then(response => { if (response.ok) location.reload(); });
-        }
-    }
-
-    setTimeout(function() {
-        document.querySelectorAll('.alert').forEach(function(alert) {
-            let bsAlert = bootstrap.Alert.getInstance(alert);
-            if (bsAlert) bsAlert.close();
-        });
-    }, 5000);
-    </script>
-
-    {% include '_story_viewer.html' %}
-    <input type="hidden" name="csrf_token" id="csrfToken" value="{{ csrf_token() if csrf_token else '' }}">
-  </body>
+</body>
 </html>

@@ -7,7 +7,7 @@ import google.generativeai as genai
 
 class AIChatbot:
     def __init__(self):
-        self.api_type = current_app.config.get('AI_API_TYPE', 'gemini')  # gemini, openai, deepseek
+        self.api_type = current_app.config.get('AI_API_TYPE', 'gemini')
         self.setup_client()
 
     def setup_client(self):

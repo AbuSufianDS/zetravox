@@ -3,7 +3,6 @@ import os
 import re
 import sys
 
-
 class SpamDetector:
     def __init__(self, model_path=None, vectorizer_path=None):
         self.model = None

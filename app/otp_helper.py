@@ -18,7 +18,7 @@ def send_otp_email(email, otp_code, username):
         print(f" OTP for {email}: {otp_code}")
         return True
 
-    print(f"\n📧 Attempting to send OTP to {email}...")
+    print(f"\n Attempting to send OTP to {email}...")
 
     try:
         url = "https://api.brevo.com/v3/smtp/email"
@@ -28,9 +28,9 @@ def send_otp_email(email, otp_code, username):
             "content-type": "application/json"
         }
         data = {
-            "sender": {"name": "ConnectHub", "email": "mdabusufian1323@gmail.com"},
+            "sender": {"name": "Zetravox", "email": "mdabusufian1323@gmail.com"},
             "to": [{"email": email, "name": username}],
-            "subject": "Password Reset OTP - ConnectHub",
+            "subject": "Password Reset OTP - Zetravox",
             "htmlContent": f"<h2>Your OTP Code: {otp_code}</h2><p>Valid for 10 minutes.</p>"
         }
         response = requests.post(url, json=data, headers=headers)

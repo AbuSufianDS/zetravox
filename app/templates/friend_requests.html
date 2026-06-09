@@ -1,54 +1,324 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-user-plus me-2 text-primary"></i>Connection Requests</h4>
+<style>
+.requests-premium {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.requests-card {
+    background: var(--bg-card);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(102,126,234,0.1);
+}
+
+.requests-header {
+    background: linear-gradient(135deg, #667eea08, #764ba208);
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.requests-header-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: wiggle 3s ease-in-out infinite;
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+}
+
+.requests-header-icon i {
+    font-size: 26px;
+    color: white;
+}
+
+.requests-header-text h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.requests-header-text p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.requests-list {
+    padding: 20px;
+}
+
+.request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background: var(--hover-bg);
+    border-radius: 20px;
+    margin-bottom: 12px;
+    transition: all 0.3s;
+}
+
+.request-item:hover {
+    transform: translateX(5px);
+    background: linear-gradient(135deg, #667eea08, #764ba208);
+}
+
+.request-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.request-avatar {
+    position: relative;
+}
+
+.request-avatar img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #667eea;
+}
+
+.request-details {
+    flex: 1;
+}
+
+.request-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.request-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-accept {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-accept:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+}
+
+.btn-decline {
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 40px;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-decline:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+    transform: scale(1.05);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea10, #764ba210);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: float 3s infinite;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #667eea;
+}
+
+.empty-state h4 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.btn-discover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .requests-premium {
+        padding: 12px;
+    }
+
+    .requests-header {
+        padding: 20px;
+    }
+
+    .request-item {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .request-info {
+        flex-direction: column;
+    }
+
+    .request-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-accept, .btn-decline {
+        flex: 1;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="requests-premium">
+    <div class="requests-card">
+
+        <div class="requests-header">
+            <div class="requests-header-icon">
+                <i class="fas fa-user-plus"></i>
             </div>
-            <div class="card-body">
-                {% if requests %}
-                    {% for req in requests %}
-                    <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 mb-2">
-                        <div class="d-flex align-items-center gap-3">
-                            <img src="{{ req.from_user.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div>
-                                <a href="{{ url_for('main.user', username=req.from_user.username) }}" class="fw-semibold text-decoration-none">
-                                    {{ req.from_user.username }}
-                                </a>
-                                <div class="small text-muted">
-                                    <i class="far fa-clock"></i> {{ moment(req.created_at).fromNow() }}
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <button class="btn btn-sm btn-success me-1" onclick="acceptRequest({{ req.id }})" id="acceptBtn{{ req.id }}">
-                                <i class="fas fa-check"></i> Approve
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="rejectRequest({{ req.id }})" id="rejectBtn{{ req.id }}">
-                                <i class="fas fa-times"></i> Decline
-                            </button>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-envelope-open fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No pending connection requests</p>
-                        <a href="{{ url_for('main.discover') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-search me-2"></i>Discover People
-                        </a>
-                    </div>
-                {% endif %}
+            <div class="requests-header-text">
+                <h2>Connection Requests</h2>
+                <p>Approve or decline friend requests</p>
             </div>
         </div>
+
+        <div class="requests-list">
+            {% if requests %}
+                {% for req in requests %}
+                <div class="request-item" id="request-{{ req.id }}">
+                    <div class="request-info">
+                        <div class="request-avatar">
+                            <img src="{{ req.from_user.avatar(56) }}" alt="{{ req.from_user.username }}">
+                        </div>
+                        <div class="request-details">
+                            <div class="request-name">
+                                {{ req.from_user.username }}
+                                {% if req.from_user.is_verified %}
+                                <i class="fas fa-check-circle" style="color: #667eea; font-size: 12px;"></i>
+                                {% endif %}
+                            </div>
+                            <div class="request-time">
+                                <i class="far fa-clock"></i>
+                                Requested {{ moment(req.created_at).fromNow() }}
+                            </div>
+                            {% if req.from_user.about_me %}
+                            <div class="request-bio small text-muted mt-1">
+                                {{ req.from_user.about_me[:60] }}{% if req.from_user.about_me|length > 60 %}...{% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-accept" onclick="acceptRequest({{ req.id }})" id="acceptBtn{{ req.id }}">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn-decline" onclick="rejectRequest({{ req.id }})" id="rejectBtn{{ req.id }}">
+                            <i class="fas fa-times"></i> Decline
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-envelope-open"></i>
+                    </div>
+                    <h4>No Pending Requests</h4>
+                    <p>When someone sends you a connection request, it will appear here.</p>
+                    <a href="{{ url_for('main.discover') }}" class="btn-discover">
+                        <i class="fas fa-compass"></i> Discover People
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 
 <script>
 function acceptRequest(requestId) {
     const btn = document.getElementById(`acceptBtn${requestId}`);
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
@@ -61,23 +331,30 @@ function acceptRequest(requestId) {
     })
     .then(response => {
         if (response.ok) {
-            location.reload();
+            const requestItem = document.getElementById(`request-${requestId}`);
+            requestItem.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                requestItem.remove();
+                if (document.querySelectorAll('.request-item').length === 0) {
+                    location.reload();
+                }
+            }, 300);
         } else {
-            alert('Unable to approve request');
+            showToast('Unable to approve request', 'error');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check"></i> Approve';
+            btn.innerHTML = originalHtml;
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check"></i> Approve';
+        btn.innerHTML = originalHtml;
     });
 }
 
 function rejectRequest(requestId) {
     const btn = document.getElementById(`rejectBtn${requestId}`);
+    const originalHtml = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
@@ -90,19 +367,49 @@ function rejectRequest(requestId) {
     })
     .then(response => {
         if (response.ok) {
-            location.reload();
+            const requestItem = document.getElementById(`request-${requestId}`);
+            requestItem.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                requestItem.remove();
+                if (document.querySelectorAll('.request-item').length === 0) {
+                    location.reload();
+                }
+            }, 300);
         } else {
-            alert('Unable to decline request');
+            showToast('Unable to decline request', 'error');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-times"></i> Decline';
+            btn.innerHTML = originalHtml;
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-times"></i> Decline';
+        btn.innerHTML = originalHtml;
     });
 }
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `position-fixed bottom-0 end-0 m-3 alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show`;
+    toast.style.zIndex = '9999';
+    toast.style.animation = 'slideInRight 0.3s ease';
+    toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(20px); }
+    }
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
 </script>
+
 {% endblock %}

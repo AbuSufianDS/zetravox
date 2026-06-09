@@ -1,75 +1,282 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="fas fa-user-friends me-2 text-primary"></i>Connections</h4>
-                <a href="{{ url_for('main.friend_requests_page') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-user-plus"></i> Requests
-                </a>
-            </div>
-            <div class="card-body">
-                {% if friends %}
-                    <div class="row g-3">
-                        {% for friend in friends %}
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ friend.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                                    <div>
-                                        <a href="{{ url_for('main.user', username=friend.username) }}" class="fw-semibold text-decoration-none">
-                                            {{ friend.username }}
-                                        </a>
-                                        <div class="small text-muted">
-                                            {% if friend.is_online %}
-                                            <span class="text-success"><i class="fas fa-circle fa-fw" style="font-size: 8px;"></i> Active Now</span>
-                                            {% else %}
-                                            <i class="far fa-clock"></i> {{ moment(friend.last_seen).fromNow() if friend.last_seen else 'Offline' }}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <a href="{{ url_for('main.chat', username=friend.username) }}" class="btn btn-sm btn-outline-primary me-1" title="Message">
-                                        <i class="fas fa-comment"></i>
-                                    </a>
-                                    <form action="{{ url_for('main.remove_friend', user_id=friend.id) }}" method="post" class="d-inline">
-                                        {{ form.hidden_tag() if form else '' }}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Connection" onclick="return confirm('Remove this connection?')">
-                                            <i class="fas fa-user-minus"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+<style>
+.connections-premium {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-                    {% if has_next or has_prev %}
-                    <nav class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            {% if has_prev %}
-                            <li class="page-item"><a class="page-link" href="{{ url_for('main.friends', page=page-1) }}">Previous</a></li>
-                            {% endif %}
-                            {% if has_next %}
-                            <li class="page-item"><a class="page-link" href="{{ url_for('main.friends', page=page+1) }}">Next</a></li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                    {% endif %}
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
-                        <p class="text-muted mb-3">No connections yet.</p>
-                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">
-                            <i class="fas fa-search me-2"></i>Find People
-                        </a>
-                    </div>
-                {% endif %}
+.connections-hero {
+    background: linear-gradient(135deg, #10b98108, #05966908);
+    border-radius: 32px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(16,185,129,0.1);
+}
+
+.connections-hero-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.connections-hero-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+.connections-hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.connections-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.stat-chip {
+    background: var(--hover-bg);
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 14px;
+}
+
+.stat-chip i {
+    color: #10b981;
+    margin-right: 6px;
+}
+
+.connections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.connection-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+}
+
+.connection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--premium-shadow-hover);
+    border-color: #10b981;
+}
+
+.connection-avatar {
+    position: relative;
+    display: inline-block;
+}
+
+.connection-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #10b981;
+}
+
+.online-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    animation: pulse 1.5s infinite;
+}
+
+.connection-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin: 12px 0 4px;
+}
+
+.connection-bio {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.connection-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-chat, .btn-remove {
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-chat {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+}
+
+.btn-chat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+}
+
+.btn-remove {
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-remove:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #10b98110, #05966910);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #10b981;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .connections-premium { padding: 12px; }
+    .connections-grid { grid-template-columns: 1fr; }
+    .connections-stats { flex-wrap: wrap; gap: 12px; }
+}
+</style>
+
+<div class="connections-premium">
+
+    <div class="connections-hero">
+        <div class="connections-hero-icon">
+            <i class="fas fa-user-friends"></i>
+        </div>
+        <h1>Connections</h1>
+        <p>Your network of friends and acquaintances</p>
+
+        <div class="connections-stats">
+            <div class="stat-chip">
+                <i class="fas fa-users"></i> {{ friends|length }} Connections
             </div>
+            <a href="{{ url_for('main.friend_requests_page') }}" class="stat-chip" style="text-decoration: none;">
+                <i class="fas fa-user-plus"></i> View Requests
+            </a>
         </div>
     </div>
+
+    {% if friends %}
+    <div class="connections-grid">
+        {% for friend in friends %}
+        <div class="connection-card">
+            <div class="connection-avatar">
+                <img src="{{ friend.avatar(80) }}" alt="{{ friend.username }}">
+                {% if friend.is_online %}
+                <span class="online-badge"></span>
+                {% endif %}
+            </div>
+            <div class="connection-name">
+                {{ friend.username }}
+                {% if friend.is_verified %}
+                <i class="fas fa-check-circle" style="color: #667eea; font-size: 12px;"></i>
+                {% endif %}
+            </div>
+            <div class="connection-bio">
+                {{ friend.about_me[:50] if friend.about_me else 'No bio yet' }}
+            </div>
+            <div class="connection-actions">
+                <a href="{{ url_for('main.chat', username=friend.username) }}" class="btn-chat">
+                    <i class="fas fa-comment"></i> Message
+                </a>
+                <form action="{{ url_for('main.remove_friend', user_id=friend.id) }}" method="post" style="display: inline;">
+                    {{ form.hidden_tag() if form else '' }}
+                    <button type="submit" class="btn-remove" onclick="return confirm('Remove this connection?')">
+                        <i class="fas fa-user-minus"></i> Remove
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if has_next or has_prev %}
+    <div class="pagination">
+        {% if has_prev %}
+        <a href="{{ url_for('main.friends', page=page-1) }}" class="btn-chat"><i class="fas fa-arrow-left"></i> Previous</a>
+        {% endif %}
+        {% if has_next %}
+        <a href="{{ url_for('main.friends', page=page+1) }}" class="btn-chat">Next <i class="fas fa-arrow-right"></i></a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-user-friends"></i>
+        </div>
+        <h4>No Connections Yet</h4>
+        <p class="text-muted">Connect with people to grow your network</p>
+        <a href="{{ url_for('main.discover') }}" class="btn-chat" style="margin-top: 16px; display: inline-flex;">
+            <i class="fas fa-search"></i> Find People
+        </a>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

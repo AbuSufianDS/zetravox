@@ -2,361 +2,590 @@
 
 {% block content %}
 <style>
-.login-container {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+.login-page {
     min-height: calc(100vh - 200px);
     display: flex;
     align-items: center;
-    position: relative;
-    overflow: hidden;
+    font-family: 'Inter', sans-serif;
 }
 
-.bg-shape {
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 70%;
-    height: 140%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    transform: rotate(15deg);
-    border-radius: 60% 40% 30% 70% / 100% 70% 30% 0%;
-    z-index: -1;
-    opacity: 0.1;
+.login-container-modern {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 20px;
 }
 
-.bg-shape-2 {
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 50%;
-    height: 80%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transform: rotate(-10deg);
-    border-radius: 70% 30% 60% 40% / 40% 60% 40% 60%;
-    z-index: -1;
-    opacity: 0.08;
+.login-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
 }
 
-.login-card {
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
-    border: none;
-    border-radius: 32px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    transition: transform 0.3s ease;
-    overflow: hidden;
-}
-
-.login-card:hover {
-    transform: translateY(-5px);
-}
-
-.brand-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.left-side {
     padding: 40px;
-    text-align: center;
-    color: white;
 }
 
-.brand-icon {
-    font-size: 64px;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+.logo-area {
+    margin-bottom: 60px;
 }
 
-.form-section {
-    padding: 48px;
+.logo-modern {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
 }
 
-.form-control-custom {
-    border: 2px solid #e2e8f0;
+.logo-icon-modern {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     border-radius: 16px;
-    padding: 14px 18px;
-    font-size: 15px;
-    transition: all 0.2s ease;
-}
-
-.form-control-custom:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    outline: none;
-}
-
-.input-icon {
-    position: relative;
-}
-
-.input-icon i {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #a0aec0;
-    font-size: 18px;
-    pointer-events: none;
-}
-
-.input-icon .form-control-custom {
-    padding-left: 48px;
-}
-
-/* Password toggle button style */
-.password-wrapper {
-    position: relative;
-}
-
-.password-toggle {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #a0aec0;
-    cursor: pointer;
-    z-index: 10;
-    font-size: 18px;
-}
-
-.password-toggle:hover {
-    color: #667eea;
-}
-
-.btn-login {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 16px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: 600;
-    color: white;
-    transition: all 0.3s ease;
-}
-
-.btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.social-btn {
-    border: 2px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 10px;
-    transition: all 0.2s ease;
-    background: white;
-    width: 48px;
-    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.social-btn:hover {
-    border-color: #667eea;
+.logo-icon-modern::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    animation: logoShine 3s infinite;
+}
+
+@keyframes logoShine {
+    from { transform: translateX(-100%) rotate(45deg); }
+    to { transform: translateX(100%) rotate(45deg); }
+}
+
+.logo-icon-modern img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    z-index: 1;
+}
+
+.logo-text-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-name-modern {
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.tagline-modern {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 0px;
+    letter-spacing: 0.3px;
+}
+
+.hero-text {
+    margin-top: 40px;
+}
+
+.hero-text h1 {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+}
+
+.hero-text h1 span {
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    animation: textGlow 2s ease-in-out infinite;
+}
+
+@keyframes textGlow {
+    0%, 100% { text-shadow: 0 0 0 rgba(102,126,234,0); }
+    50% { text-shadow: 0 0 20px rgba(102,126,234,0.3); }
+}
+
+.hero-text p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 40px;
+}
+
+.feature-list-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feature-item-modern {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideInLeft 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.feature-item-modern:nth-child(1) { animation-delay: 0.1s; }
+.feature-item-modern:nth-child(2) { animation-delay: 0.2s; }
+.feature-item-modern:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.feature-icon-modern {
+    width: 32px;
+    height: 32px;
+    background: #667eea15;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.feature-item-modern:hover .feature-icon-modern {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scale(1.1);
+}
+
+.feature-icon-modern i {
+    font-size: 14px;
+    color: #667eea;
+    transition: all 0.3s;
+}
+
+.feature-item-modern:hover .feature-icon-modern i {
+    color: white;
+}
+
+.feature-item-modern span {
+    font-size: 14px;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.feature-item-modern:hover span {
+    color: var(--text-primary);
+}
+
+.right-side {
+    background: var(--bg-card);
+    border-radius: 32px;
+    padding: 48px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.form-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.form-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 24px;
+    text-decoration: none;
+}
+
+.google-btn:hover {
+    background: var(--hover-bg);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-.divider {
+.google-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.google-btn span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.divider-modern {
     display: flex;
     align-items: center;
     text-align: center;
     margin: 24px 0;
 }
 
-.divider::before,
-.divider::after {
+.divider-modern::before,
+.divider-modern::after {
     content: '';
     flex: 1;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.divider span {
+.divider-modern span {
     padding: 0 16px;
-    color: #a0aec0;
-    font-size: 13px;
+    color: var(--text-secondary);
+    font-size: 12px;
     font-weight: 500;
 }
 
-.checkbox-custom {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-    border: 2px solid #cbd5e0;
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.remember-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
 }
 
-.checkbox-custom:checked {
-    background: #667eea;
-    border-color: #667eea;
+.remember-checkbox input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #667eea;
 }
 
-.forgot-link {
+.remember-checkbox span {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.forgot-link-modern {
+    font-size: 13px;
     color: #667eea;
     text-decoration: none;
-    font-size: 14px;
     font-weight: 500;
-    transition: color 0.2s;
+    transition: all 0.2s;
 }
 
-.forgot-link:hover {
+.forgot-link-modern:hover {
     color: #764ba2;
     text-decoration: underline;
 }
 
-.feature-list {
-    margin-top: 32px;
-    padding-top: 32px;
-    border-top: 2px solid #e2e8f0;
+.login-btn-modern {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 
-.feature-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    color: #4a5568;
-    font-size: 14px;
+.login-btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
 }
 
-.feature-item i {
-    width: 24px;
+.login-btn-modern:hover::before {
+    left: 100%;
+}
+
+.login-btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.signup-link-modern {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.signup-link-modern span {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.signup-link-modern a {
     color: #667eea;
-    font-size: 18px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: all 0.2s;
 }
 
-@media (max-width: 768px) {
-    .brand-section {
-        padding: 30px;
+.signup-link-modern a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+.footer-text {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 992px) {
+    .login-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
     }
-    .form-section {
-        padding: 30px;
+
+    .left-side {
+        text-align: center;
+        padding: 20px;
     }
-    .login-card:hover {
-        transform: none;
+
+    .hero-text h1 {
+        font-size: 36px;
     }
+
+    .feature-list-modern {
+        align-items: center;
+    }
+
+    .logo-area {
+        text-align: center;
+    }
+
+    .logo-modern {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 560px) {
+    .right-side {
+        padding: 32px 24px;
+    }
+
+    .hero-text h1 {
+        font-size: 28px;
+    }
+
+    .form-header h2 {
+        font-size: 24px;
+    }
+}
+
+[data-theme="dark"] .right-side {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .form-input {
+    background: var(--hover-bg);
 }
 </style>
 
-<div class="login-container">
-    <div class="bg-shape"></div>
-    <div class="bg-shape-2"></div>
+<div class="login-page">
+    <div class="login-container-modern">
+        <div class="login-grid">
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="login-card">
-                    <div class="row g-0">
-                        <div class="col-md-5">
-                            <div class="brand-section h-100 d-flex flex-column justify-content-center">
-                                <div class="brand-icon">
-                                    <i class="fas fa-share-alt"></i>
-                                </div>
-                                <h2 class="mt-4 mb-2 fw-bold">ConnectHub</h2>
-                                <p class="mb-4 opacity-75">Your Social Universe</p>
-                                <div class="mt-auto pt-4">
-                                    <div class="feature-item text-white">
-                                        <i class="fas fa-globe"></i>
-                                        <span>Connect globally</span>
-                                    </div>
-                                    <div class="feature-item text-white">
-                                        <i class="fas fa-bolt"></i>
-                                        <span>Real-time updates</span>
-                                    </div>
-                                    <div class="feature-item text-white">
-                                        <i class="fas fa-shield-alt"></i>
-                                        <span>Privacy first</span>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="left-side">
+                <div class="logo-area">
+                    <a href="{{ url_for('main.index') }}" class="logo-modern">
+                        <div class="logo-icon-modern">
+                            <img src="{{ url_for('static', filename='images/zetravox-logo.png') }}" alt="Zetravox">
                         </div>
-
-                        <div class="col-md-7">
-                            <div class="form-section">
-                                <h3 class="mb-2 fw-bold" style="color: #1a202c;">Welcome back</h3>
-                                <p class="text-muted mb-4">Sign in to continue your journey</p>
-
-                                <form action="" method="post">
-                                    {{ form.hidden_tag() }}
-
-                                    <div class="input-icon mb-3">
-                                        <i class="fas fa-user"></i>
-                                        {{ form.username(class="form-control-custom w-100", placeholder="Username", autocomplete="off") }}
-                                        {% for error in form.username.errors %}
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-
-                                    <div class="password-wrapper mb-3">
-                                        <div class="input-icon">
-                                            <i class="fas fa-lock"></i>
-                                            {{ form.password(class="form-control-custom w-100", id="password", placeholder="Password") }}
-                                        </div>
-                                        <button type="button" class="password-toggle" id="togglePassword">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        {% for error in form.password.errors %}
-                                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <label class="d-flex align-items-center gap-2 cursor-pointer">
-                                            {{ form.remember_me(class="checkbox-custom") }}
-                                            <span class="text-muted small">Keep me signed in</span>
-                                        </label>
-                                       <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot password?</a>
-                                    </div>
-
-                                    {{ form.submit(class="btn-login w-100", value="Sign In") }}
-                                </form>
-
-                                <div class="divider">
-                                    <span>OR CONTINUE WITH</span>
-                                </div>
-
-                                <div class="d-flex justify-content-center gap-3 mb-4">
-                                    <a href="#" class="social-btn">
-                                        <i class="fab fa-google text-danger fs-5"></i>
-                                    </a>
-                                    <a href="#" class="social-btn">
-                                        <i class="fab fa-facebook-f text-primary fs-5"></i>
-                                    </a>
-                                    <a href="#" class="social-btn">
-                                        <i class="fab fa-twitter text-info fs-5"></i>
-                                    </a>
-                                    <a href="#" class="social-btn">
-                                        <i class="fab fa-github text-dark fs-5"></i>
-                                    </a>
-                                </div>
-
-                                <div class="text-center mt-4">
-                                    <span class="text-muted">New to ConnectHub?</span>
-                                    <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-bold ms-2" style="color: #667eea;">
-                                        Create account
-                                        <i class="fas fa-arrow-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
+                        <div class="logo-text-container">
+                            <div class="logo-name-modern">Zetravox</div>
+                            <div class="tagline-modern">Connect the World • Share Your Voice</div>
                         </div>
+                    </a>
+                </div>
+
+                <div class="hero-text">
+                    <h1>
+                        Changing the way<br>
+                        <span>the world connects</span>
+                    </h1>
+                    <p>Join millions of users sharing ideas,<br>building communities, and making connections.</p>
+                </div>
+
+                <div class="feature-list-modern">
+                    <div class="feature-item-modern">
+                        <div class="feature-icon-modern">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <span>Connect with people worldwide</span>
+                    </div>
+                    <div class="feature-item-modern">
+                        <div class="feature-icon-modern">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <span>Real-time updates and notifications</span>
+                    </div>
+                    <div class="feature-item-modern">
+                        <div class="feature-icon-modern">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span>Your privacy, our priority</span>
                     </div>
                 </div>
             </div>
+
+            <div class="right-side">
+                <div class="form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to continue your journey</p>
+                </div>
+
+                <a href="#" class="google-btn">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span>Sign in with Google</span>
+                </a>
+
+                <div class="divider-modern">
+                    <span>Or continue with email</span>
+                </div>
+
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group">
+                        <label class="form-label">Email or Username</label>
+                        {{ form.username(class="form-input", placeholder="Enter your email or username", autocomplete="off") }}
+                        {% for error in form.username.errors %}
+                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        {{ form.password(class="form-input", id="password", placeholder="Enter your password") }}
+                        {% for error in form.password.errors %}
+                            <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-row">
+                        <label class="remember-checkbox">
+                            {{ form.remember_me() }}
+                            <span>Keep me logged in</span>
+                        </label>
+                        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link-modern">Forgot password?</a>
+                    </div>
+
+                    {{ form.submit(class="login-btn-modern", value="Sign In") }}
+                </form>
+
+                <div class="signup-link-modern">
+                    <span>Don't have an account?</span>
+                    <a href="{{ url_for('auth.register') }}">Create account</a>
+                </div>
+
+                <div class="footer-text">
+                    By continuing, you agree to our Terms of Service and Privacy Policy
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
 <script>
-document.getElementById('togglePassword')?.addEventListener('click', function() {
-    const passwordInput = document.getElementById('password');
-    const icon = this.querySelector('i');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-});
+const passwordInput = document.getElementById('password');
+if (passwordInput) {
+    // You can add a password toggle button here if desired
+}
 </script>
 {% endblock %}

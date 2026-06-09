@@ -1,38 +1,211 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    <h3><i class="fas fa-globe text-primary"></i> Explore</h3>
-                    <p class="text-muted">Discover content from around ConnectHub</p>
-                </div>
-            </div>
+<style>
+.explore-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-            {% for post in posts %}
-                {% include '_post.html' %}
-            {% else %}
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-binoculars fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No posts to explore yet.</p>
-                    </div>
-                </div>
-            {% endfor %}
-            
-            <nav aria-label="Post navigation">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ prev_url or '#' }}">← Newer</a>
-                    </li>
-                    <li class="page-item{% if not next_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ next_url or '#' }}">Older →</a>
-                    </li>
-                </ul>
-            </nav>
+.explore-hero {
+    background: linear-gradient(135deg, #43e97b08, #38f9d708);
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(67,233,123,0.1);
+}
+
+.explore-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.explore-hero-icon i {
+    font-size: 40px;
+    color: white;
+    animation: counter-rotate 4s linear infinite;
+}
+
+@keyframes counter-rotate {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+}
+
+.explore-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.explore-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.stat-badge {
+    background: var(--hover-bg);
+    padding: 6px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #43e97b10, #38f9d710);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #43e97b;
+}
+
+.pagination-premium {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.pagination-btn {
+    padding: 10px 24px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: white;
+}
+
+.pagination-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .explore-premium {
+        padding: 12px;
+    }
+
+    .explore-hero {
+        padding: 30px 20px;
+    }
+
+    .explore-hero h1 {
+        font-size: 24px;
+    }
+
+    .explore-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+</style>
+
+<div class="explore-premium">
+
+    <div class="explore-hero">
+        <div class="explore-hero-icon">
+            <i class="fas fa-globe-americas"></i>
+        </div>
+        <h1>Explore</h1>
+        <p class="text-muted mt-2">Discover trending content from around Zetravox</p>
+
+        <div class="explore-stats">
+            <div class="stat-badge">
+                <i class="fas fa-fire" style="color: #f59e0b;"></i>
+                <span>Trending Now</span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-globe" style="color: #10b981;"></i>
+                <span>Global Feed</span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-clock" style="color: #667eea;"></i>
+                <span>Recent Activity</span>
+            </div>
         </div>
     </div>
+
+    {% if posts %}
+    <div class="posts-container">
+        {% for post in posts %}
+            {% include '_post.html' %}
+        {% endfor %}
+    </div>
+
+    {% if next_url or prev_url %}
+    <div class="pagination-premium">
+        {% if prev_url %}
+        <a href="{{ prev_url }}" class="pagination-btn">
+            <i class="fas fa-arrow-left"></i> Newer
+        </a>
+        {% endif %}
+        {% if next_url %}
+        <a href="{{ next_url }}" class="pagination-btn">
+            Older <i class="fas fa-arrow-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-binoculars"></i>
+        </div>
+        <h4>No posts to explore</h4>
+        <p class="text-muted">Check back later for new content!</p>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

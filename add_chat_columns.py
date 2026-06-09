@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 conn = sqlite3.connect('app.db')
 cursor = conn.cursor()
@@ -18,6 +19,18 @@ if 'image_url' not in existing_columns:
 else:
     print('image_url column already exists')
 
+if 'reply_to_id' not in existing_columns:
+    cursor.execute('ALTER TABLE chat_message ADD COLUMN reply_to_id INTEGER DEFAULT NULL')
+    print('Added reply_to_id column')
+else:
+    print('reply_to_id column already exists')
+
+if 'reactions' not in existing_columns:
+    cursor.execute('ALTER TABLE chat_message ADD COLUMN reactions TEXT DEFAULT "{}"')
+    print('Added reactions column')
+else:
+    print('reactions column already exists')
+
 conn.commit()
 conn.close()
-print('ChatMessage columns updated successfully')
+print('All ChatMessage columns updated successfully!')

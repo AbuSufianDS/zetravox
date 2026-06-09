@@ -1,57 +1,173 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-birthday-cake me-2" style="color: #f7b928;"></i>Celebrations</h4>
-                <small class="text-muted">Upcoming celebrations from your network</small>
-            </div>
-            <div class="card-body">
-                {% if birthdays %}
-                    <div class="row g-3">
-                        {% for b in birthdays %}
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ b.user.avatar(50) }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-                                    <div>
-                                        <a href="{{ url_for('main.user', username=b.user.username) }}" class="fw-semibold text-decoration-none">
-                                            {{ b.user.username }}
-                                        </a>
-                                        <div class="small">
-                                            {% if b.days_until == 0 %}
-                                            <span class="text-success fw-bold"><i class="fas fa-gift"></i> Today!</span>
-                                            {% elif b.days_until == 1 %}
-                                            <span class="text-primary">Tomorrow</span>
-                                            {% else %}
-                                            <span class="text-muted">In {{ b.days_until }} days</span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="small text-muted">
-                                            {{ b.birthday.strftime('%B %d') }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <a href="{{ url_for('main.user', username=b.user.username) }}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-gift me-1"></i> Send Wishes
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
+<style>
+.birthdays-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.birthdays-header {
+    background: linear-gradient(135deg, #f59e0b08, #ef444408);
+    border-radius: 32px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.birthdays-header-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.birthdays-header-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.birthdays-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.birthday-card {
+    background: linear-gradient(135deg, #fef3c7, #fffbeb);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border-left: 4px solid #f59e0b;
+    transition: all 0.3s;
+}
+
+[data-theme="dark"] .birthday-card {
+    background: linear-gradient(135deg, #2d2d3a, #1e1e2e);
+}
+
+.birthday-card:hover {
+    transform: translateX(5px);
+}
+
+.birthday-user {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.birthday-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f59e0b;
+}
+
+.birthday-info {
+    flex: 1;
+}
+
+.birthday-name {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.birthday-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.birthday-countdown {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+}
+
+@media (max-width: 768px) {
+    .birthdays-premium { padding: 12px; }
+    .birthday-user { flex-direction: column; text-align: center; }
+}
+</style>
+
+<div class="birthdays-premium">
+
+    <div class="birthdays-header">
+        <div class="birthdays-header-icon">
+            <i class="fas fa-birthday-cake"></i>
+        </div>
+        <h1>Celebrations</h1>
+        <p class="text-muted">Upcoming birthdays in your network</p>
+    </div>
+
+    {% if birthdays %}
+        {% for b in birthdays %}
+        <div class="birthday-card">
+            <div class="birthday-user">
+                <img src="{{ b.user.avatar(60) }}" class="birthday-avatar">
+                <div class="birthday-info">
+                    <div class="birthday-name">
+                        {{ b.user.username }}
+                        {% if b.days_until == 0 %}
+                        <span class="birthday-badge"><i class="fas fa-gift"></i> Today!</span>
+                        {% endif %}
                     </div>
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-birthday-cake fa-3x text-muted mb-3"></i>
-                        <p class="text-muted mb-3">No upcoming celebrations in the next 7 days</p>
-                        <p class="small text-muted">When friends add their birthday to their profile, they'll appear here</p>
+                    <div class="birthday-countdown">
+                        {% if b.days_until == 0 %}
+                        <i class="fas fa-birthday-cake me-1"></i> Celebrating today! 🎂
+                        {% elif b.days_until == 1 %}
+                        <i class="fas fa-clock me-1"></i> Tomorrow
+                        {% else %}
+                        <i class="fas fa-calendar-day me-1"></i> In {{ b.days_until }} days
+                        {% endif %}
+                        <span class="mx-2">•</span>
+                        <i class="far fa-calendar-alt me-1"></i> {{ b.birthday.strftime('%B %d') }}
                     </div>
-                {% endif %}
+                </div>
+                <a href="{{ url_for('main.user', username=b.user.username) }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-gift me-1"></i> Send Wishes
+                </a>
             </div>
         </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon-wrapper">
+            <i class="fas fa-birthday-cake fa-3x text-muted mb-3"></i>
+        </div>
+        <h4>No Upcoming Celebrations</h4>
+        <p class="text-muted">No birthdays in the next 7 days</p>
+        <div class="mt-3">
+            <small class="text-muted"><i class="fas fa-info-circle me-1"></i> When friends add their birthday, they'll appear here</small>
+        </div>
     </div>
+    {% endif %}
+
 </div>
 {% endblock %}

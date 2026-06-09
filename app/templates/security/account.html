@@ -7,216 +7,253 @@
     margin: 0 auto;
 }
 
-.settings-sidebar {
+.settings-sidebar-premium {
     background: var(--bg-card);
-    border-radius: 20px;
-    padding: 8px;
+    border-radius: 24px;
+    padding: 12px;
     box-shadow: var(--shadow);
     position: sticky;
     top: 80px;
+    border: 1px solid rgba(102,126,234,0.1);
 }
 
-.settings-nav-item {
+.settings-nav-item-premium {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 14px 18px;
-    border-radius: 14px;
+    border-radius: 16px;
     color: var(--text-primary);
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 500;
+    margin-bottom: 4px;
 }
 
-.settings-nav-item i {
+.settings-nav-item-premium i {
     width: 24px;
     font-size: 18px;
     color: #667eea;
+    transition: all 0.3s;
 }
 
-.settings-nav-item:hover {
-    background: var(--hover-bg);
-    transform: translateX(4px);
+.settings-nav-item-premium:hover {
+    background: linear-gradient(135deg, #667eea10, #764ba210);
+    transform: translateX(5px);
 }
 
-.settings-nav-item.active {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    color: #667eea;
-    border-left: 3px solid #667eea;
+.settings-nav-item-premium:hover i {
+    transform: scale(1.1);
 }
 
-.account-card {
+.settings-nav-item-premium.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.settings-nav-item-premium.active i {
+    color: white;
+}
+
+.account-card-premium {
     background: var(--bg-card);
     border: none;
-    border-radius: 20px;
+    border-radius: 24px;
     box-shadow: var(--shadow);
+    margin-bottom: 24px;
     overflow: hidden;
+    border: 1px solid rgba(102,126,234,0.1);
+    transition: all 0.3s;
 }
 
-.account-card-header {
+.account-card-premium:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.account-card-header-premium {
     padding: 20px 24px;
     border-bottom: 1px solid var(--border-color);
-    background: var(--bg-card);
+    background: linear-gradient(135deg, #667eea05, #764ba205);
 }
 
-.account-card-header h5 {
+.account-card-header-premium h5 {
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.account-card-body {
+.account-card-body-premium {
     padding: 24px;
 }
 
-.profile-section {
+.profile-section-premium {
     display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
+    gap: 32px;
+    margin-bottom: 28px;
     flex-wrap: wrap;
 }
 
-.profile-avatar {
+.profile-avatar-premium {
     text-align: center;
 }
 
-.profile-avatar img {
+.avatar-ring-premium {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-premium img {
     width: 120px;
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #667eea;
-    padding: 3px;
+    border: 3px solid var(--bg-card);
 }
 
-.profile-avatar .btn-upload {
-    margin-top: 12px;
-    font-size: 13px;
+.btn-upload-premium {
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 40px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.profile-fields {
-    flex: 1;
+.btn-upload-premium:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
 }
 
-.form-group {
+.form-group-premium {
     margin-bottom: 20px;
 }
 
-.form-label {
+.form-label-premium {
     font-weight: 600;
     margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 14px;
 }
 
-.form-label i {
+.form-label-premium i {
     color: #667eea;
     width: 20px;
 }
 
-.form-control-custom {
+.form-control-premium {
     background: var(--bg-card);
     border: 2px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 12px 16px;
     transition: all 0.2s;
     color: var(--text-primary);
     width: 100%;
 }
 
-.form-control-custom:focus {
+.form-control-premium:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     outline: none;
 }
 
-.form-control-custom:disabled {
+.form-control-premium:disabled {
     background: var(--hover-bg);
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
-.input-group-custom {
+/* Input Group */
+.input-group-premium {
     display: flex;
     align-items: center;
 }
 
-.input-group-custom .input-group-text {
+.input-group-text-premium {
     background: var(--hover-bg);
     border: 2px solid var(--border-color);
     border-right: none;
-    border-radius: 12px 0 0 12px;
+    border-radius: 16px 0 0 16px;
     padding: 12px 16px;
     color: var(--text-secondary);
 }
 
-.input-group-custom .form-control-custom {
-    border-radius: 0 12px 12px 0;
+.input-group-premium .form-control-premium {
+    border-radius: 0 16px 16px 0;
     border-left: none;
 }
 
-.btn-primary-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 12px;
-    padding: 12px 28px;
-    font-weight: 600;
-    color: white;
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-.btn-primary-gradient:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btn-outline-secondary-custom {
-    background: transparent;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 10px 24px;
-    color: var(--text-primary);
-    font-weight: 500;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.btn-outline-secondary-custom:hover {
-    background: var(--hover-bg);
-    border-color: #667eea;
-}
-
-.info-badge {
-    background: var(--hover-bg);
-    color: var(--text-secondary);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    margin-left: 12px;
-}
-
-.section-divider {
-    margin: 24px 0;
-    border-top: 1px solid var(--border-color);
-}
-
-.row-custom {
+.row-grid-premium {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
+.info-badge-premium {
+    background: linear-gradient(135deg, #667eea10, #764ba210);
+    color: #667eea;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.btn-primary-gradient-premium {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 40px;
+    padding: 12px 32px;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary-gradient-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
 @media (max-width: 768px) {
-    .row-custom {
+    .row-grid-premium {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
-    .profile-section {
+
+    .profile-section-premium {
         flex-direction: column;
         align-items: center;
         text-align: center;
+    }
+
+    .profile-fields-premium {
+        width: 100%;
+    }
+
+    .settings-sidebar-premium {
+        position: static;
+        margin-bottom: 20px;
     }
 }
 </style>
@@ -224,38 +261,42 @@
 <div class="account-container">
     <div class="row g-4">
         <div class="col-md-3">
-            <div class="settings-sidebar">
-                <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item active">
+            <div class="settings-sidebar-premium">
+                <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item-premium active">
                     <i class="fas fa-user-circle"></i>
                     <span>Account</span>
                 </a>
-                <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-shield-alt"></i>
                     <span>Security</span>
                 </a>
-                <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-lock"></i>
                     <span>Privacy</span>
                 </a>
-                <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-bell"></i>
                     <span>Notifications</span>
                 </a>
-                <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.session_management') }}" class="settings-nav-item-premium">
                     <i class="fas fa-desktop"></i>
                     <span>Sessions</span>
                 </a>
-                <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.login_history') }}" class="settings-nav-item-premium">
                     <i class="fas fa-history"></i>
                     <span>Login History</span>
                 </a>
-                <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item-premium">
                     <i class="fas fa-ban"></i>
                     <span>Blocked Users</span>
                 </a>
-                <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
+                <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-palette"></i>
                     <span>Appearance</span>
+                </a>
+                <a href="{{ url_for('main.screen_protection') }}" class="settings-nav-item-premium">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Screen Protection</span>
                 </a>
             </div>
         </div>
@@ -264,132 +305,130 @@
             <form method="POST" action="{{ url_for('main.account_settings') }}" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                <div class="account-card">
-                    <div class="account-card-header">
+                <div class="account-card-premium">
+                    <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-id-card" style="color: #667eea;"></i>
                             Profile Information
                         </h5>
                     </div>
-                    <div class="account-card-body">
-                        <div class="profile-section">
-                            <div class="profile-avatar">
-                                <img src="{{ current_user.avatar(120) }}" alt="Profile Picture">
-                                <div class="btn-upload">
-                                    <label for="profile_pic" class="btn-outline-secondary-custom" style="display: inline-block; padding: 6px 16px; font-size: 12px;">
-                                        <i class="fas fa-camera me-1"></i> Change Photo
-                                    </label>
-                                    <input type="file" name="profile_pic" id="profile_pic" class="form-control-custom" accept="image/*" style="display: none;">
+                    <div class="account-card-body-premium">
+                        <div class="profile-section-premium">
+                            <div class="profile-avatar-premium">
+                                <div class="avatar-ring-premium">
+                                    <img src="{{ current_user.avatar(120) }}" alt="Profile Picture" id="avatarPreview">
                                 </div>
+                                <label for="profile_pic" class="btn-upload-premium">
+                                    <i class="fas fa-camera"></i> Change Photo
+                                </label>
+                                <input type="file" name="profile_pic" id="profile_pic" accept="image/*" style="display: none;">
                             </div>
-                            <div class="profile-fields">
-                                <div class="form-group">
-                                    <label class="form-label">
+                            <div class="profile-fields-premium" style="flex: 1;">
+                                <div class="form-group-premium">
+                                    <label class="form-label-premium">
                                         <i class="fas fa-user"></i> Username
                                     </label>
-                                    <input type="text" name="username" class="form-control-custom" value="{{ current_user.username }}" required>
+                                    <input type="text" name="username" class="form-control-premium" value="{{ current_user.username }}" required>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">
+                                <div class="form-group-premium">
+                                    <label class="form-label-premium">
                                         <i class="fas fa-envelope"></i> Email Address
                                     </label>
-                                    <div class="input-group-custom">
-                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                        <input type="email" class="form-control-custom" value="{{ current_user.email }}" disabled>
+                                    <div class="input-group-premium">
+                                        <span class="input-group-text-premium"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" class="form-control-premium" value="{{ current_user.email }}" disabled>
                                     </div>
-                                    <div class="info-badge" style="display: inline-block; margin-top: 8px;">
-                                        <i class="fas fa-lock me-1"></i> Cannot be changed
+                                    <div class="info-badge-premium mt-2">
+                                        <i class="fas fa-lock"></i> Cannot be changed
                                     </div>
                                 </div>
+                                <div class="form-group-premium">
+                                    <label class="form-label-premium">
+                                        <i class="fas fa-info-circle"></i> About Me
+                                    </label>
+                                    <textarea name="about_me" class="form-control-premium" rows="3" placeholder="Tell us about yourself...">{{ current_user.about_me or '' }}</textarea>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-info-circle"></i> About Me
-                            </label>
-                            <textarea name="about_me" class="form-control-custom" rows="4" placeholder="Tell us about yourself...">{{ current_user.about_me or '' }}</textarea>
-                            <div class="switch-desc mt-1">Share a brief description of yourself</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="account-card mt-4">
-                    <div class="account-card-header">
+                <div class="account-card-premium">
+                    <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-briefcase" style="color: #667eea;"></i>
                             Professional Details
                         </h5>
                     </div>
-                    <div class="account-card-body">
-                        <div class="row-custom">
-                            <div class="form-group">
-                                <label class="form-label">
+                    <div class="account-card-body-premium">
+                        <div class="row-grid-premium">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-briefcase"></i> Work / Occupation
                                 </label>
-                                <input type="text" name="work" class="form-control-custom" value="{{ current_user.work or '' }}" placeholder="e.g., Software Engineer at Google">
+                                <input type="text" name="work" class="form-control-premium" value="{{ current_user.work or '' }}" placeholder="e.g., Software Engineer at Google">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-graduation-cap"></i> Education
                                 </label>
-                                <input type="text" name="education" class="form-control-custom" value="{{ current_user.education or '' }}" placeholder="e.g., MIT, Stanford">
+                                <input type="text" name="education" class="form-control-premium" value="{{ current_user.education or '' }}" placeholder="e.g., MIT, Stanford">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="account-card mt-4">
-                    <div class="account-card-header">
+                <div class="account-card-premium">
+                    <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
                             Location & Contact
                         </h5>
                     </div>
-                    <div class="account-card-body">
-                        <div class="row-custom">
-                            <div class="form-group">
-                                <label class="form-label">
+                    <div class="account-card-body-premium">
+                        <div class="row-grid-premium">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-map-marker-alt"></i> Location
                                 </label>
-                                <input type="text" name="location" class="form-control-custom" value="{{ current_user.location or '' }}" placeholder="City, Country">
+                                <input type="text" name="location" class="form-control-premium" value="{{ current_user.location or '' }}" placeholder="City, Country">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-globe"></i> Website
                                 </label>
-                                <input type="url" name="website" class="form-control-custom" value="{{ current_user.website or '' }}" placeholder="https://yourwebsite.com">
+                                <input type="url" name="website" class="form-control-premium" value="{{ current_user.website or '' }}" placeholder="https://yourwebsite.com">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-phone"></i> Phone Number
                                 </label>
-                                <input type="tel" name="phone" class="form-control-custom" value="{{ current_user.phone or '' }}" placeholder="+1 234 567 8900">
+                                <input type="tel" name="phone" class="form-control-premium" value="{{ current_user.phone or '' }}" placeholder="+1 234 567 8900">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-birthday-cake"></i> Birthday
                                 </label>
-                                <input type="date" name="birthday" class="form-control-custom" value="{{ current_user.birthday or '' }}">
+                                <input type="date" name="birthday" class="form-control-premium" value="{{ current_user.birthday or '' }}">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="account-card mt-4">
-                    <div class="account-card-header">
+                <div class="account-card-premium">
+                    <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-heart" style="color: #667eea;"></i>
                             Personal Info
                         </h5>
                     </div>
-                    <div class="account-card-body">
-                        <div class="row-custom">
-                            <div class="form-group">
-                                <label class="form-label">
+                    <div class="account-card-body-premium">
+                        <div class="row-grid-premium">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-venus-mars"></i> Gender
                                 </label>
-                                <select name="gender" class="form-control-custom">
+                                <select name="gender" class="form-control-premium">
                                     <option value="">Select</option>
                                     <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Male</option>
                                     <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Female</option>
@@ -397,11 +436,11 @@
                                     <option value="prefer_not_to_say" {% if current_user.gender == 'prefer_not_to_say' %}selected{% endif %}>Prefer not to say</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">
+                            <div class="form-group-premium">
+                                <label class="form-label-premium">
                                     <i class="fas fa-heart"></i> Relationship Status
                                 </label>
-                                <select name="relationship_status" class="form-control-custom">
+                                <select name="relationship_status" class="form-control-premium">
                                     <option value="">Select</option>
                                     <option value="single" {% if current_user.relationship_status == 'single' %}selected{% endif %}>Single</option>
                                     <option value="in_relationship" {% if current_user.relationship_status == 'in_relationship' %}selected{% endif %}>In a Relationship</option>
@@ -411,11 +450,11 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
                                 <i class="fas fa-users"></i> Interested In
                             </label>
-                            <select name="interested_in" class="form-control-custom">
+                            <select name="interested_in" class="form-control-premium">
                                 <option value="">Select</option>
                                 <option value="men" {% if current_user.interested_in == 'men' %}selected{% endif %}>Men</option>
                                 <option value="women" {% if current_user.interested_in == 'women' %}selected{% endif %}>Women</option>
@@ -426,8 +465,8 @@
                 </div>
 
                 <div class="text-end mt-4">
-                    <button type="submit" class="btn-primary-gradient">
-                        <i class="fas fa-save me-2"></i>Save All Changes
+                    <button type="submit" class="btn-primary-gradient-premium">
+                        <i class="fas fa-save"></i> Save All Changes
                     </button>
                 </div>
             </form>
@@ -436,18 +475,31 @@
 </div>
 
 <script>
+
+const profilePicInput = document.getElementById('profile_pic');
+const avatarPreview = document.getElementById('avatarPreview');
+
+if (profilePicInput) {
+    profilePicInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                avatarPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            const label = document.querySelector('label[for="profile_pic"]');
+            if (label) {
+                const fileName = file.name;
+                label.innerHTML = `<i class="fas fa-check"></i> ${fileName.substring(0, 20)}${fileName.length > 20 ? '...' : ''}`;
+            }
+        }
+    });
+}
+
 document.querySelector('label[for="profile_pic"]')?.addEventListener('click', function() {
     document.getElementById('profile_pic').click();
-});
-
-document.getElementById('profile_pic')?.addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
-        const fileName = e.target.files[0].name;
-        const label = document.querySelector('label[for="profile_pic"]');
-        if (label) {
-            label.innerHTML = `<i class="fas fa-check me-1"></i> ${fileName.substring(0, 20)}${fileName.length > 20 ? '...' : ''}`;
-        }
-    }
 });
 </script>
 {% endblock %}

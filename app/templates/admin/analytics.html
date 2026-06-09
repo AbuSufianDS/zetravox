@@ -1,97 +1,345 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <h4 class="mb-0">
-                        <i class="fas fa-flag me-2"></i>Flagged Content History
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info mb-4">
-                        <i class="fas fa-info-circle me-2"></i>
-                        This page shows all content that has been flagged as spam or inappropriate.
-                    </div>
+<style>
+.flagged-premium {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-                    {% if posts %}
-                        {% for post in posts %}
-                        <div class="card mb-3 border-danger">
-                            <div class="card-header bg-danger text-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        <strong>{{ post.author.username }}</strong>
-                                        <span class="text-white-50 ms-2">
-                                            posted {{ moment(post.timestamp).fromNow() }}
-                                        </span>
-                                    </div>
-                                    <span class="badge bg-light text-dark">
-                                        <i class="fas fa-robot me-1"></i>Confidence: {{ (post.spam_confidence * 100)|round(1) }}%
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">{{ post.body }}</p>
-                                {% if post.media_url %}
-                                    {% if post.media_type == 'image' %}
-                                        <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}"
-                                             class="img-fluid rounded mt-2" style="max-height: 200px;">
-                                    {% elif post.media_type == 'video' %}
-                                        <video controls class="mt-2" style="max-height: 200px;">
-                                            <source src="{{ url_for('static', filename='uploads/' + post.media_url) }}">
-                                        </video>
-                                    {% endif %}
-                                {% endif %}
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Flagged by AI spam detection system
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <a href="{{ url_for('main.approve_post', post_id=post.id) }}"
-                                   class="btn btn-success btn-sm">
-                                    <i class="fas fa-check me-1"></i> Approve
-                                </a>
-                                <a href="{{ url_for('main.reject_post', post_id=post.id) }}"
-                                   class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Delete this flagged content?')">
-                                    <i class="fas fa-trash me-1"></i> Delete
-                                </a>
-                                <a href="{{ url_for('main.user', username=post.author.username) }}"
-                                   class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-user me-1"></i> View Profile
-                                </a>
-                            </div>
-                        </div>
-                        {% endfor %}
+.flagged-header {
+    background: linear-gradient(135deg, #ef444408, #dc262608);
+    border-radius: 32px;
+    padding: 32px;
+    margin-bottom: 30px;
+    text-align: center;
+}
 
-                        {% if next_url or prev_url %}
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                                    <a class="page-link" href="{{ prev_url or '#' }}">Previous</a>
-                                </li>
-                                <li class="page-item{% if not next_url %} disabled{% endif %}">
-                                    <a class="page-link" href="{{ next_url or '#' }}">Next</a>
-                                </li>
-                            </ul>
-                        </nav>
-                        {% endif %}
-                    {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5>No Flagged Content</h5>
-                            <p class="text-muted">All content has been reviewed and approved.</p>
-                        </div>
-                    {% endif %}
-                </div>
+.flagged-header-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: shake 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes shake {
+    from { transform: translateX(0); }
+    to { transform: translateX(3px); }
+}
+
+.flagged-header-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+.flagged-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.flagged-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-badge {
+    background: var(--hover-bg);
+    padding: 8px 20px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-badge i {
+    color: #ef4444;
+}
+
+.flagged-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    transition: all 0.3s;
+}
+
+.flagged-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--premium-shadow-hover);
+}
+
+.flagged-card-header {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    padding: 16px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.flagged-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.flagged-user img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.flagged-confidence {
+    background: rgba(255,255,255,0.2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.flagged-body {
+    padding: 20px;
+}
+
+.flagged-text {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.flagged-media {
+    margin-top: 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    max-height: 300px;
+}
+
+.flagged-media img, .flagged-media video {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+.flagged-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-approve:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+}
+
+.btn-delete {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-delete:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.btn-profile {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-profile:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #10b98110, #05966910);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #10b981;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.pagination-btn {
+    padding: 8px 20px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .flagged-premium { padding: 12px; }
+    .flagged-card-header { flex-direction: column; text-align: center; }
+    .flagged-footer { justify-content: center; }
+}
+</style>
+
+<div class="flagged-premium">
+
+    <div class="flagged-header">
+        <div class="flagged-header-icon">
+            <i class="fas fa-flag"></i>
+        </div>
+        <h1>Flagged Content</h1>
+        <p>Content marked as spam or inappropriate</p>
+        <div class="flagged-stats">
+            <div class="stat-badge">
+                <i class="fas fa-flag"></i>
+                <span>{{ posts|length }} Flagged Items</span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-robot"></i>
+                <span>AI Detection Active</span>
             </div>
         </div>
     </div>
+
+    {% if posts %}
+        {% for post in posts %}
+        <div class="flagged-card">
+            <div class="flagged-card-header">
+                <div class="flagged-user">
+                    <img src="{{ post.author.avatar(40) }}" alt="{{ post.author.username }}">
+                    <div>
+                        <strong>{{ post.author.username }}</strong>
+                        <div class="small text-white-50">{{ moment(post.timestamp).fromNow() }}</div>
+                    </div>
+                </div>
+                <div class="flagged-confidence">
+                    <i class="fas fa-chart-line me-1"></i>
+                    Confidence: {{ (post.spam_confidence * 100)|round(1) }}%
+                </div>
+            </div>
+            <div class="flagged-body">
+                <div class="flagged-text">{{ post.body }}</div>
+                {% if post.media_items %}
+                    {% for media in post.media_items %}
+                    <div class="flagged-media">
+                        {% if media.media_type == 'image' %}
+                            <img src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}" alt="Media">
+                        {% elif media.media_type == 'video' %}
+                            <video controls>
+                                <source src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}">
+                            </video>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="flagged-footer">
+                <a href="{{ url_for('main.approve_post', post_id=post.id) }}" class="btn-approve">
+                    <i class="fas fa-check"></i> Approve
+                </a>
+                <a href="{{ url_for('main.reject_post', post_id=post.id) }}" class="btn-delete" onclick="return confirm('Delete this flagged content?')">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+                <a href="{{ url_for('main.user', username=post.author.username) }}" class="btn-profile">
+                    <i class="fas fa-user"></i> View Profile
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if next_url or prev_url %}
+        <div class="pagination">
+            {% if prev_url %}
+            <a href="{{ prev_url }}" class="pagination-btn"><i class="fas fa-arrow-left"></i> Previous</a>
+            {% endif %}
+            {% if next_url %}
+            <a href="{{ next_url }}" class="pagination-btn">Next <i class="fas fa-arrow-right"></i></a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h4>No Flagged Content</h4>
+        <p class="text-muted">All content has been reviewed and approved</p>
+        <div class="mt-2">
+            <small class="text-muted"><i class="fas fa-shield-alt me-1"></i> Content moderation is active</small>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

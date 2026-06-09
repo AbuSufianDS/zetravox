@@ -8,7 +8,6 @@ with app.app_context():
     try:
         inspector = inspect(db.engine)
 
-        # Check if table exists
         if 'notification' in inspector.get_table_names():
             columns = [col['name'] for col in inspector.get_columns('notification')]
 

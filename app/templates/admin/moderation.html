@@ -1,98 +1,402 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <h4 class="mb-0">
-                        <i class="fas fa-flag me-2"></i>Moderation Queue
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <p><i class="fas fa-info-circle me-2"></i>Content flagged by users or detected as spam awaiting review.</p>
-                </div>
+<style>
+.moderation-premium {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.moderation-header {
+    background: linear-gradient(135deg, #ef444408, #dc262608);
+    border-radius: 32px;
+    padding: 32px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.moderation-header-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: shake 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes shake {
+    from { transform: translateX(0); }
+    to { transform: translateX(3px); }
+}
+
+.moderation-header-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+.moderation-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.moderation-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+    background: var(--hover-bg);
+    padding: 8px 20px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-pill i {
+    color: #ef4444;
+}
+
+.moderation-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 2px solid #f59e0b;
+    margin-bottom: 24px;
+    transition: all 0.3s;
+}
+
+.moderation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(245,158,11,0.2);
+}
+
+.moderation-card-header {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    padding: 16px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.moderation-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.moderation-user img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.moderation-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.badge-flag, .badge-ai {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-flag { background: rgba(255,255,255,0.2); }
+.badge-ai { background: rgba(0,0,0,0.3); }
+
+.moderation-body {
+    padding: 20px;
+}
+
+.moderation-text {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.moderation-media {
+    margin-top: 16px;
+    border-radius: 16px;
+    overflow: hidden;
+    max-height: 300px;
+}
+
+.moderation-media img, .moderation-media video {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+.flag-info {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(245,158,11,0.1);
+    border-radius: 12px;
+    border-left: 3px solid #f59e0b;
+}
+
+.moderation-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-approve-mod {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-approve-mod:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+}
+
+.btn-reject-mod {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-reject-mod:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.btn-profile-mod {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px 24px;
+    border-radius: 40px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-profile-mod:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #10b98110, #05966910);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: pulse 2s infinite;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #10b981;
+}
+
+@media (max-width: 768px) {
+    .moderation-premium { padding: 12px; }
+    .moderation-card-header { flex-direction: column; text-align: center; }
+    .moderation-footer { justify-content: center; }
+}
+</style>
+
+<div class="moderation-premium">
+
+    <div class="moderation-header">
+        <div class="moderation-header-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1>Moderation Queue</h1>
+        <p>Review flagged content and user reports</p>
+        <div class="moderation-stats">
+            <div class="stat-pill">
+                <i class="fas fa-flag"></i>
+                <span id="pendingCount">{{ posts|length }} Pending</span>
             </div>
-
-            {% if not posts %}
-                <div class="card mt-3">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <h5>All Clear!</h5>
-                        <p class="text-muted">No content pending moderation.</p>
-                    </div>
-                </div>
-            {% else %}
-                {% for post in posts %}
-                <div class="card mt-3 border-warning">
-                    <div class="card-header bg-warning text-dark">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    {{ post.author.username }}
-                                </strong>
-                                <span class="text-muted ms-2">
-                                    posted {{ moment(post.timestamp).fromNow() }}
-                                </span>
-                            </div>
-                            <div>
-                                {% set report_count = report_counts.get(post.id, 0) %}
-                                {% if report_count > 0 %}
-                                <span class="badge bg-danger me-2">
-                                    <i class="fas fa-flag me-1"></i>{{ report_count }} flag{% if report_count != 1 %}s{% endif %}
-                                </span>
-                                {% endif %}
-                                {% if post.is_spam %}
-                                <span class="badge bg-secondary">
-                                    <i class="fas fa-robot me-1"></i>AI Detected
-                                </span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ post.body }}</p>
-                        {% if post.media_url %}
-                            {% if post.media_type == 'image' %}
-                                <img src="{{ url_for('static', filename='uploads/' + post.media_url) }}"
-                                     class="img-fluid rounded mt-2" style="max-height: 200px;">
-                            {% elif post.media_type == 'video' %}
-                                <video controls class="mt-2" style="max-height: 200px;">
-                                    <source src="{{ url_for('static', filename='uploads/' + post.media_url) }}">
-                                </video>
-                            {% endif %}
-                        {% endif %}
-
-                        {% if report_counts.get(post.id, 0) > 0 %}
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                <i class="fas fa-users me-1"></i>
-                                This content has been flagged by users
-                            </small>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer">
-                        <a href="{{ url_for('main.approve_post', post_id=post.id) }}"
-                           class="btn btn-success btn-sm">
-                            <i class="fas fa-check me-1"></i> Approve
-                        </a>
-                        <a href="{{ url_for('main.reject_post', post_id=post.id) }}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Delete this content?')">
-                            <i class="fas fa-trash me-1"></i> Reject & Delete
-                        </a>
-                        <a href="{{ url_for('main.user', username=post.author.username) }}"
-                           class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-user me-1"></i> View Profile
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            {% endif %}
+            <div class="stat-pill">
+                <i class="fas fa-robot"></i>
+                <span>AI Detection Active</span>
+            </div>
+            <div class="stat-pill">
+                <i class="fas fa-users"></i>
+                <span>Community Reports</span>
+            </div>
         </div>
     </div>
+
+    {% if posts %}
+        {% for post in posts %}
+        <div class="moderation-card" id="post-{{ post.id }}">
+            <div class="moderation-card-header">
+                <div class="moderation-user">
+                    <img src="{{ post.author.avatar(40) }}" alt="{{ post.author.username }}">
+                    <div>
+                        <strong>{{ post.author.username }}</strong>
+                        <div class="small text-white-50">{{ moment(post.timestamp).fromNow() }}</div>
+                    </div>
+                </div>
+                <div class="moderation-badges">
+                    {% set report_count = report_counts.get(post.id, 0) %}
+                    {% if report_count > 0 %}
+                    <span class="badge-flag">
+                        <i class="fas fa-flag me-1"></i>{{ report_count }} Flag{{ 's' if report_count != 1 }}
+                    </span>
+                    {% endif %}
+                    {% if post.is_spam %}
+                    <span class="badge-ai">
+                        <i class="fas fa-robot me-1"></i>AI Detected
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="moderation-body">
+                <div class="moderation-text">{{ post.body }}</div>
+                {% if post.media_items %}
+                    {% for media in post.media_items %}
+                    <div class="moderation-media">
+                        {% if media.media_type == 'image' %}
+                            <img src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}" alt="Media">
+                        {% elif media.media_type == 'video' %}
+                            <video controls>
+                                <source src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}">
+                            </video>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% if report_count > 0 %}
+                <div class="flag-info">
+                    <i class="fas fa-users me-2"></i>
+                    <small>This content has been flagged by multiple users for review</small>
+                </div>
+                {% endif %}
+            </div>
+            <div class="moderation-footer">
+                <a href="{{ url_for('main.approve_post', post_id=post.id) }}" class="btn-approve-mod" onclick="return confirmAction('approve', {{ post.id }})">
+                    <i class="fas fa-check"></i> Approve
+                </a>
+                <a href="{{ url_for('main.reject_post', post_id=post.id) }}" class="btn-reject-mod" onclick="return confirmAction('reject', {{ post.id }})">
+                    <i class="fas fa-trash"></i> Reject & Delete
+                </a>
+                <a href="{{ url_for('main.user', username=post.author.username) }}" class="btn-profile-mod">
+                    <i class="fas fa-user"></i> View Profile
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if pagination and (pagination.has_prev or pagination.has_next) %}
+        <div class="pagination" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('main.moderation', page=pagination.prev_num) }}" class="pagination-btn">
+                <i class="fas fa-arrow-left"></i> Previous
+            </a>
+            {% endif %}
+            {% if pagination.has_next %}
+            <a href="{{ url_for('main.moderation', page=pagination.next_num) }}" class="pagination-btn">
+                Next <i class="fas fa-arrow-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h4>All Clear!</h4>
+        <p class="text-muted">No content pending moderation</p>
+        <div class="mt-2">
+            <small class="text-muted"><i class="fas fa-shield-alt me-1"></i> All content has been reviewed</small>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
+
+<style>
+.pagination-btn {
+    padding: 8px 20px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+</style>
+
+<script>
+function confirmAction(action, postId) {
+    const message = action === 'approve'
+        ? 'Approve this content? It will be visible to everyone.'
+        : 'Permanently delete this content? This action cannot be undone.';
+    return confirm(message);
+}
+
+// Update counts in real-time
+function updatePendingCount() {
+    const remaining = document.querySelectorAll('.moderation-card').length;
+    document.getElementById('pendingCount').innerHTML = remaining + ' Pending';
+
+    if (remaining === 0) {
+        setTimeout(() => location.reload(), 500);
+    }
+}
+</script>
 {% endblock %}

@@ -1,71 +1,295 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    <h3><i class="fas fa-compass text-primary"></i> Discover</h3>
-                    <p class="text-muted">Find new content and people to connect with</p>
-                </div>
-            </div>
+<style>
+.discover-premium {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-            {% if not posts %}
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-globe fa-3x text-muted mb-3"></i>
-                        <h5>Nothing new to discover</h5>
-                        <p class="text-muted">Check back later for fresh content!</p>
-                    </div>
-                </div>
-            {% else %}
+.discover-hero {
+    background: linear-gradient(135deg, #4facfe08, #00f2fe08);
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(79,172,254,0.1);
+}
+
+.discover-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.discover-hero-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.discover-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.discover-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 30px;
+}
+
+.posts-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.suggestions-column {
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+}
+
+.suggestions-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.suggestions-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.suggestions-header i {
+    font-size: 24px;
+    color: #4facfe;
+}
+
+.suggestions-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    transition: all 0.3s;
+    margin-bottom: 12px;
+}
+
+.suggestion-item:hover {
+    background: var(--hover-bg);
+    transform: translateX(5px);
+}
+
+.suggestion-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.suggestion-info {
+    flex: 1;
+}
+
+.suggestion-name {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.suggestion-followers {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.suggestion-follow-btn {
+    background: var(--hover-bg);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.suggestion-follow-btn:hover {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+}
+
+.empty-suggestions {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-secondary);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+}
+
+@media (max-width: 992px) {
+    .discover-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .suggestions-column {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .discover-premium {
+        padding: 12px;
+    }
+
+    .discover-hero {
+        padding: 30px 20px;
+    }
+
+    .discover-hero h1 {
+        font-size: 24px;
+    }
+}
+</style>
+
+<div class="discover-premium">
+
+    <div class="discover-hero">
+        <div class="discover-hero-icon">
+            <i class="fas fa-compass"></i>
+        </div>
+        <h1>Discover</h1>
+        <p class="text-muted mt-2">Find new content and people to connect with</p>
+    </div>
+
+    <div class="discover-grid">
+        <div class="posts-column">
+            {% if posts %}
                 {% for post in posts %}
                     {% include '_post.html' %}
                 {% endfor %}
-            {% endif %}
 
-            {% if next_url or prev_url %}
-            <nav>
-                <ul class="pagination justify-content-center">
-                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ prev_url or '#' }}">← Newer</a>
-                    </li>
-                    <li class="page-item{% if not next_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ next_url or '#' }}">Older →</a>
-                    </li>
-                </ul>
-            </nav>
+                {% if next_url or prev_url %}
+                <div class="pagination-premium" style="display: flex; justify-content: center; gap: 12px; margin-top: 20px;">
+                    {% if prev_url %}
+                    <a href="{{ prev_url }}" class="pagination-btn"><i class="fas fa-arrow-left"></i> Newer</a>
+                    {% endif %}
+                    {% if next_url %}
+                    <a href="{{ next_url }}" class="pagination-btn">Older <i class="fas fa-arrow-right"></i></a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h4>Nothing new to discover</h4>
+                    <p class="text-muted">Check back later for fresh content!</p>
+                </div>
             {% endif %}
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-user-plus"></i> Suggested Connections
+        <div class="suggestions-column">
+            <div class="suggestions-card">
+                <div class="suggestions-header">
+                    <i class="fas fa-user-plus"></i>
+                    <h3>Suggested Connections</h3>
                 </div>
-                <div class="card-body">
-                    {% if suggested_users %}
-                        {% for user in suggested_users %}
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ user.avatar(40) }}" class="rounded-circle me-3">
-                            <div class="flex-grow-1">
-                                <strong>{{ user.username }}</strong>
-                                <br>
-                                <small class="text-muted">{{ user.followers_count() }} followers</small>
-                            </div>
-                            <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Follow</button>
-                            </form>
+
+                {% if suggested_users %}
+                    {% for user in suggested_users %}
+                    <div class="suggestion-item">
+                        <img src="{{ user.avatar(48) }}" class="suggestion-avatar">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">{{ user.username }}</div>
+                            <div class="suggestion-followers">{{ user.followers_count() }} followers</div>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted text-center">No suggestions yet</p>
-                    {% endif %}
-                </div>
+                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                            <button type="submit" class="suggestion-follow-btn">
+                                <i class="fas fa-user-plus"></i> Follow
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-suggestions">
+                        <i class="fas fa-users fa-2x mb-2 d-block text-muted"></i>
+                        <p class="small text-muted">No suggestions yet</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.pagination-btn {
+    padding: 8px 20px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #4facfe10, #00f2fe10);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 40px;
+    color: #4facfe;
+}
+</style>
+
 {% endblock %}

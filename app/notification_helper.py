@@ -1,32 +1,23 @@
 from app import db
-from app.models import Notification
-import json
-from datetime import datetime, timezone
 
 
-def create_notification(user_id, notification_type, data):
-    try:
-        # Ensure data is a dictionary
-        if not isinstance(data, dict):
-            data = {}
+def create_notification(user_id, type, message, link=None):
+    from app.models import Notification
+    import json
 
-        notification = Notification(
-            name=notification_type,
-            user_id=user_id,
-            payload_json=json.dumps(data),
-            timestamp=datetime.now(timezone.utc).timestamp(),
-            read=False
-        )
-        db.session.add(notification)
-        db.session.commit()
-        print(f"NOTIFICATION CREATED: {notification_type} for user {user_id}")
-        print(f"   Data: {data}")
-        return notification
-    except Exception as e:
-        print(f"Error creating notification: {e}")
-        db.session.rollback()
-        return None
-
+    notification = Notification(
+        user_id=user_id,
+        name=type,
+        payload_json=json.dumps({
+            'type': type,
+            'message': message,
+            'link': link
+        }),
+        read=False
+    )
+    db.session.add(notification)
+    db.session.commit()
+    return notification
 
 def send_like_notification(user_id, from_username, post_id, post_body):
     create_notification(user_id, 'like', {

@@ -1,23 +1,202 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0"><i class="fas fa-bell me-2 text-primary"></i>Activity</h4>
-                </div>
-                <div class="card-body p-0">
-                    <div id="notifications-list" class="list-group list-group-flush">
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="text-muted mt-2">Loading activity...</p>
-                        </div>
-                    </div>
-                </div>
+<style>
+.notifications-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.notif-hero {
+    background: linear-gradient(135deg, #667eea08, #764ba208);
+    border-radius: 32px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(102,126,234,0.1);
+}
+
+.notif-hero-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: ring 2s infinite;
+}
+
+@keyframes ring {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+}
+
+.notif-hero-icon i {
+    font-size: 32px;
+    color: white;
+}
+
+.notif-hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+}
+
+.notif-hero p {
+    color: var(--text-secondary);
+}
+
+.notif-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.notif-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.mark-all-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mark-all-btn:hover {
+    text-decoration: underline;
+}
+
+.notif-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.notif-item:hover {
+    background: var(--hover-bg);
+    transform: translateX(5px);
+}
+
+.notif-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notif-icon.like { background: #ef444420; color: #ef4444; }
+.notif-icon.comment { background: #3b82f620; color: #3b82f6; }
+.notif-icon.follow { background: #10b98120; color: #10b981; }
+.notif-icon.share { background: #8b5cf620; color: #8b5cf6; }
+.notif-icon.friend { background: #f59e0b20; color: #f59e0b; }
+
+.notif-content {
+    flex: 1;
+}
+
+.notif-message {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.notif-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notif-dot {
+    width: 8px;
+    height: 8px;
+    background: #667eea;
+    border-radius: 50%;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea10, #764ba210);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #667eea;
+}
+
+.empty-state h4 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+    .notifications-premium { padding: 12px; }
+    .notif-hero { padding: 24px; }
+    .notif-hero h1 { font-size: 22px; }
+}
+</style>
+
+<div class="notifications-premium">
+
+    <div class="notif-hero">
+        <div class="notif-hero-icon">
+            <i class="fas fa-bell"></i>
+        </div>
+        <h1>Activity</h1>
+        <p>Stay updated with what's happening</p>
+    </div>
+
+    <div class="notif-card">
+        <div class="notif-header">
+            <h3><i class="fas fa-clock me-2"></i>Recent Activity</h3>
+            <button class="mark-all-btn" onclick="markAllRead()">Mark all as read</button>
+        </div>
+
+        <div id="notifications-list">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="text-muted mt-2">Loading activity...</p>
             </div>
         </div>
     </div>
@@ -28,60 +207,67 @@ function formatTime(timestamp) {
     const date = new Date(timestamp * 1000);
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);
-
     if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
     if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
     return date.toLocaleDateString();
 }
 
-function getNotificationHTML(notif) {
-    let icon = '';
-    let message = '';
-    let link = '#';
+function getNotificationIcon(type) {
+    const icons = {
+        'like': '<i class="fas fa-heart"></i>',
+        'comment': '<i class="fas fa-comment"></i>',
+        'follow': '<i class="fas fa-user-plus"></i>',
+        'share': '<i class="fas fa-share-alt"></i>',
+        'friend_request': '<i class="fas fa-user-friends"></i>',
+        'friend_accepted': '<i class="fas fa-check-circle"></i>'
+    };
+    return icons[type] || '<i class="fas fa-bell"></i>';
+}
 
-    if (notif.name === 'like') {
-        icon = '<i class="fas fa-heart text-danger fa-fw"></i>';
-        message = `${notif.from_user} applauded your post`;
-        link = `/post/${notif.post_id}`;
-    } else if (notif.name === 'comment') {
-        icon = '<i class="fas fa-comment text-primary fa-fw"></i>';
-        const reply = notif.comment.substring(0, 50);
-        message = `${notif.from_user} replied: "${reply}${notif.comment.length > 50 ? '...' : ''}"`;
-        link = `/post/${notif.post_id}`;
+function getNotificationClass(type) {
+    const classes = {
+        'like': 'like',
+        'comment': 'comment',
+        'follow': 'follow',
+        'share': 'share',
+        'friend_request': 'friend',
+        'friend_accepted': 'friend'
+    };
+    return classes[type] || 'like';
+}
+
+function getNotificationLink(notif) {
+    if (notif.name === 'like' || notif.name === 'comment' || notif.name === 'share') {
+        return `/post/${notif.post_id}`;
     } else if (notif.name === 'follow') {
-        icon = '<i class="fas fa-user-plus text-success fa-fw"></i>';
-        message = `${notif.from_user} started following you`;
-        link = `/user/${notif.from_user}`;
-    } else if (notif.name === 'share') {
-        icon = '<i class="fas fa-share text-info fa-fw"></i>';
-        message = `${notif.from_user} reposted your content`;
-        link = `/post/${notif.post_id}`;
+        return `/user/${notif.from_user}`;
     } else if (notif.name === 'friend_request') {
-        icon = '<i class="fas fa-user-plus text-primary fa-fw"></i>';
-        message = `${notif.from_user} wants to connect with you`;
-        link = `/friend-requests`;
+        return '/friend-requests';
     } else if (notif.name === 'friend_accepted') {
-        icon = '<i class="fas fa-check-circle text-success fa-fw"></i>';
-        message = `${notif.from_user} accepted your connection request`;
-        link = `/friends`;
-    } else {
-        icon = '<i class="fas fa-bell text-secondary fa-fw"></i>';
-        message = notif.message || 'You have new activity';
+        return '/friends';
     }
+    return '#';
+}
 
-    return `
-        <a href="${link}" class="list-group-item list-group-item-action" style="text-decoration: none;">
-            <div class="d-flex align-items-start gap-3">
-                <div class="flex-shrink-0">${icon}</div>
-                <div class="flex-grow-1">
-                    <p class="mb-1">${message}</p>
-                    <small class="text-muted">${formatTime(notif.timestamp)}</small>
-                </div>
-            </div>
-        </a>
-    `;
+function getNotificationMessage(notif) {
+    switch(notif.name) {
+        case 'like': return `<strong>${escapeHtml(notif.from_user)}</strong> liked your post`;
+        case 'comment': return `<strong>${escapeHtml(notif.from_user)}</strong> commented: "${escapeHtml(notif.comment?.substring(0, 60))}"`;
+        case 'follow': return `<strong>${escapeHtml(notif.from_user)}</strong> started following you`;
+        case 'share': return `<strong>${escapeHtml(notif.from_user)}</strong> shared your post`;
+        case 'friend_request': return `<strong>${escapeHtml(notif.from_user)}</strong> wants to connect`;
+        case 'friend_accepted': return `<strong>${escapeHtml(notif.from_user)}</strong> accepted your request`;
+        default: return escapeHtml(notif.message || 'You have new activity');
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function loadNotifications() {
@@ -92,10 +278,12 @@ function loadNotifications() {
 
             if (!notifications || notifications.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No activity yet</p>
-                        <small class="text-muted">When someone interacts with you, you'll see it here</small>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-bell-slash"></i>
+                        </div>
+                        <h4>No activity yet</h4>
+                        <p class="text-muted">When someone interacts with you, it will appear here</p>
                     </div>
                 `;
                 return;
@@ -103,30 +291,68 @@ function loadNotifications() {
 
             let html = '';
             notifications.forEach(notif => {
-                html += getNotificationHTML(notif);
+                const iconClass = getNotificationClass(notif.name);
+                const iconHtml = getNotificationIcon(notif.name);
+                const message = getNotificationMessage(notif);
+                const link = getNotificationLink(notif);
+                const time = formatTime(notif.timestamp);
+
+                html += `
+                    <a href="${link}" class="notif-item" onclick="markAsRead(${notif.id})">
+                        <div class="notif-icon ${iconClass}">
+                            ${iconHtml}
+                        </div>
+                        <div class="notif-content">
+                            <div class="notif-message">${message}</div>
+                            <div class="notif-time">
+                                <i class="far fa-clock"></i> ${time}
+                                <span class="notif-dot"></span>
+                            </div>
+                        </div>
+                    </a>
+                `;
             });
             container.innerHTML = html;
         })
         .catch(error => {
-            console.error('Error loading activity:', error);
+            console.error('Error:', error);
             document.getElementById('notifications-list').innerHTML = `
                 <div class="text-center py-5">
                     <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
                     <p class="text-muted">Unable to load activity</p>
-                    <button class="btn btn-primary btn-sm" onclick="loadNotifications()">
-                        <i class="fas fa-sync me-2"></i>Try Again
-                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="loadNotifications()">Try Again</button>
                 </div>
             `;
         });
 }
 
-const badge = document.getElementById('notification-count');
-if (badge) {
-    badge.style.display = 'none';
-    badge.innerText = '0';
+function markAsRead(notifId) {
+    fetch(`/api/notifications/${notifId}/mark-read`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+    }).catch(error => console.error('Error:', error));
+}
+
+function markAllRead() {
+    fetch('/api/notifications/mark-read', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+    }).then(() => loadNotifications());
+}
+
+function updateBadge() {
+    fetch('/notifications')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notification-count');
+            if (badge && data.count > 0) {
+                badge.style.display = 'inline-block';
+                badge.innerText = data.count > 99 ? '99+' : data.count;
+            }
+        });
 }
 
 loadNotifications();
+updateBadge();
 </script>
 {% endblock %}

@@ -1,74 +1,220 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
+<style>
+.feeds-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    <h3 class="mb-0">
-                        {% if feed_type == 'for_you' %}
-                            <i class="fas fa-star text-warning"></i> For You
-                            {% if is_personalized %}
-                                <small class="text-muted">(AI Curated)</small>
-                            {% endif %}
-                        {% elif feed_type == 'trending' %}
-                            <i class="fas fa-fire text-danger"></i> Trending Now
-                        {% else %}
-                            <i class="fas fa-compass text-primary"></i> Explore
-                        {% endif %}
-                    </h3>
-                    <p class="text-muted">
-                        {% if feed_type == 'for_you' %}
-                            Personalized recommendations based on your activity
-                        {% elif feed_type == 'trending' %}
-                            Popular content from the last 7 days
-                        {% else %}
-                            Discover content from people you haven't connected with yet
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
+.feeds-hero {
+    background: linear-gradient(135deg, #10b98108, #05966908);
+    border-radius: 32px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(16,185,129,0.1);
+}
 
-            {% if not posts %}
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-stream fa-3x text-muted mb-3"></i>
-                        <h5>No posts yet</h5>
-                        <p class="text-muted">
-                            {% if feed_type == 'for_you' %}
-                                Engage with posts to get personalized recommendations
-                            {% else %}
-                                Check back later for more content
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            {% else %}
-                {% for post in posts %}
-                    {% include '_post.html' %}
-                {% endfor %}
-            {% endif %}
+.feeds-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: float 3s ease-in-out infinite;
+}
 
-            {% if next_url or prev_url %}
-            <nav aria-label="Post navigation">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ prev_url or '#' }}">
-                            <i class="fas fa-arrow-left me-1"></i>Newer
-                        </a>
-                    </li>
-                    <li class="page-item{% if not next_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ next_url or '#' }}">
-                            Older<i class="fas fa-arrow-right ms-1"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            {% endif %}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
 
+.feeds-hero-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.feeds-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.feeds-hero p {
+    color: var(--text-secondary);
+}
+
+.stats-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--hover-bg);
+    padding: 8px 20px;
+    border-radius: 40px;
+    margin-top: 16px;
+    font-size: 13px;
+}
+
+.stats-badge i {
+    color: #10b981;
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #10b98110, #05966910);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #10b981;
+}
+
+.empty-state h4 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.btn-discover {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16,185,129,0.4);
+    color: white;
+}
+
+.pagination-premium {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.pagination-btn {
+    padding: 10px 24px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.pagination-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .feeds-premium { padding: 12px; }
+    .feeds-hero { padding: 24px; }
+    .feeds-hero h1 { font-size: 24px; }
+}
+</style>
+
+<div class="feeds-premium">
+
+    <div class="feeds-hero">
+        <div class="feeds-hero-icon">
+            <i class="fas fa-user-friends"></i>
+        </div>
+        <h1>Friends Feed</h1>
+        <p>Posts and updates from your connections</p>
+        <div class="stats-badge">
+            <i class="fas fa-users"></i>
+            {# FIX: Use posts.total instead of posts|length for pagination object #}
+            <span>{{ posts.total if posts.total is defined else posts.items|length }} Posts from friends</span>
         </div>
     </div>
+
+    {# FIX: Use posts.items to get the actual post list #}
+    {% if posts and posts.items %}
+        <div class="posts-container">
+            {% for post in posts.items %}
+                {% include '_post.html' %}
+            {% endfor %}
+        </div>
+
+        {# Pagination - using posts.has_prev and posts.has_next #}
+        {% if posts.has_prev or posts.has_next %}
+        <div class="pagination-premium">
+            {% if posts.has_prev %}
+            <a href="{{ url_for('main.feeds', page=posts.prev_num) }}" class="pagination-btn">
+                <i class="fas fa-arrow-left"></i> Newer
+            </a>
+            {% endif %}
+            {% if posts.has_next %}
+            <a href="{{ url_for('main.feeds', page=posts.next_num) }}" class="pagination-btn">
+                Older <i class="fas fa-arrow-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-user-friends"></i>
+        </div>
+        <h4>No posts from friends</h4>
+        <p>Connect with people to see their updates here</p>
+        <a href="{{ url_for('main.discover') }}" class="btn-discover">
+            <i class="fas fa-compass"></i> Find Friends
+        </a>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

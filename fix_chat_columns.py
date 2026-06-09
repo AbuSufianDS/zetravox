@@ -1,4 +1,3 @@
-# save as fix_chat_columns.py
 import sqlite3
 
 conn = sqlite3.connect('app.db')

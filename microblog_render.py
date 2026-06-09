@@ -3,7 +3,6 @@ from app.models import User, Post, Comment, Notification, Message, Task
 
 app = create_app()
 
-# Reduce memory usage
 import gc
 gc.collect()
 

@@ -1,28 +1,221 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card mb-3">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-clock me-2 text-warning"></i>Flashbacks</h4>
-                <small class="text-muted">Your posts from this day in previous years</small>
+<style>
+.memories-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.memories-hero {
+    background: linear-gradient(135deg, #f59e0b08, #ef444408);
+    border-radius: 32px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(245,158,11,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.memories-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.memories-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.memories-hero-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.memories-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.memories-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: var(--hover-bg);
+    padding: 10px 20px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-card i {
+    color: #f59e0b;
+}
+
+.timeline-container {
+    margin-bottom: 30px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #f59e0b, #ef4444);
+}
+
+.timeline-year {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-year-dot {
+    position: absolute;
+    left: -26px;
+    top: 10px;
+    width: 12px;
+    height: 12px;
+    background: #f59e0b;
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+}
+
+.timeline-year-title {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #f59e0b;
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #f59e0b10, #ef444410);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #f59e0b;
+}
+
+@media (max-width: 768px) {
+    .memories-premium { padding: 12px; }
+    .memories-hero { padding: 24px; }
+    .memories-hero h1 { font-size: 24px; }
+}
+</style>
+
+<div class="memories-premium">
+
+    <div class="memories-hero">
+        <div class="memories-hero-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h1>Flashbacks</h1>
+        <p>Relive your memories from this day</p>
+        <div class="memories-stats">
+            <div class="stat-card">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ moment().format('MMMM D') }}</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-images"></i>
+                <span>{{ posts|length }} Memories</span>
             </div>
         </div>
+    </div>
 
-        {% if posts %}
-            {% for post in posts %}
-                {% include '_post.html' %}
-            {% endfor %}
-        {% else %}
-            <div class="card text-center">
-                <div class="card-body py-5">
-                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
-                    <p class="text-muted mb-0">No flashbacks from this day yet</p>
-                    <small class="text-muted">Check back tomorrow for more memories!</small>
+    {% if posts %}
+    <div class="timeline-container">
+        <div class="timeline">
+            {% set years = posts|groupby('timestamp.year') %}
+            {% for year, year_posts in years|reverse %}
+            <div class="timeline-year">
+                <div class="timeline-year-dot"></div>
+                <div class="timeline-year-title">
+                    <i class="fas fa-calendar-alt me-2"></i>{{ year }}
+                </div>
+                <div class="posts-container">
+                    {% for post in year_posts %}
+                        {% include '_post.html' %}
+                    {% endfor %}
                 </div>
             </div>
-        {% endif %}
+            {% endfor %}
+        </div>
     </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h4>No Flashbacks Today</h4>
+        <p class="text-muted">Come back tomorrow to see your memories!</p>
+        <div class="mt-3 text-center">
+            <small class="text-muted"><i class="fas fa-lightbulb me-1"></i> Tip: Share more posts to create beautiful memories</small>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

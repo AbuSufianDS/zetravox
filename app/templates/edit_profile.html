@@ -1,267 +1,575 @@
 {% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-user-edit me-2"></i>Edit Profile</h3>
+<style>
+:root {
+    --edit-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --edit-gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --edit-gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Premium Edit Profile Container */
+.edit-profile-premium {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.edit-card-premium {
+    background: var(--bg-card);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(102,126,234,0.1);
+}
+
+/* Premium Tabs */
+.edit-tabs-premium {
+    display: flex;
+    background: linear-gradient(135deg, #667eea08, #764ba208);
+    padding: 8px 20px;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.tab-btn-premium {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-radius: 40px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tab-btn-premium i {
+    font-size: 18px;
+}
+
+.tab-btn-premium:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.tab-btn-premium.active {
+    background: var(--edit-gradient-1);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+}
+
+/* Form Container */
+.edit-form-container {
+    padding: 30px;
+}
+
+.form-section {
+    display: none;
+    animation: fadeInUp 0.4s ease;
+}
+
+.form-section.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Groups */
+.form-group-premium {
+    margin-bottom: 24px;
+}
+
+.form-label-premium {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.form-label-premium i {
+    width: 24px;
+    color: #667eea;
+    margin-right: 8px;
+}
+
+.form-control-premium {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.3s;
+}
+
+.form-control-premium:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+
+textarea.form-control-premium {
+    resize: vertical;
+    min-height: 100px;
+}
+
+select.form-control-premium {
+    cursor: pointer;
+}
+
+/* Avatar & Cover Upload */
+.avatar-upload-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.avatar-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-preview-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #667eea;
+    box-shadow: 0 10px 25px rgba(102,126,234,0.2);
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: var(--edit-gradient-1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid var(--bg-card);
+}
+
+.avatar-upload-btn i {
+    color: white;
+    font-size: 14px;
+}
+
+.avatar-upload-btn:hover {
+    transform: scale(1.1);
+}
+
+.cover-preview {
+    position: relative;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.cover-preview-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+.cover-upload-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 30px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cover-upload-btn:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+/* Two Column Grid */
+.form-row-premium {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* Form Actions */
+.form-actions-premium {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-premium-save {
+    background: var(--edit-gradient-1);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-premium-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+}
+
+.btn-premium-cancel {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 32px;
+    border-radius: 40px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-premium-cancel:hover {
+    background: #ef4444;
+    color: white;
+    border-color: transparent;
+}
+
+@media (max-width: 768px) {
+    .edit-tabs-premium {
+        justify-content: center;
+    }
+
+    .tab-btn-premium {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .tab-btn-premium i {
+        font-size: 14px;
+    }
+
+    .edit-form-container {
+        padding: 20px;
+    }
+
+    .form-row-premium {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .form-actions-premium {
+        flex-direction: column;
+    }
+
+    .btn-premium-save, .btn-premium-cancel {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+
+<div class="edit-profile-premium">
+    <div class="edit-card-premium">
+
+        <div class="edit-tabs-premium">
+            <button class="tab-btn-premium active" data-tab="basic">
+                <i class="fas fa-user-circle"></i> Basic Info
+            </button>
+            <button class="tab-btn-premium" data-tab="photos">
+                <i class="fas fa-images"></i> Photos
+            </button>
+            <button class="tab-btn-premium" data-tab="details">
+                <i class="fas fa-address-card"></i> Personal
+            </button>
+            <button class="tab-btn-premium" data-tab="privacy">
+                <i class="fas fa-lock"></i> Privacy
+            </button>
+        </div>
+
+        <form action="" method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="edit-form-container">
+
+                <div class="form-section active" id="basic-tab-content">
+                    <div class="form-group-premium">
+                        <label class="form-label-premium">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        {{ form.username(class="form-control-premium", placeholder="Enter username") }}
+                        {% for error in form.username.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-premium">
+                        <label class="form-label-premium">
+                            <i class="fas fa-info-circle"></i> About Me
+                        </label>
+                        {{ form.about_me(class="form-control-premium", rows="4", placeholder="Tell the world something about yourself...") }}
+                        {% for error in form.about_me.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group-premium">
+                        <label class="form-label-premium">
+                            <i class="fas fa-heart"></i> Relationship Status
+                        </label>
+                        {{ form.relationship_status(class="form-control-premium") }}
+                        {% for error in form.relationship_status.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form action="" method="post" enctype="multipart/form-data">
-                        {{ form.hidden_tag() }}
 
-                        <ul class="nav nav-tabs mb-4" id="profileTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">
-                                    <i class="fas fa-user-circle me-1"></i> Basic Info
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab">
-                                    <i class="fas fa-images me-1"></i> Photos
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
-                                    <i class="fas fa-address-card me-1"></i> Personal Details
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#privacy" type="button" role="tab">
-                                    <i class="fas fa-lock me-1"></i> Privacy
-                                </button>
-                            </li>
-                        </ul>
+                <div class="form-section" id="photos-tab-content">
 
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
-                                <div class="mb-3">
-                                    {{ form.username.label(class="form-label") }}
-                                    {{ form.username(class="form-control") }}
-                                    {% for error in form.username.errors %}
-                                        <div class="text-danger">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
+                    <div class="avatar-upload-section">
+                        <div class="avatar-preview">
+                            {% if current_user.profile_pic and current_user.profile_pic != 'default.jpg' and current_user.profile_pic != 'None' %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
+                                     class="avatar-preview-img" id="avatarPreviewImg">
+                            {% else %}
+                                <img src="{{ current_user.avatar(140) }}"
+                                     class="avatar-preview-img" id="avatarPreviewImg">
+                            {% endif %}
+                            <label for="profile_pic" class="avatar-upload-btn">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                        </div>
+                        <p class="text-muted small mt-2">Click the camera icon to change your profile picture</p>
+                        {{ form.profile_pic(class="d-none", id="profile_pic", accept="image/*") }}
+                        {% for error in form.profile_pic.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
 
-                                <div class="mb-3">
-                                    {{ form.about_me.label(class="form-label") }}
-                                    {{ form.about_me(class="form-control", rows=4) }}
-                                    <small class="text-muted">Share something about yourself</small>
-                                    {% for error in form.about_me.errors %}
-                                        <div class="text-danger">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
+                    <div class="cover-preview">
+                        {% if current_user.cover_pic and current_user.cover_pic != 'default_cover.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.cover_pic) }}"
+                                 class="cover-preview-img" id="coverPreviewImg">
+                        {% else %}
+                            <div class="cover-preview-img" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                        {% endif %}
+                        <label for="cover_pic" class="cover-upload-btn">
+                            <i class="fas fa-camera me-2"></i> Change Cover
+                        </label>
+                        {{ form.cover_pic(class="d-none", id="cover_pic", accept="image/*") }}
+                        {% for error in form.cover_pic.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
 
-                                <div class="mb-3">
-                                    {{ form.relationship_status.label(class="form-label") }}
-                                    {{ form.relationship_status(class="form-select") }}
-                                    {% for error in form.relationship_status.errors %}
-                                        <div class="text-danger">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="photos" role="tabpanel">
-                                <div class="text-center mb-4">
-                                    <label class="form-label fw-bold">Current Avatar</label>
-                                    <div>
-                                        {% if current_user.profile_pic and current_user.profile_pic != 'default.jpg' and current_user.profile_pic != 'None' %}
-                                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
-                                                 class="rounded-circle mb-2"
-                                                 style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">
-                                        {% else %}
-                                            <img src="{{ current_user.avatar(120) }}"
-                                                 class="rounded-circle mb-2"
-                                                 style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #0d6efd;">
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    {{ form.profile_pic.label(class="form-label") }}
-                                    {{ form.profile_pic(class="form-control", accept="image/*") }}
-                                    <small class="text-muted">JPG, PNG, GIF (Max 5MB). Recommended size: 200x200px</small>
-                                    {% for error in form.profile_pic.errors %}
-                                        <div class="text-danger">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-
-                                <div class="text-center mb-4 mt-4">
-                                    <label class="form-label fw-bold">Current Cover Image</label>
-                                    <div>
-                                        {% if current_user.cover_pic and current_user.cover_pic != 'default_cover.jpg' %}
-                                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.cover_pic) }}"
-                                                 class="img-fluid rounded"
-                                                 style="width: 100%; max-height: 200px; object-fit: cover; border: 1px solid #dee2e6;">
-                                        {% else %}
-                                            <div class="bg-secondary rounded" style="height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    {{ form.cover_pic.label(class="form-label") }}
-                                    {{ form.cover_pic(class="form-control", accept="image/*") }}
-                                    <small class="text-muted">JPG, PNG, GIF (Max 5MB). Recommended size: 1200x400px</small>
-                                    {% for error in form.cover_pic.errors %}
-                                        <div class="text-danger">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-
-                                <div id="profilePreview" style="display:none;" class="mb-3">
-                                    <label class="form-label">Avatar Preview</label>
-                                    <img id="profilePreviewImg" class="img-fluid rounded" style="max-height: 150px;">
-                                </div>
-
-                                <div id="coverPreview" style="display:none;" class="mb-3">
-                                    <label class="form-label">Cover Preview</label>
-                                    <img id="coverPreviewImg" class="img-fluid rounded" style="width: 100%; max-height: 200px; object-fit: cover;">
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="details" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.work.label(class="form-label") }}
-                                            {{ form.work(class="form-control", placeholder="e.g., Software Engineer at Google") }}
-                                            {% for error in form.work.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.education.label(class="form-label") }}
-                                            {{ form.education(class="form-control", placeholder="e.g., MIT, Stanford") }}
-                                            {% for error in form.education.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.location.label(class="form-label") }}
-                                            {{ form.location(class="form-control", placeholder="e.g., New York, NY") }}
-                                            {% for error in form.location.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.website.label(class="form-label") }}
-                                            {{ form.website(class="form-control", placeholder="https://yourwebsite.com") }}
-                                            {% for error in form.website.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.birthday.label(class="form-label") }}
-                                            {{ form.birthday(class="form-control", placeholder="1990-01-01") }}
-                                            <small class="text-muted">Format: YYYY-MM-DD</small>
-                                            {% for error in form.birthday.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.phone.label(class="form-label") }}
-                                            {{ form.phone(class="form-control", placeholder="+1 234 567 8900") }}
-                                            {% for error in form.phone.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.gender.label(class="form-label") }}
-                                            {{ form.gender(class="form-select") }}
-                                            {% for error in form.gender.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.interested_in.label(class="form-label") }}
-                                            {{ form.interested_in(class="form-select") }}
-                                            {% for error in form.interested_in.errors %}
-                                                <div class="text-danger">{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="privacy" role="tabpanel">
-                                <div class="mb-3">
-                                    {{ form.is_private.label(class="form-label") }}
-                                    {{ form.is_private(class="form-select") }}
-                                    <small class="text-muted">Private profiles require approval for new connections. Only approved connections can see your posts</small>
-                                </div>
-                            </div>
+                <div class="form-section" id="details-tab-content">
+                    <div class="form-row-premium">
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-briefcase"></i> Work
+                            </label>
+                            {{ form.work(class="form-control-premium", placeholder="e.g., Software Engineer at Google") }}
+                            {% for error in form.work.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
-                            {{ form.submit(class="btn btn-primary") }}
-                            <a href="{{ url_for('main.user', username=current_user.username) }}" class="btn btn-secondary">Cancel</a>
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-graduation-cap"></i> Education
+                            </label>
+                            {{ form.education(class="form-control-premium", placeholder="e.g., MIT, Stanford") }}
+                            {% for error in form.education.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
-                    </form>
+                    </div>
+
+                    <div class="form-row-premium">
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-map-marker-alt"></i> Location
+                            </label>
+                            {{ form.location(class="form-control-premium", placeholder="e.g., New York, NY") }}
+                            {% for error in form.location.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-link"></i> Website
+                            </label>
+                            {{ form.website(class="form-control-premium", placeholder="https://yourwebsite.com") }}
+                            {% for error in form.website.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row-premium">
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-birthday-cake"></i> Birthday
+                            </label>
+                            {{ form.birthday(class="form-control-premium", placeholder="1990-01-01", type="date") }}
+                            {% for error in form.birthday.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-phone"></i> Phone
+                            </label>
+                            {{ form.phone(class="form-control-premium", placeholder="+1 234 567 8900") }}
+                            {% for error in form.phone.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-row-premium">
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-venus-mars"></i> Gender
+                            </label>
+                            {{ form.gender(class="form-control-premium") }}
+                            {% for error in form.gender.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">
+                                <i class="fas fa-users"></i> Interested In
+                            </label>
+                            {{ form.interested_in(class="form-control-premium") }}
+                            {% for error in form.interested_in.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section" id="privacy-tab-content">
+                    <div class="form-group-premium">
+                        <label class="form-label-premium">
+                            <i class="fas fa-user-secret"></i> Account Privacy
+                        </label>
+                        {{ form.is_private(class="form-control-premium") }}
+                        <small class="text-muted mt-2 d-block">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Private profiles require approval for new connections. Only approved connections can see your posts.
+                        </small>
+                        {% for error in form.is_private.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-actions-premium">
+                    <a href="{{ url_for('main.user', username=current_user.username) }}" class="btn-premium-cancel">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </a>
+                    {{ form.submit(class="btn-premium-save") }}
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
 <script>
-document.getElementById('profile_pic').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const preview = document.getElementById('profilePreview');
-    const previewImg = document.getElementById('profilePreviewImg');
 
-    if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            previewImg.src = event.target.result;
-            preview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-    } else {
-        preview.style.display = 'none';
-    }
+document.querySelectorAll('.tab-btn-premium').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn-premium').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
+
+        const tabId = this.dataset.tab;
+        document.getElementById(`${tabId}-tab-content`).classList.add('active');
+    });
 });
 
-document.getElementById('cover_pic').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const preview = document.getElementById('coverPreview');
-    const previewImg = document.getElementById('coverPreviewImg');
+const profilePicInput = document.getElementById('profile_pic');
+const avatarPreview = document.getElementById('avatarPreviewImg');
 
-    if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            previewImg.src = event.target.result;
-            preview.style.display = 'block';
+if (profilePicInput) {
+    profilePicInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                avatarPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
         }
-        reader.readAsDataURL(file);
-    } else {
-        preview.style.display = 'none';
-    }
-});
+    });
+}
+
+const coverPicInput = document.getElementById('cover_pic');
+const coverPreview = document.getElementById('coverPreviewImg');
+
+if (coverPicInput) {
+    coverPicInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                coverPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `position-fixed bottom-0 end-0 m-3 alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    toast.style.zIndex = '9999';
+    toast.style.animation = 'slideInRight 0.3s ease';
+    toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
 </script>
+
+<style>
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+
 {% endblock %}

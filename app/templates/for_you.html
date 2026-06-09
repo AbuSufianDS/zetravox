@@ -1,47 +1,247 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    <h3><i class="fas fa-star text-warning"></i> For You</h3>
-                    <p class="text-muted">Personalized recommendations just for you</p>
-                    {% if is_personalized %}
-                    <span class="badge bg-primary">AI Powered</span>
-                    {% endif %}
-                </div>
-            </div>
+<style>
+.for-you-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-            {% if not posts %}
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-magic fa-3x text-muted mb-3"></i>
-                        <h5>No recommendations yet</h5>
-                        <p class="text-muted">Follow more people and interact with content to get better recommendations!</p>
-                        <a href="{{ url_for('main.discover') }}" class="btn btn-primary">Discover People</a>
-                    </div>
-                </div>
-            {% else %}
-                {% for post in posts %}
-                    {% include '_post.html' %}
-                {% endfor %}
-            {% endif %}
-            
-            {% if next_url or prev_url %}
-            <nav>
-                <ul class="pagination justify-content-center">
-                    <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ prev_url or '#' }}">← Newer</a>
-                    </li>
-                    <li class="page-item{% if not next_url %} disabled{% endif %}">
-                        <a class="page-link" href="{{ next_url or '#' }}">Older →</a>
-                    </li>
-                </ul>
-            </nav>
-            {% endif %}
+.hero-premium {
+    background: linear-gradient(135deg, #667eea08, #764ba208);
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(102,126,234,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-premium::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(102,126,234,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.hero-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.hero-premium h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+}
+
+.hero-premium p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.ai-badge-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    padding: 6px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty-state-premium {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea10, #764ba210);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: #667eea;
+}
+
+.empty-state-premium h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.empty-state-premium p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.btn-discover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    color: white;
+}
+
+.pagination-premium {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.pagination-btn {
+    padding: 10px 24px;
+    background: var(--hover-bg);
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-btn:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.pagination-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .for-you-premium {
+        padding: 12px;
+    }
+
+    .hero-premium {
+        padding: 30px 20px;
+    }
+
+    .hero-premium h1 {
+        font-size: 24px;
+    }
+
+    .hero-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .hero-icon i {
+        font-size: 28px;
+    }
+}
+</style>
+
+<div class="for-you-premium">
+
+    <div class="hero-premium">
+        <div class="hero-icon">
+            <i class="fas fa-magic"></i>
         </div>
+        <h1>For You</h1>
+        <p>Personalized content curated just for your taste</p>
+        {% if is_personalized %}
+        <div class="ai-badge-premium">
+            <i class="fas fa-robot"></i>
+            <span>AI Powered Recommendations</span>
+        </div>
+        {% endif %}
     </div>
+
+    {% if posts %}
+    <div class="posts-container">
+        {% for post in posts %}
+            {% include '_post.html' %}
+        {% endfor %}
+    </div>
+
+    {% if next_url or prev_url %}
+    <div class="pagination-premium">
+        {% if prev_url %}
+        <a href="{{ prev_url }}" class="pagination-btn">
+            <i class="fas fa-arrow-left"></i> Newer
+        </a>
+        {% endif %}
+        {% if next_url %}
+        <a href="{{ next_url }}" class="pagination-btn">
+            Older <i class="fas fa-arrow-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state-premium">
+        <div class="empty-icon">
+            <i class="fas fa-magic"></i>
+        </div>
+        <h3>No recommendations yet</h3>
+        <p>Follow more people and interact with content to get better recommendations!</p>
+        <a href="{{ url_for('main.discover') }}" class="btn-discover">
+            <i class="fas fa-compass"></i> Discover People
+        </a>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

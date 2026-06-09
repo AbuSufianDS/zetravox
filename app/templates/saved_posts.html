@@ -1,27 +1,336 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-bookmark me-2"></i>Bookmarks</h4>
+<style>
+.bookmarks-premium {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.bookmarks-hero {
+    background: linear-gradient(135deg, #f59e0b08, #ef444408);
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(245,158,11,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.bookmarks-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.bookmarks-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.bookmarks-hero-icon i {
+    font-size: 40px;
+    color: white;
+}
+
+.bookmarks-hero h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+}
+
+.bookmarks-hero p {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.bookmarks-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: var(--hover-bg);
+    padding: 12px 24px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-card i {
+    font-size: 20px;
+    color: #f59e0b;
+}
+
+.stat-card span {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.stat-card small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Posts Container */
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.empty-state-premium {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon-wrapper {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #f59e0b10, #ef444410);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: float 3s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.empty-icon-wrapper i {
+    font-size: 56px;
+    color: #f59e0b;
+}
+
+.empty-state-premium h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.empty-state-premium p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.empty-state-premium small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.btn-explore {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-explore:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    color: white;
+}
+
+.btn-feed {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-feed:hover {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    border-color: transparent;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .bookmarks-premium {
+        padding: 12px;
+    }
+
+    .bookmarks-hero {
+        padding: 30px 20px;
+    }
+
+    .bookmarks-hero h1 {
+        font-size: 24px;
+    }
+
+    .bookmarks-hero-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .bookmarks-hero-icon i {
+        font-size: 28px;
+    }
+
+    .bookmarks-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 8px 16px;
+    }
+
+    .stat-card span {
+        font-size: 14px;
+    }
+
+    .empty-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-explore, .btn-feed {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="bookmarks-premium">
+
+    <div class="bookmarks-hero">
+        <div class="bookmarks-hero-icon">
+            <i class="fas fa-bookmark"></i>
+        </div>
+        <h1>Your Bookmarks</h1>
+        <p>All your saved content in one place</p>
+
+        <div class="bookmarks-stats">
+            <div class="stat-card">
+                <i class="fas fa-bookmark"></i>
+                <div>
+                    <span>{{ posts|length }}</span>
+                    <small>Saved Items</small>
                 </div>
             </div>
-
-            {% for post in posts %}
-                {% include '_post.html' %}
-            {% else %}
-                <div class="card">
-                    <div class="card-body text-center text-muted py-5">
-                        <i class="fas fa-bookmark fa-3x mb-3"></i>
-                        <p>You haven't bookmarked any content yet.</p>
-                        <small>Click the bookmark icon on posts to save them here</small>
-                    </div>
+            <div class="stat-card">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <span>Never Lose</span>
+                    <small>Your Favorites</small>
                 </div>
-            {% endfor %}
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-sync-alt"></i>
+                <div>
+                    <span>Sync</span>
+                    <small>Across Devices</small>
+                </div>
+            </div>
         </div>
     </div>
+
+    {% if posts %}
+    <div class="posts-container">
+        {% for post in posts %}
+            {% include '_post.html' %}
+        {% endfor %}
+    </div>
+    {% else %}
+
+    <div class="empty-state-premium">
+        <div class="empty-icon-wrapper">
+            <i class="fas fa-bookmark"></i>
+        </div>
+        <h3>No Bookmarks Yet</h3>
+        <p>You haven't saved any content to your bookmarks.</p>
+        <small>Click the bookmark icon on any post to save it here</small>
+
+        <div class="empty-actions">
+            <a href="{{ url_for('main.explore') }}" class="btn-explore">
+                <i class="fas fa-compass"></i> Explore Content
+            </a>
+            <a href="{{ url_for('main.index') }}" class="btn-feed">
+                <i class="fas fa-home"></i> Go to Feed
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statNumbers = document.querySelectorAll('.stat-card span:first-child');
+    statNumbers.forEach(stat => {
+        const finalValue = parseInt(stat.innerText);
+        if (!isNaN(finalValue)) {
+            let current = 0;
+            const increment = finalValue / 30;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= finalValue) {
+                    stat.innerText = finalValue;
+                    clearInterval(timer);
+                } else {
+                    stat.innerText = Math.floor(current);
+                }
+            }, 30);
+        }
+    });
+});
+</script>
+
 {% endblock %}

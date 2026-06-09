@@ -1,46 +1,833 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex align-items-center">
-                        <img src="{{ story.author.avatar(40) }}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
-                        <div>
-                            <strong>{{ story.author.username }}</strong>
-                            <br>
-                            <small class="text-muted">{{ moment(story.timestamp).fromNow() }}</small>
-                        </div>
+<style>
+:root {
+    --story-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --story-gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --story-gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --story-gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --story-gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.story-viewer-premium {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.story-viewer-premium::before {
+    content: '';
+    position: absolute;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+    animation: rotateBackground 20s linear infinite;
+}
+
+@keyframes rotateBackground {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.story-card-premium {
+    position: relative;
+    width: 100%;
+    max-width: 550px;
+    margin: 0 auto;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    animation: floatIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.story-header-premium {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.story-author-premium {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.story-author-ring {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--story-gradient-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulseRing 2s infinite;
+}
+
+@keyframes pulseRing {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(102,126,234,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(102,126,234,0); }
+}
+
+.story-author-ring img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.story-author-info {
+    color: white;
+}
+
+.story-author-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.story-time {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* Progress Bar */
+.story-progress-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 0;
+    z-index: 20;
+}
+
+.story-progress-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.story-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: white;
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+.story-content-premium {
+    position: relative;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--story-gradient-1);
+}
+
+.story-media-premium {
+    width: 100%;
+    min-height: 600px;
+    object-fit: cover;
+    display: block;
+}
+
+.story-text-premium {
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.story-text-premium::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmerText 8s infinite;
+}
+
+@keyframes shimmerText {
+    0%, 100% { transform: translate(-20%, -20%); }
+    50% { transform: translate(20%, 20%); }
+}
+
+.story-text-icon {
+    font-size: 80px;
+    margin-bottom: 30px;
+    animation: bounceIcon 2s infinite;
+}
+
+@keyframes bounceIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.story-text-caption {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
+    word-break: break-word;
+}
+
+.story-text-quote {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+/* Story Actions */
+.story-actions-premium {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.story-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.story-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.story-stat:hover {
+    transform: scale(1.1);
+}
+
+.story-reaction-picker {
+    position: relative;
+}
+
+.story-reaction-btn {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    color: white;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.story-reaction-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+.story-reaction-dropdown {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 10px;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 50px;
+    padding: 8px 12px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s;
+}
+
+.story-reaction-picker:hover .story-reaction-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.story-reaction-option {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.story-reaction-option:hover {
+    transform: scale(1.3);
+    background: rgba(255,255,255,0.2);
+}
+
+.story-comments-premium {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    padding: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 15;
+}
+
+.story-comments-premium.active {
+    transform: translateY(0);
+}
+
+.story-comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.story-comments-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.story-comment-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 16px;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.story-comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.story-comment-content {
+    flex: 1;
+}
+
+.story-comment-username {
+    font-weight: 600;
+    font-size: 12px;
+    color: white;
+}
+
+.story-comment-text {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 2px;
+}
+
+.story-comment-time {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+}
+
+.story-comment-input {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.story-comment-input-field {
+    flex: 1;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 30px;
+    color: white;
+    font-size: 14px;
+}
+
+.story-comment-input-field::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+.story-comment-submit {
+    background: var(--story-gradient-1);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.story-comment-submit:hover {
+    transform: scale(1.05);
+}
+
+.story-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-nav-btn:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.story-nav-prev {
+    left: 20px;
+}
+
+.story-nav-next {
+    right: 20px;
+}
+
+.story-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-close-btn:hover {
+    background: rgba(0,0,0,0.8);
+    transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+    .story-card-premium {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .story-content-premium {
+        min-height: 100vh;
+    }
+
+    .story-media-premium {
+        min-height: 100vh;
+    }
+
+    .story-text-caption {
+        font-size: 22px;
+    }
+
+    .story-nav-btn {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+.story-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+}
+
+.story-loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<div class="story-viewer-premium">
+
+    <button class="story-close-btn" onclick="closeStory()">
+        <i class="fas fa-times"></i>
+    </button>
+
+    {% if prev_story_id %}
+    <button class="story-nav-btn story-nav-prev" onclick="navigateStory('prev')">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    {% endif %}
+
+    {% if next_story_id %}
+    <button class="story-nav-btn story-nav-next" onclick="navigateStory('next')">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    {% endif %}
+
+    <div class="story-card-premium" data-story-id="{{ story.id }}">
+
+        <div class="story-progress-container">
+            {% for s in all_stories %}
+            <div class="story-progress-bar">
+                <div class="story-progress-fill" data-story-id="{{ s.id }}" style="width: {% if s.id == story.id %}0{% elif s.id|int < story.id|int %}100{% else %}0{% endif %}%;"></div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="story-header-premium">
+            <div class="story-author-premium">
+                <div class="story-author-ring">
+                    <img src="{{ story.author.avatar(44) }}">
+                </div>
+                <div class="story-author-info">
+                    <div class="story-author-name">{{ story.author.username }}</div>
+                    <div class="story-time">{{ moment(story.timestamp).fromNow() }}</div>
+                </div>
+            </div>
+            <div class="story-more-btn" onclick="toggleStoryMenu()">
+                <i class="fas fa-ellipsis-h"></i>
+            </div>
+        </div>
+
+        <div class="story-content-premium">
+            {% if story.media_type == 'image' %}
+                <img src="{{ url_for('static', filename='uploads/stories/' + story.media_url) }}"
+                     class="story-media-premium"
+                     id="storyMedia"
+                     onclick="togglePause()">
+
+            {% elif story.media_type == 'video' %}
+                <video class="story-media-premium"
+                       id="storyVideo"
+                       autoplay
+                       onclick="togglePause()">
+                    <source src="{{ url_for('static', filename='uploads/stories/' + story.media_url) }}" type="video/mp4">
+                </video>
+
+            {% elif story.media_type == 'text' %}
+                <div class="story-text-premium" style="background: {{ story.bg_color or 'var(--story-gradient-1)' }}">
+                    <div class="story-text-icon">
+                        {% if 'gradient-purple' in story.bg_color %}
+                            <i class="fas fa-feather-alt"></i>
+                        {% elif 'gradient-pink' in story.bg_color %}
+                            <i class="fas fa-heart"></i>
+                        {% elif 'gradient-blue' in story.bg_color %}
+                            <i class="fas fa-cloud-moon"></i>
+                        {% else %}
+                            <i class="fas fa-pen-fancy"></i>
+                        {% endif %}
+                    </div>
+                    <div class="story-text-caption">{{ story.caption }}</div>
+                    <div class="story-text-quote">— {{ story.author.username }}</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="story-actions-premium">
+            <div class="story-stats">
+                <div class="story-stat" onclick="showComments()">
+                    <i class="far fa-comment"></i>
+                    <span id="commentCount">{{ comments|length }}</span>
+                </div>
+                <div class="story-stat" onclick="toggleReaction()">
+                    <i class="far fa-heart"></i>
+                    <span id="reactionCount">{{ story.reaction_count if story.reaction_count else 0 }}</span>
+                </div>
+                <div class="story-stat">
+                    <i class="far fa-eye"></i>
+                    <span>{{ story.views if story.views else 0 }}</span>
+                </div>
+            </div>
+
+            <div class="story-reaction-picker">
+                <button class="story-reaction-btn" onclick="toggleReactionPicker()">
+                    <i class="far fa-smile-wink"></i> React
+                </button>
+                <div class="story-reaction-dropdown" id="reactionDropdown">
+                    <button class="story-reaction-option" onclick="addReaction('❤️')">❤️</button>
+                    <button class="story-reaction-option" onclick="addReaction('👍')">👍</button>
+                    <button class="story-reaction-option" onclick="addReaction('😂')">😂</button>
+                    <button class="story-reaction-option" onclick="addReaction('😮')">😮</button>
+                    <button class="story-reaction-option" onclick="addReaction('😢')">😢</button>
+                    <button class="story-reaction-option" onclick="addReaction('🔥')">🔥</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-comments-premium" id="commentsSection">
+            <div class="story-comments-header">
+                <span><i class="fas fa-comments"></i> Comments</span>
+                <button class="btn-close btn-close-white" onclick="hideComments()"></button>
+            </div>
+            <div class="story-comments-list" id="commentsList">
+                {% for comment in comments %}
+                <div class="story-comment-item">
+                    <img src="{{ comment.author.avatar(32) }}" class="story-comment-avatar">
+                    <div class="story-comment-content">
+                        <div class="story-comment-username">{{ comment.author.username }}</div>
+                        <div class="story-comment-text">{{ comment.message }}</div>
+                        <div class="story-comment-time">{{ moment(comment.timestamp).fromNow() }}</div>
                     </div>
                 </div>
-                <div class="card-body text-center">
-                    {% if story.media_type == 'image' %}
-                        <img src="{{ url_for('static', filename='uploads/stories/' + story.media_url) }}" 
-                             class="img-fluid rounded" 
-                             style="max-height: 500px; width: auto;">
-                    {% elif story.media_type == 'video' %}
-                        <video controls class="w-100 rounded" style="max-height: 500px;">
-                            <source src="{{ url_for('static', filename='uploads/stories/' + story.media_url) }}" 
-                                    type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    {% elif story.media_type == 'text' %}
-                        <div class="p-5 rounded" style="background: {{ story.bg_color or 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}; min-height: 400px;">
-                            <p class="text-white" style="font-size: 1.5rem; white-space: pre-wrap;">{{ story.caption }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if story.caption and story.media_type != 'text' %}
-                        <p class="mt-3">{{ story.caption }}</p>
-                    {% endif %}
+                {% else %}
+                <div class="text-center text-white-50 py-3">
+                    <i class="far fa-comment-dots fa-2x mb-2 d-block"></i>
+                    <small>No comments yet. Be the first!</small>
                 </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Stream</a>
-                </div>
+                {% endfor %}
+            </div>
+            <div class="story-comment-input">
+                <input type="text" class="story-comment-input-field" id="commentInput" placeholder="Add a comment...">
+                <button class="story-comment-submit" onclick="addComment()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+let progressInterval = null;
+let currentStoryId = {{ story.id }};
+let isPaused = false;
+
+function startProgress() {
+    const progressFill = document.querySelector('.story-progress-fill');
+    if (!progressFill) return;
+
+    let width = 0;
+    progressInterval = setInterval(() => {
+        if (!isPaused) {
+            width += 0.5;
+            progressFill.style.width = width + '%';
+
+            if (width >= 100) {
+                clearInterval(progressInterval);
+                autoNextStory();
+            }
+        }
+    }, 50);
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    const video = document.getElementById('storyVideo');
+    if (video) {
+        if (isPaused) {
+            video.pause();
+        } else {
+            video.play();
+        }
+    }
+}
+
+function autoNextStory() {
+    {% if next_story_id %}
+    window.location.href = '/view_story/{{ next_story_id }}';
+    {% else %}
+    closeStory();
+    {% endif %}
+}
+
+function navigateStory(direction) {
+    clearInterval(progressInterval);
+    if (direction === 'prev' && {{ prev_story_id is not none }}) {
+        window.location.href = '/view_story/{{ prev_story_id }}';
+    } else if (direction === 'next' && {{ next_story_id is not none }}) {
+        window.location.href = '/view_story/{{ next_story_id }}';
+    }
+}
+
+function closeStory() {
+    window.location.href = '/';
+}
+
+function showComments() {
+    const commentsSection = document.getElementById('commentsSection');
+    commentsSection.classList.toggle('active');
+    isPaused = true;
+    const video = document.getElementById('storyVideo');
+    if (video) video.pause();
+}
+
+function hideComments() {
+    document.getElementById('commentsSection').classList.remove('active');
+    isPaused = false;
+    const video = document.getElementById('storyVideo');
+    if (video) video.play();
+}
+
+function toggleReactionPicker() {
+    const dropdown = document.getElementById('reactionDropdown');
+    dropdown.style.opacity = dropdown.style.opacity === '0' ? '1' : '0';
+    dropdown.style.visibility = dropdown.style.visibility === 'hidden' ? 'visible' : 'hidden';
+}
+
+function addReaction(reaction) {
+    fetch(`/react_story/{{ story.id }}/${reaction}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('reactionCount').textContent = data.reaction_count;
+            document.getElementById('reactionDropdown').style.opacity = '0';
+            document.getElementById('reactionDropdown').style.visibility = 'hidden';
+            showToast('Reaction added!', 'success');
+        }
+    });
+}
+
+function addComment() {
+    const commentInput = document.getElementById('commentInput');
+    const message = commentInput.value.trim();
+
+    if (!message) return;
+
+    fetch('/send_story_comment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            story_id: {{ story.id }},
+            message: message
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function toggleStoryMenu() {
+    showToast('Story options coming soon!', 'info');
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `position-fixed bottom-0 end-0 m-3 alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show`;
+    toast.style.zIndex = '9999';
+    toast.style.animation = 'slideInRight 0.3s ease';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+startProgress();
+
+document.querySelector('.story-card-premium').addEventListener('mouseenter', () => {
+    isPaused = true;
+    const video = document.getElementById('storyVideo');
+    if (video) video.pause();
+});
+
+document.querySelector('.story-card-premium').addEventListener('mouseleave', () => {
+    isPaused = false;
+    const video = document.getElementById('storyVideo');
+    if (video) video.play();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+        navigateStory('prev');
+    } else if (e.key === 'ArrowRight') {
+        navigateStory('next');
+    } else if (e.key === 'Escape') {
+        closeStory();
+    }
+});
+</script>
+
 {% endblock %}

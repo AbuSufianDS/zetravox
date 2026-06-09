@@ -5,7 +5,7 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm'}
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB per file
+MAX_FILE_SIZE = 50 * 1024 * 1024
 MAX_FILES = 10
 
 

@@ -1,0 +1,86 @@
+{% macro render_comment(comment, current_user, post, is_reply=False) %}
+<div class="comment-wrapper" data-comment-id="{{ comment.id }}" id="comment-{{ comment.id }}">
+    <div class="{% if is_reply %}comment-reply ms-4{% else %}comment-item{% endif %} mb-3">
+        <div class="d-flex gap-2">
+            <img src="{{ comment.author.avatar(32) }}" class="rounded-circle" width="32" height="32">
+            <div class="flex-grow-1">
+                <div class="comment-bubble p-2 rounded-3" style="background: var(--hover-bg);">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong class="me-2">{{ comment.author.username }}</strong>
+                            <small class="text-muted">{{ moment(comment.timestamp).fromNow() }}</small>
+                        </div>
+                        {% if comment.author.id == current_user.id or current_user.is_admin %}
+                        <button class="btn btn-sm btn-link text-danger p-0 delete-comment-btn" data-comment-id="{{ comment.id }}" style="font-size: 12px;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <p class="mb-1 mt-1">{{ comment.body }}</p>
+                    
+                    <!-- Comment Actions -->
+                    <div class="comment-actions mt-1 d-flex gap-3">
+                        <button class="btn btn-sm btn-link text-muted p-0 comment-reaction-btn" 
+                                data-comment-id="{{ comment.id }}" 
+                                data-reaction="❤️" 
+                                style="font-size: 12px;">
+                            ❤️ <span class="reaction-count-{{ comment.id }}-❤️">{{ comment.reaction_summary.get('❤️', 0) }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-link text-muted p-0 comment-reaction-btn" 
+                                data-comment-id="{{ comment.id }}" 
+                                data-reaction="👍" 
+                                style="font-size: 12px;">
+                            👍 <span class="reaction-count-{{ comment.id }}-👍">{{ comment.reaction_summary.get('👍', 0) }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-link text-muted p-0 comment-reaction-btn" 
+                                data-comment-id="{{ comment.id }}" 
+                                data-reaction="😂" 
+                                style="font-size: 12px;">
+                            😂 <span class="reaction-count-{{ comment.id }}-😂">{{ comment.reaction_summary.get('😂', 0) }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-link text-muted p-0 comment-reaction-btn" 
+                                data-comment-id="{{ comment.id }}" 
+                                data-reaction="😮" 
+                                style="font-size: 12px;">
+                            😮 <span class="reaction-count-{{ comment.id }}-😮">{{ comment.reaction_summary.get('😮', 0) }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-link text-muted p-0 reply-toggle-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                    </div>
+                    
+                    <!-- Reply Form (hidden by default) -->
+                    <div class="reply-form mt-2" id="reply-form-{{ comment.id }}" style="display: none;">
+                        <div class="d-flex gap-2">
+                            <img src="{{ current_user.avatar(24) }}" class="rounded-circle" width="24" height="24">
+                            <div class="flex-grow-1">
+                                <textarea class="form-control form-control-sm reply-input" 
+                                          rows="2" 
+                                          placeholder="Write a reply..."
+                                          id="reply-input-{{ comment.id }}"></textarea>
+                                <div class="mt-1 d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary submit-reply-btn" data-comment-id="{{ comment.id }}">
+                                        Reply
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary cancel-reply-btn" data-comment-id="{{ comment.id }}">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Replies Container -->
+                <div class="replies-container mt-2" id="replies-{{ comment.id }}">
+                    {% if comment.replies.count() > 0 %}
+                        {% for reply in comment.replies.order_by(Comment.timestamp.asc()).all() %}
+                            {{ render_comment(reply, current_user, post, is_reply=True) }}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

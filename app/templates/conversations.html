@@ -1,50 +1,639 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-comments me-2 text-primary"></i>Messages</h5>
+<style>
+:root {
+    --msg-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --msg-gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --msg-gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.messages-premium-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.messages-premium-card {
+    background: var(--bg-card);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(102,126,234,0.12);
+    transition: all 0.3s ease;
+}
+
+.messages-premium-card:hover {
+    box-shadow: 0 25px 50px rgba(102,126,234,0.15);
+}
+
+.messages-premium-header {
+    background: linear-gradient(135deg, #667eea08, #764ba208);
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.messages-premium-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    z-index: 1;
+}
+
+.header-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: var(--msg-gradient-1);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.header-icon-wrapper i {
+    font-size: 28px;
+    color: white;
+}
+
+.header-text h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    background: var(--msg-gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-text p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.header-stats {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--hover-bg);
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* Search Bar */
+.messages-search-bar {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 40px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+
+.conversations-list {
+    max-height: 550px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.conversations-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.conversations-list::-webkit-scrollbar-track {
+    background: var(--hover-bg);
+    border-radius: 10px;
+}
+
+.conversations-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+.conversation-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    margin-bottom: 8px;
+    background: var(--bg-card);
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.conversation-item:hover {
+    background: linear-gradient(135deg, #667eea05, #764ba205);
+    border-color: rgba(102,126,234,0.2);
+    transform: translateX(5px);
+}
+
+.conversation-avatar {
+    position: relative;
+}
+
+.avatar-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--msg-gradient-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--bg-card);
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+.conversation-info {
+    flex: 1;
+}
+
+.conversation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+
+.conversation-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.verified-badge {
+    color: #667eea;
+    font-size: 12px;
+}
+
+.conversation-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.conversation-preview {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.preview-icon {
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.preview-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+.unread-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 30px;
+    min-width: 28px;
+    text-align: center;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.status-sent, .status-delivered, .status-seen {
+    font-size: 12px;
+}
+
+.status-sent i { color: var(--text-secondary); }
+.status-delivered i { color: #667eea; }
+.status-seen i { color: #10b981; }
+
+/* Empty State */
+.empty-state-premium {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea10, #764ba210);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: float 3s infinite;
+}
+
+.empty-icon-wrapper i {
+    font-size: 48px;
+    color: #667eea;
+}
+
+.empty-state-premium h4 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.empty-state-premium p {
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+}
+
+.btn-find-people {
+    background: var(--msg-gradient-1);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 40px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-find-people:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    color: white;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--border-color);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.messages-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.footer-action-btn {
+    background: var(--hover-bg);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.footer-action-btn:hover {
+    background: var(--msg-gradient-1);
+    color: white;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .messages-premium-container {
+        padding: 12px;
+    }
+
+    .messages-premium-header {
+        padding: 20px;
+    }
+
+    .header-icon-wrapper {
+        width: 48px;
+        height: 48px;
+    }
+
+    .header-icon-wrapper i {
+        font-size: 22px;
+    }
+
+    .header-text h2 {
+        font-size: 20px;
+    }
+
+    .header-stats {
+        position: static;
+        transform: none;
+        margin-top: 12px;
+        display: inline-block;
+    }
+
+    .conversation-item {
+        padding: 12px 16px;
+    }
+
+    .avatar-ring {
+        width: 50px;
+        height: 50px;
+    }
+
+    .conversation-name {
+        font-size: 14px;
+    }
+
+    .preview-text {
+        max-width: 180px;
+    }
+
+    .empty-icon-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+
+    .empty-icon-wrapper i {
+        font-size: 36px;
+    }
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .conversation-item {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .search-input {
+    background: var(--hover-bg);
+}
+</style>
+
+<div class="messages-premium-container">
+    <div class="messages-premium-card">
+
+        <div class="messages-premium-header">
+            <div class="header-content">
+                <div class="header-icon-wrapper">
+                    <i class="fas fa-comment-dots"></i>
                 </div>
-                <div class="list-group list-group-flush">
-                    {% if conversations %}
-                        {% for conv in conversations %}
-                        <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="list-group-item list-group-item-action">
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="{{ conv.user.avatar(48) }}" class="rounded-circle" style="width: 48px; height: 48px;">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <strong>{{ conv.user.username }}</strong>
-                                        {% if conv.unread_count > 0 %}
-                                        <span class="badge bg-danger rounded-pill">{{ conv.unread_count }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="small text-muted">
-                                        {{ conv.last_message.message[:50] if conv.last_message else 'No messages yet' }}
-                                    </div>
-                                </div>
-                                <small class="text-muted">
-                                    {% if conv.last_message %}
-                                        {{ conv.last_message.timestamp.strftime('%H:%M') }}
-                                    {% endif %}
-                                </small>
-                            </div>
-                        </a>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center p-5">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No messages yet</p>
-                            <a href="{{ url_for('main.discover') }}" class="btn btn-primary">
-                                <i class="fas fa-search me-2"></i>Find People
-                            </a>
-                        </div>
-                    {% endif %}
+                <div class="header-text">
+                    <h2>Messages</h2>
+                    <p>Connect and chat with your friends</p>
                 </div>
+                {% if conversations %}
+                <div class="header-stats">
+                    <i class="fas fa-comment me-1"></i>
+                    {{ conversations|length }} Conversations
+                </div>
+                {% endif %}
             </div>
         </div>
+
+        <div class="messages-search-bar">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" id="searchConversations" placeholder="Search conversations...">
+            </div>
+        </div>
+
+        <div class="conversations-list" id="conversationsList">
+            {% if conversations %}
+                {% for conv in conversations %}
+                <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="conversation-item" data-username="{{ conv.user.username|lower }}">
+                    <div class="conversation-avatar">
+                        <div class="avatar-ring">
+                            <img src="{{ conv.user.avatar(56) }}" class="avatar-img" alt="{{ conv.user.username }}">
+                        </div>
+                        {% if conv.user.is_online %}
+                        <span class="online-indicator"></span>
+                        {% endif %}
+                    </div>
+
+                    <div class="conversation-info">
+                        <div class="conversation-header">
+                            <div class="conversation-name">
+                                {{ conv.user.username }}
+                                {% if conv.user.is_verified %}
+                                <i class="fas fa-check-circle verified-badge"></i>
+                                {% endif %}
+                            </div>
+                            {% if conv.last_message %}
+                            <div class="conversation-time">
+                                {{ moment(conv.last_message.timestamp).fromNow() }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="conversation-preview">
+                            <i class="fas fa-reply preview-icon"></i>
+                            <span class="preview-text">
+                                {% if conv.last_message %}
+                                    {% if conv.last_message.sender_id == current_user.id %}
+                                    You:
+                                    {% endif %}
+                                    {{ conv.last_message.message[:50] }}{% if conv.last_message.message|length > 50 %}...{% endif %}
+                                {% else %}
+                                    No messages yet. Start a conversation!
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="conversation-status">
+                        {% if conv.unread_count > 0 %}
+                        <span class="unread-badge">{{ conv.unread_count }}</span>
+                        {% else %}
+                        <div class="status-seen">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state-premium">
+                    <div class="empty-icon-wrapper">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <h4>No Messages Yet</h4>
+                    <p>Start a conversation with your connections</p>
+                    <a href="{{ url_for('main.friends') }}" class="btn-find-people">
+                        <i class="fas fa-user-plus"></i> Find Friends
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="messages-footer">
+            <a href="{{ url_for('main.friends') }}" class="footer-action-btn">
+                <i class="fas fa-user-friends"></i> Find Friends
+            </a>
+            <a href="{{ url_for('main.discover') }}" class="footer-action-btn">
+                <i class="fas fa-compass"></i> Discover People
+            </a>
+        </div>
+
     </div>
 </div>
+
+<script>
+
+const searchInput = document.getElementById('searchConversations');
+const conversations = document.querySelectorAll('.conversation-item');
+
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+
+        conversations.forEach(conv => {
+            const username = conv.dataset.username;
+            if (username && username.includes(searchTerm)) {
+                conv.style.display = 'flex';
+            } else {
+                conv.style.display = 'none';
+            }
+        });
+
+        const visibleConversations = document.querySelectorAll('.conversation-item[style*="display: flex"], .conversation-item:not([style*="display: none"])');
+        const emptyState = document.querySelector('.empty-state-premium');
+
+        if (visibleConversations.length === 0 && !emptyState) {
+            const list = document.getElementById('conversationsList');
+            const noResults = document.createElement('div');
+            noResults.className = 'empty-state-premium';
+            noResults.innerHTML = `
+                <div class="empty-icon-wrapper">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h4>No Results Found</h4>
+                <p>No conversations match "${searchTerm}"</p>
+            `;
+            list.appendChild(noResults);
+        } else if (visibleConversations.length > 0 && emptyState) {
+            emptyState.remove();
+        }
+    });
+}
+
+let refreshInterval;
+function startAutoRefresh() {
+    refreshInterval = setInterval(() => {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newConversations = doc.querySelector('.conversations-list');
+                if (newConversations) {
+                    document.querySelector('.conversations-list').innerHTML = newConversations.innerHTML;
+                }
+            })
+            .catch(error => console.error('Auto-refresh error:', error));
+    }, 30000);
+}
+
+if ({{ conversations|length }} > 0) {
+    // startAutoRefresh(); // Uncomment if needed
+}
+
+window.addEventListener('beforeunload', () => {
+    if (refreshInterval) clearInterval(refreshInterval);
+});
+</script>
+
 {% endblock %}

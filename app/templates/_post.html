@@ -1,324 +1,805 @@
-<div class="card post-card">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-            <div class="d-flex gap-3">
-                <img src="{{ post.author.avatar(48) }}" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;">
-                <div>
-                    <a href="{{ url_for('main.user', username=post.author.username) }}" class="fw-bold text-decoration-none">
-                        {{ post.author.username }}
-                        {% if post.author.is_verified %}
-                        <i class="fas fa-check-circle text-primary" style="font-size: 12px;"></i>
-                        {% endif %}
-                    </a>
-                    <div class="small text-muted">
-                        {{ moment(post.timestamp).fromNow() }}
-                        {% if post.privacy == 'followers' %}
-                        <i class="fas fa-user-friends ms-2"></i>
-                        {% elif post.privacy == 'only_me' %}
-                        <i class="fas fa-lock ms-2"></i>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="dropdown">
-                <button class="btn btn-sm btn-link text-secondary" data-bs-toggle="dropdown">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-    {% if current_user == post.author %}
-    <li><a class="dropdown-item" href="{{ url_for('main.edit_post', post_id=post.id) }}">
-        <i class="fas fa-edit me-2"></i>Edit
-    </a></li>
-    <li><a class="dropdown-item" href="{{ url_for('main.pin_post', post_id=post.id) }}">
-        <i class="fas fa-thumbtack me-2"></i>Pin to Profile
-    </a></li>
-    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareMomentModal{{ post.id }}">
-        <i class="fas fa-plus-circle me-2"></i>Add to Moment
-    </a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ post.id }}">
-        <i class="fas fa-trash me-2"></i>Remove
-    </a></li>
-    {% else %}
-    <li><a class="dropdown-item" href="#" onclick="bookmarkPost({{ post.id }})" id="saveBtn{{ post.id }}">
-        <i class="far fa-bookmark me-2"></i>Bookmark
-    </a></li>
-    <li><a class="dropdown-item" href="#" onclick="interestedPost({{ post.id }})">
-        <i class="fas fa-thumbs-up me-2"></i>Show Interest
-    </a></li>
-    <li><a class="dropdown-item" href="#" onclick="notInterested({{ post.id }})">
-        <i class="fas fa-eye-slash me-2"></i>Not For Me
-    </a></li>
-    <li><a class="dropdown-item" href="#" onclick="hidePost({{ post.id }})">
-        <i class="fas fa-ban me-2"></i>Dismiss
-    </a></li>
-    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal{{ post.id }}">
-        <i class="fas fa-flag me-2"></i>Flag Content
-    </a></li>
-    <li><a class="dropdown-item" href="#" onclick="blockUser({{ post.author.id }})">
-        <i class="fas fa-user-slash me-2"></i>Block @{{ post.author.username }}
-    </a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shareMomentModal{{ post.id }}">
-        <i class="fas fa-plus-circle me-2"></i>Add to Moment
-    </a></li>
-    {% endif %}
-</ul>
-            </div>
+{% macro render_comment(comment, current_user, post, is_reply=False) %}
+<div class="comment-ultra" data-comment-id="{{ comment.id }}" id="comment-{{ comment.id }}">
+    <div class="comment-ultra-inner" style="margin-left: {% if is_reply %}48{% else %}0{% endif %}px;">
+        <div class="comment-ultra-avatar">
+            <img src="{{ comment.author.avatar(40) }}" alt="{{ comment.author.username }}">
+            <div class="comment-ultra-status"></div>
         </div>
-
-        <div class="mb-3">
-            <div class="post-text">{{ post.body }}</div>
-            {% if post.media_items %}
-            <div class="post-media-grid mt-3">
-                <div class="row g-2">
-                    {% for media in post.media_items %}
-                    <div class="col-{% if post.media_items.count() == 1 %}12{% elif post.media_items.count() == 2 %}6{% elif post.media_items.count() >= 3 %}4{% endif %}">
-                        {% if media.media_type == 'image' %}
-                        <img src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}"
-                             class="img-fluid rounded post-media-img"
-                             style="width: 100%; height: 250px; object-fit: cover; cursor: pointer;">
-                        {% elif media.media_type == 'video' %}
-                        <video controls class="w-100 rounded" style="height: 250px; object-fit: cover;">
-                            <source src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}" type="video/mp4">
-                        </video>
+        <div class="comment-ultra-content">
+            <div class="comment-ultra-header">
+                <div class="comment-ultra-author">
+                    <strong>{{ comment.author.username }}</strong>
+                    {% if comment.author.is_verified %}
+                    <i class="fas fa-check-circle verified-badge"></i>
+                    {% endif %}
+                    <span class="comment-ultra-time">{{ moment(comment.timestamp).fromNow() }}</span>
+                </div>
+                <div class="comment-ultra-actions-dropdown">
+                    <button class="comment-ultra-more" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <button class="dropdown-item reply-ultra-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                        <button class="dropdown-item reaction-ultra-trigger" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-smile-wink"></i> React
+                        </button>
+                        {% if comment.author.id == current_user.id or current_user.is_admin %}
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item text-danger delete-ultra-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
                         {% endif %}
                     </div>
-                    {% endfor %}
+                    <div class="reaction-ultra-picker" id="reactionPicker-{{ comment.id }}" style="display: none;">
+                        <div class="reaction-ultra-grid">
+                            <button class="reaction-ultra-option" data-reaction="❤️" data-comment-id="{{ comment.id }}">❤️</button>
+                            <button class="reaction-ultra-option" data-reaction="👍" data-comment-id="{{ comment.id }}">👍</button>
+                            <button class="reaction-ultra-option" data-reaction="😂" data-comment-id="{{ comment.id }}">😂</button>
+                            <button class="reaction-ultra-option" data-reaction="😮" data-comment-id="{{ comment.id }}">😮</button>
+                            <button class="reaction-ultra-option" data-reaction="😡" data-comment-id="{{ comment.id }}">😡</button>
+                            <button class="reaction-ultra-option" data-reaction="🥺" data-comment-id="{{ comment.id }}">🥺</button>
+                            <button class="reaction-ultra-option" data-reaction="🔥" data-comment-id="{{ comment.id }}">🔥</button>
+                            <button class="reaction-ultra-option" data-reaction="🎉" data-comment-id="{{ comment.id }}">🎉</button>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="comment-ultra-body">{{ comment.body }}</div>
+
+            {% if comment.reaction_summary %}
+            <div class="comment-ultra-reactions" id="commentReactions-{{ comment.id }}">
+                {% for r_char, r_count in comment.reaction_summary.items() %}
+                <span class="comment-ultra-reaction-badge" data-comment-id="{{ comment.id }}" data-reaction="{{ r_char }}">
+                    {{ r_char }} <span class="reaction-count">{{ r_count }}</span>
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="comment-ultra-footer">
+                <button class="comment-ultra-like-btn" onclick="toggleCommentReaction({{ comment.id }}, '❤️')">
+                    <i class="far fa-heart"></i> <span>Love</span>
+                </button>
+                <button class="reply-ultra-btn" data-comment-id="{{ comment.id }}">
+                    <i class="far fa-comment"></i> <span>Reply</span>
+                </button>
+            </div>
+
+            <div class="reply-ultra-form" id="replyForm-{{ comment.id }}" style="display: none;">
+                <div class="reply-ultra-input-wrapper">
+                    <img src="{{ current_user.avatar(32) }}" class="reply-ultra-avatar">
+                    <textarea class="reply-ultra-input" id="replyInput-{{ comment.id }}" rows="1" placeholder="Write a reply..."></textarea>
+                    <div class="reply-ultra-actions">
+                        <button class="reply-ultra-cancel" data-comment-id="{{ comment.id }}">Cancel</button>
+                        <button class="reply-ultra-submit" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-paper-plane"></i> Reply
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% if comment.replies.count() > 0 %}
+            <div class="comment-ultra-replies" id="repliesContainer-{{ comment.id }}">
+                {% for reply in comment.replies.all() %}
+                    {{ render_comment(reply, current_user, post, is_reply=True) }}
+                {% endfor %}
             </div>
             {% endif %}
         </div>
+    </div>
+</div>
+{% endmacro %}
 
-        <div id="reactionSummary{{ post.id }}" class="border-top border-bottom py-2 mb-3">
+<div class="post-ultra-card" data-post-id="{{ post.id }}">
+
+    {# POST HEADER #}
+    <div class="post-ultra-header">
+        <div class="post-ultra-author">
+            <div class="post-ultra-avatar-wrapper">
+                <img src="{{ post.author.avatar(52) }}" class="post-ultra-avatar">
+                <div class="post-ultra-online-dot" style="display: {% if post.author.is_online %}block{% else %}none{% endif %}"></div>
+            </div>
+            <div class="post-ultra-author-info">
+                <div class="post-ultra-author-name">
+                    <a href="{{ url_for('main.user', username=post.author.username) }}">{{ post.author.username }}</a>
+                    {% if post.author.is_verified %}
+                    <i class="fas fa-check-circle verified-icon"></i>
+                    {% endif %}
+                </div>
+                <div class="post-ultra-meta">
+                    <span class="post-ultra-time">{{ moment(post.timestamp).fromNow() }}</span>
+                    {% if post.privacy == 'followers' %}
+                    <i class="fas fa-user-friends"></i>
+                    {% elif post.privacy == 'only_me' %}
+                    <i class="fas fa-lock"></i>
+                    {% endif %}
+                    <span class="post-ultra-dot">•</span>
+                    <span class="post-ultra-read-time">{{ post.body|length // 100 + 1 }} min read</span>
+                </div>
+            </div>
+        </div>
+        <div class="post-ultra-menu">
+            <button class="post-ultra-menu-btn" data-bs-toggle="dropdown">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                {% if current_user == post.author %}
+                <a class="dropdown-item" href="{{ url_for('main.edit_post', post_id=post.id) }}">
+                    <i class="fas fa-edit"></i> Edit Post
+                </a>
+                <a class="dropdown-item" href="{{ url_for('main.pin_post', post_id=post.id) }}">
+                    <i class="fas fa-thumbtack"></i> Pin to Profile
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ post.id }}">
+                    <i class="fas fa-trash-alt"></i> Delete Post
+                </a>
+                {% else %}
+                <a class="dropdown-item" href="#" onclick="bookmarkPost({{ post.id }})" id="saveBtn{{ post.id }}">
+                    <i class="far fa-bookmark"></i> Save Post
+                </a>
+                <a class="dropdown-item" href="#" onclick="interestedPost({{ post.id }})">
+                    <i class="fas fa-thumbs-up"></i> I'm Interested
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal{{ post.id }}">
+                    <i class="fas fa-flag"></i> Report
+                </a>
+                <a class="dropdown-item text-danger" href="#" onclick="blockUser({{ post.author.id }})">
+                    <i class="fas fa-ban"></i> Block @{{ post.author.username }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# POST CONTENT #}
+    <div class="post-ultra-content">
+        <div class="post-ultra-text">
+            {{ post.body }}
+        </div>
+
+        {% if post.media_items %}
+        <div class="post-ultra-media">
+            <div class="media-ultra-grid media-count-{{ post.media_items.count() }}">
+                {% for media in post.media_items %}
+                <div class="media-ultra-item">
+                    {% if media.media_type == 'image' %}
+                    <img src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}"
+                         class="media-ultra-image"
+                         onclick="openMediaModal(this.src, 'image')"
+                         loading="lazy">
+                    {% elif media.media_type == 'video' %}
+                    <video class="media-ultra-video" controls preload="metadata">
+                        <source src="{{ url_for('static', filename='uploads/posts/' + media.media_url) }}" type="video/mp4">
+                    </video>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# POST STATS #}
+    <div class="post-ultra-stats">
+        <div class="post-ultra-reactions-preview">
             {% set reaction_counts = post.get_reaction_counts() %}
             {% if reaction_counts %}
-            <div class="d-flex align-items-center gap-2">
-                <div class="reaction-icons">
-                    {% for reaction, count in reaction_counts.items() %}
-                        {% if loop.index <= 3 %}
-                            {% if reaction == 'like' %}👍
-                            {% elif reaction == 'love' %}❤️
-                            {% elif reaction == 'haha' %}😂
-                            {% elif reaction == 'wow' %}😮
-                            {% elif reaction == 'sad' %}😢
-                            {% elif reaction == 'angry' %}😠
-                            {% endif %}
+            <div class="reactions-preview-icons">
+                {% for reaction, count in reaction_counts.items() %}
+                    {% if loop.index <= 3 %}
+                        {% if reaction == 'like' %}👍
+                        {% elif reaction == 'love' %}❤️
+                        {% elif reaction == 'haha' %}😂
+                        {% elif reaction == 'wow' %}😮
+                        {% elif reaction == 'sad' %}😢
+                        {% elif reaction == 'angry' %}😠
                         {% endif %}
-                    {% endfor %}
-                </div>
-                <span class="small text-muted">{{ reaction_counts.values() | sum }}</span>
+                    {% endif %}
+                {% endfor %}
             </div>
+            <span class="reactions-preview-count">{{ reaction_counts.values() | sum }}</span>
             {% endif %}
         </div>
+        <div class="post-ultra-comments-preview">
+            <i class="far fa-comment"></i>
+            <span>{{ post.comment_count() }} comments</span>
+        </div>
+    </div>
 
-        <div class="post-actions">
-            <div class="reaction-container">
-                <button class="action-icon" id="reactionTrigger{{ post.id }}">
-                    {% set user_reaction = post.user_reaction(current_user) %}
-                    {% if user_reaction %}
-                        {% if user_reaction == 'like' %}
-                        <i class="fas fa-thumbs-up"></i>
-                        {% elif user_reaction == 'love' %}
-                        <i class="fas fa-heart text-danger"></i>
-                        {% elif user_reaction == 'haha' %}
-                        <i class="fas fa-laugh-squint"></i>
-                        {% elif user_reaction == 'wow' %}
-                        <i class="fas fa-surprise"></i>
-                        {% elif user_reaction == 'sad' %}
-                        <i class="fas fa-sad-tear"></i>
-                        {% elif user_reaction == 'angry' %}
-                        <i class="fas fa-angry"></i>
-                        {% endif %}
-                    {% else %}
-                        <i class="far fa-thumbs-up"></i>
+    {# POST ACTION BAR #}
+    <div class="post-ultra-actions">
+        <div class="post-ultra-action reaction-ultra-container">
+            <button class="post-ultra-action-btn" id="reactionBtn-{{ post.id }}">
+                {% set user_reaction = post.user_reaction(current_user) %}
+                {% if user_reaction %}
+                    {% if user_reaction == 'like' %}<i class="fas fa-thumbs-up"></i> Like
+                    {% elif user_reaction == 'love' %}<i class="fas fa-heart text-danger"></i> Love
+                    {% elif user_reaction == 'haha' %}<i class="fas fa-laugh-squint"></i> Haha
+                    {% elif user_reaction == 'wow' %}<i class="fas fa-surprise"></i> Wow
+                    {% elif user_reaction == 'sad' %}<i class="fas fa-sad-tear"></i> Sad
+                    {% elif user_reaction == 'angry' %}<i class="fas fa-angry"></i> Angry
                     {% endif %}
-                </button>
-                <div class="reaction-picker">
-                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'like')" title="Applaud"><i class="fas fa-thumbs-up"></i></button>
-                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'love')" title="Love"><i class="fas fa-heart text-danger"></i></button>
-                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'haha')" title="Funny"><i class="fas fa-laugh-squint"></i></button>
-                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'wow')" title="Wow"><i class="fas fa-surprise"></i></button>
-                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'sad')" title="Sad"><i class="fas fa-sad-tear"></i></button>
-                    <button class="reaction-option" onclick="applaudPost({{ post.id }}, 'angry')" title="Angry"><i class="fas fa-angry"></i></button>
+                {% else %}
+                <i class="far fa-thumbs-up"></i> Like
+                {% endif %}
+            </button>
+            <div class="reaction-ultra-picker-main" id="reactionPickerMain-{{ post.id }}">
+                <button class="reaction-ultra-option-main" onclick="reactToPost({{ post.id }}, 'like')">👍</button>
+                <button class="reaction-ultra-option-main" onclick="reactToPost({{ post.id }}, 'love')">❤️</button>
+                <button class="reaction-ultra-option-main" onclick="reactToPost({{ post.id }}, 'haha')">😂</button>
+                <button class="reaction-ultra-option-main" onclick="reactToPost({{ post.id }}, 'wow')">😮</button>
+                <button class="reaction-ultra-option-main" onclick="reactToPost({{ post.id }}, 'sad')">😢</button>
+                <button class="reaction-ultra-option-main" onclick="reactToPost({{ post.id }}, 'angry')">😠</button>
+            </div>
+        </div>
+        <button class="post-ultra-action-btn" onclick="toggleComments({{ post.id }})">
+            <i class="far fa-comment"></i> Comment
+        </button>
+        <button class="post-ultra-action-btn" onclick="sharePost({{ post.id }})">
+            <i class="fas fa-share-alt"></i> Share
+        </button>
+        {% if current_user.id != post.author.id %}
+        <button class="post-ultra-action-btn" onclick="savePostQuick({{ post.id }})" id="saveQuickBtn-{{ post.id }}">
+            <i class="far fa-bookmark"></i> Save
+        </button>
+        {% endif %}
+    </div>
+
+    {# COMMENTS SECTION #}
+    <div class="post-ultra-comments" id="commentsSection-{{ post.id }}" style="display: none;">
+        <div class="comments-ultra-container">
+
+            {# NEW COMMENT INPUT #}
+            <div class="comment-ultra-input-wrapper">
+                <img src="{{ current_user.avatar(40) }}" class="comment-ultra-input-avatar">
+                <div class="comment-ultra-input-container">
+                    <textarea class="comment-ultra-input" id="newCommentInput-{{ post.id }}"
+                              placeholder="Write a comment..." rows="1"></textarea>
+                    <div class="comment-ultra-input-actions">
+                        <button class="comment-ultra-emoji-btn" onclick="toggleCommentEmoji({{ post.id }})">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <button class="comment-ultra-submit-btn" onclick="submitNewComment({{ post.id }})">
+                            <i class="fas fa-paper-plane"></i> Post
+                        </button>
+                    </div>
                 </div>
             </div>
-            <button class="action-icon" data-bs-toggle="collapse" data-bs-target="#comments{{ post.id }}" title="Reply">
-                <i class="far fa-comment"></i>
-                {% if post.comment_count() > 0 %}
-                <span class="count-badge">{{ post.comment_count() }}</span>
-                {% endif %}
-            </button>
-            <button class="action-icon" onclick="repostPost({{ post.id }})" title="Repost">
-                <i class="fas fa-share-alt"></i>
-                {% if post.share_count > 0 %}
-                <span class="count-badge">{{ post.share_count }}</span>
-                {% endif %}
-            </button>
-        </div>
 
-        <div class="collapse mt-3" id="comments{{ post.id }}">
-            <div class="bg-light rounded p-3" style="max-height: 400px; overflow-y: auto;">
-                {% for comment in post.get_comments() %}
-                <div class="d-flex gap-2 mb-3">
-                    <img src="{{ comment.author.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px;">
-                    <div class="flex-grow-1 bg-white rounded p-2">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <span class="fw-bold small">{{ comment.author.username }}</span>
-                            <span class="small text-muted">{{ moment(comment.timestamp).fromNow() }}</span>
-                        </div>
-                        <p class="small mb-0">{{ comment.body }}</p>
-                    </div>
-                    {% if current_user == comment.author or current_user.is_admin %}
-                    <a href="{{ url_for('main.delete_comment', comment_id=comment.id) }}" class="text-danger"><i class="fas fa-times"></i></a>
-                    {% endif %}
+            {# EMOJI PICKER FOR COMMENT #}
+            <div class="comment-ultra-emoji-picker" id="commentEmojiPicker-{{ post.id }}" style="display: none;">
+                <div class="emoji-ultra-grid">
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '😀')">😀</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '😂')">😂</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '❤️')">❤️</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '👍')">👍</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '😍')">😍</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '🔥')">🔥</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '🎉')">🎉</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '😢')">😢</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '😡')">😡</span>
+                    <span class="emoji-ultra-item" onclick="addEmojiToComment({{ post.id }}, '🥺')">🥺</span>
                 </div>
-                {% else %}
-                <p class="text-muted text-center small mb-0">No replies yet. Start the conversation!</p>
-                {% endfor %}
+            </div>
 
-                <form action="{{ url_for('main.add_comment', post_id=post.id) }}" method="post" class="mt-3">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
-                    <div class="d-flex gap-2">
-                        <img src="{{ current_user.avatar(32) }}" class="rounded-circle" style="width: 32px; height: 32px;">
-                        <input type="text" name="body" class="form-control form-control-sm" placeholder="Write a reply..." required>
-                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i></button>
+            {# COMMENTS LIST #}
+            <div class="comments-ultra-list" id="commentsList-{{ post.id }}">
+                {% for comment in post.get_comments() %}
+                    {{ render_comment(comment, current_user, post) }}
+                {% else %}
+                <div class="comments-ultra-empty">
+                    <div class="empty-comments-icon">
+                        <i class="far fa-comment-dots"></i>
                     </div>
-                </form>
+                    <h5>No comments yet</h5>
+                    <p>Be the first to share your thoughts!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# MEDIA MODAL #}
+<div class="modal fade" id="mediaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content media-modal-content">
+            <div class="modal-body text-center p-0">
+                <button type="button" class="media-modal-close" data-bs-dismiss="modal">&times;</button>
+                <img id="modalMediaImage" class="media-modal-image" style="display: none;">
+                <video id="modalMediaVideo" class="media-modal-video" controls style="display: none;"></video>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function notInterested(postId) {
-    if(confirm('Hide this from your stream? We will show fewer posts like this.')) {
-        fetch(`/not-interested/${postId}`, {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => {
-            if(response.ok) {
-                location.reload();
-            }
-        });
+// ==================== GLOBAL FUNCTIONS ====================
+
+function openMediaModal(src, type) {
+    const modal = new bootstrap.Modal(document.getElementById('mediaModal'));
+    const imgEl = document.getElementById('modalMediaImage');
+    const videoEl = document.getElementById('modalMediaVideo');
+
+    if (type === 'image') {
+        imgEl.style.display = 'block';
+        videoEl.style.display = 'none';
+        imgEl.src = src;
+    } else {
+        imgEl.style.display = 'none';
+        videoEl.style.display = 'block';
+        videoEl.src = src;
     }
+    modal.show();
 }
 
-function hidePost(postId) {
-    if(confirm('Dismiss this post? You won\'t see it again in your stream.')) {
-        fetch(`/hide-post/${postId}`, {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => {
-            if(response.ok) {
-                location.reload();
-            }
-        });
-    }
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast-ultra ${type}`;
+    toast.innerHTML = `
+        <div class="toast-ultra-icon">${type === 'success' ? '✓' : '✗'}</div>
+        <div class="toast-ultra-message">${message}</div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
-function interestedPost(postId) {
-    fetch(`/interested/${postId}`, {
-        method: 'GET',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.interested) {
-            alert('This post has been added to your interests!');
-        } else {
-            alert('Removed from your interests');
+async function reactToPost(postId, reaction) {
+    try {
+        const response = await fetch(`/react_post/${postId}/${reaction}`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        if (data.counts) {
+            location.reload();
         }
-        location.reload();
-    });
+    } catch (error) {
+        showToast('Failed to add reaction', 'error');
+    }
 }
 
-function blockUser(userId) {
-    if(confirm('Block this person? They will not be able to see your profile or interact with you.')) {
-        fetch(`/block-user/${userId}`, {
+async function toggleCommentReaction(commentId, reaction) {
+    try {
+        const response = await fetch(`/comment/${commentId}/react`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
-            }
-        })
-        .then(response => {
-            if(response.ok) {
-                location.reload();
-            }
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify({ reaction: reaction })
         });
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to add reaction', 'error');
+        }
+    } catch (error) {
+        showToast('Failed to add reaction', 'error');
     }
 }
+
+function sharePost(postId) {
+    if (confirm('Share this post with your followers?')) {
+        fetch(`/share_post/${postId}`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || '' }
+        }).then(() => location.reload());
+    }
+}
+
+async function savePostQuick(postId) {
+    try {
+        const response = await fetch(`/save_post/${postId}`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        const btn = document.getElementById(`saveQuickBtn-${postId}`);
+        if (data.saved) {
+            btn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+            showToast('Post saved!', 'success');
+        } else {
+            btn.innerHTML = '<i class="far fa-bookmark"></i> Save';
+            showToast('Post unsaved', 'info');
+        }
+    } catch (error) {
+        showToast('Failed to save post', 'error');
+    }
+}
+
+function toggleComments(postId) {
+    const section = document.getElementById(`commentsSection-${postId}`);
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+async function submitNewComment(postId) {
+    const input = document.getElementById(`newCommentInput-${postId}`);
+    const body = input.value.trim();
+
+    if (!body) {
+        showToast('Comment cannot be empty', 'error');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('body', body);
+    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+    try {
+        const response = await fetch(`/add_comment/${postId}`, {
+            method: 'POST',
+            body: formData
+        });
+        if (response.redirected || response.ok) {
+            location.reload();
+        } else {
+            showToast('Failed to add comment', 'error');
+        }
+    } catch (error) {
+        showToast('Failed to add comment', 'error');
+    }
+}
+
+function toggleCommentEmoji(postId) {
+    const picker = document.getElementById(`commentEmojiPicker-${postId}`);
+    picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+}
+
+function addEmojiToComment(postId, emoji) {
+    const input = document.getElementById(`newCommentInput-${postId}`);
+    input.value += emoji;
+    input.focus();
+    document.getElementById(`commentEmojiPicker-${postId}`).style.display = 'none';
+}
+
+function bookmarkPost(postId) {
+    fetch(`/save_post/${postId}`, { method: 'GET' }).then(() => location.reload());
+}
+function interestedPost(postId) { fetch(`/interested/${postId}`).then(() => location.reload()); }
+function blockUser(userId) { if(confirm('Block this user?')) fetch(`/block-user/${userId}`, {method:'POST', headers:{'X-CSRFToken':document.querySelector('input[name="csrf_token"]')?.value||''}}).then(()=>location.reload()); }
+
+// ==================== COMMENT INTERACTIONS ====================
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Reply to comment
+    document.querySelectorAll('.reply-ultra-btn').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            const commentId = this.dataset.commentId;
+            document.querySelectorAll('.reply-ultra-form').forEach(f => f.style.display = 'none');
+            const form = document.getElementById(`replyForm-${commentId}`);
+            if (form) form.style.display = 'block';
+        };
+    });
+
+    // Cancel reply
+    document.querySelectorAll('.reply-ultra-cancel').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            const commentId = this.dataset.commentId;
+            document.getElementById(`replyForm-${commentId}`).style.display = 'none';
+            document.getElementById(`replyInput-${commentId}`).value = '';
+        };
+    });
+
+    // Submit reply
+    document.querySelectorAll('.reply-ultra-submit').forEach(btn => {
+        btn.onclick = async function(e) {
+            e.preventDefault();
+            const commentId = this.dataset.commentId;
+            const input = document.getElementById(`replyInput-${commentId}`);
+            const body = input?.value.trim();
+
+            if (!body) {
+                showToast('Reply cannot be empty', 'error');
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch(`/comment/${commentId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                    },
+                    body: JSON.stringify({ body: body })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    showToast(data.error || 'Failed to add reply', 'error');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-paper-plane"></i> Reply';
+                }
+            } catch (error) {
+                showToast('Failed to add reply', 'error');
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-paper-plane"></i> Reply';
+            }
+        };
+    });
+
+    // Show reaction picker
+    document.querySelectorAll('.reaction-ultra-trigger').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const commentId = this.dataset.commentId;
+            const picker = document.getElementById(`reactionPicker-${commentId}`);
+            document.querySelectorAll('.reaction-ultra-picker').forEach(p => p.style.display = 'none');
+            picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+        };
+    });
+
+    // Reaction options
+    document.querySelectorAll('.reaction-ultra-option').forEach(opt => {
+        opt.onclick = async function(e) {
+            e.preventDefault();
+            const reaction = this.dataset.reaction;
+            const commentId = this.dataset.commentId;
+            document.getElementById(`reactionPicker-${commentId}`).style.display = 'none';
+            await toggleCommentReaction(commentId, reaction);
+        };
+    });
+
+    // Reaction badges click
+    document.querySelectorAll('.comment-ultra-reaction-badge').forEach(badge => {
+        badge.onclick = async function() {
+            const commentId = this.dataset.commentId;
+            const reaction = this.dataset.reaction;
+            await toggleCommentReaction(commentId, reaction);
+        };
+    });
+
+    // Delete comment
+    document.querySelectorAll('.delete-ultra-btn').forEach(btn => {
+        btn.onclick = async function(e) {
+            e.preventDefault();
+            const commentId = this.dataset.commentId;
+
+            if (confirm('Delete this comment? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`/comment/${commentId}/delete`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById(`comment-${commentId}`).remove();
+                        showToast('Comment deleted', 'success');
+                    } else {
+                        showToast(data.error || 'Failed to delete comment', 'error');
+                    }
+                } catch (error) {
+                    showToast('Failed to delete comment', 'error');
+                }
+            }
+        };
+    });
+
+    // Close pickers on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.reaction-ultra-trigger') && !e.target.closest('.reaction-ultra-picker')) {
+            document.querySelectorAll('.reaction-ultra-picker').forEach(p => p.style.display = 'none');
+        }
+        if (!e.target.closest('.comment-ultra-emoji-btn') && !e.target.closest('.comment-ultra-emoji-picker')) {
+            document.querySelectorAll('.comment-ultra-emoji-picker').forEach(p => p.style.display = 'none');
+        }
+    });
+});
 </script>
 
 <style>
-.post-card {
-    background: var(--bg-card);
+/* ==================== ULTRA PREMIUM STYLES ==================== */
+
+:root {
+    --post-ultra-bg: #ffffff;
+    --post-ultra-border: #e4e6eb;
+    --post-ultra-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --post-ultra-shadow-hover: 0 8px 25px rgba(0,0,0,0.1);
+    --post-ultra-primary: #1877f2;
+    --post-ultra-primary-hover: #166fe5;
+    --post-ultra-text: #050505;
+    --post-ultra-text-secondary: #65676b;
+    --post-ultra-hover: #f0f2f5;
+}
+
+[data-theme="dark"] {
+    --post-ultra-bg: #242526;
+    --post-ultra-border: #3e4042;
+    --post-ultra-text: #e4e6eb;
+    --post-ultra-text-secondary: #b0b3b8;
+    --post-ultra-hover: #3a3b3c;
+}
+
+/* Post Card */
+.post-ultra-card {
+    background: var(--post-ultra-bg);
     border-radius: 16px;
     margin-bottom: 20px;
-    box-shadow: var(--shadow);
-    transition: all 0.2s ease;
+    padding: 16px;
+    border: 1px solid var(--post-ultra-border);
+    transition: all 0.25s ease;
+    animation: postFadeIn 0.4s ease;
 }
 
-.post-card:hover {
-    box-shadow: var(--shadow-hover);
+@keyframes postFadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.post-text {
-    font-size: 15px;
-    color: var(--text-primary);
-    line-height: 1.5;
+.post-ultra-card:hover {
+    box-shadow: var(--post-ultra-shadow-hover);
 }
 
-.post-actions {
+/* Post Header */
+.post-ultra-header {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 8px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
 }
 
-.action-icon {
-    flex: 1;
-    background: transparent;
+.post-ultra-author {
+    display: flex;
+    gap: 12px;
+}
+
+.post-ultra-avatar-wrapper {
+    position: relative;
+}
+
+.post-ultra-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-ultra-online-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #31a24c;
+    border-radius: 50%;
+    border: 2px solid var(--post-ultra-bg);
+}
+
+.post-ultra-author-name a {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--post-ultra-text);
+    text-decoration: none;
+}
+
+.post-ultra-author-name a:hover { text-decoration: underline; }
+
+.verified-icon {
+    color: #1877f2;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.post-ultra-meta {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--post-ultra-text-secondary);
+    margin-top: 2px;
+}
+
+.post-ultra-dot { font-size: 10px; }
+
+.post-ultra-menu-btn {
+    background: none;
     border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--post-ultra-text-secondary);
+    transition: background 0.2s;
+}
+
+.post-ultra-menu-btn:hover {
+    background: var(--post-ultra-hover);
+}
+
+/* Post Content */
+.post-ultra-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--post-ultra-text);
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Media Grid */
+.post-ultra-media { margin-bottom: 14px; }
+.media-ultra-grid {
+    display: grid;
+    gap: 4px;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.media-count-1 { grid-template-columns: 1fr; }
+.media-count-2 { grid-template-columns: 1fr 1fr; }
+.media-count-3, .media-count-4 { grid-template-columns: repeat(2, 1fr); }
+.media-ultra-item { aspect-ratio: 16/9; background: var(--post-ultra-hover); }
+.media-ultra-image, .media-ultra-video { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+
+/* Post Stats */
+.post-ultra-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid var(--post-ultra-border);
+    border-bottom: 1px solid var(--post-ultra-border);
+    margin-bottom: 8px;
+}
+.post-ultra-reactions-preview { display: flex; align-items: center; gap: 6px; }
+.reactions-preview-icons { display: flex; gap: 2px; font-size: 14px; }
+.reactions-preview-count { font-size: 13px; color: var(--post-ultra-text-secondary); }
+.post-ultra-comments-preview { font-size: 13px; color: var(--post-ultra-text-secondary); }
+
+/* Post Actions */
+.post-ultra-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.post-ultra-action {
+    flex: 1;
+    position: relative;
+}
+.post-ultra-action-btn {
+    width: 100%;
     padding: 8px 12px;
+    background: none;
+    border: none;
     border-radius: 8px;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--post-ultra-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    cursor: pointer;
+    gap: 8px;
 }
-
-.action-icon i { font-size: 18px; }
-.action-icon:hover { background-color: var(--hover-bg); color: #667eea; }
-.action-icon:active { transform: scale(0.96); }
-
-.count-badge {
-    background: var(--border-color);
-    padding: 2px 6px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
+.post-ultra-action-btn:hover {
+    background: var(--post-ultra-hover);
+    color: var(--post-ultra-primary);
 }
-
-.reaction-container {
-    position: relative;
-    flex: 1;
-}
-
-.reaction-picker {
+.reaction-ultra-picker-main {
     position: absolute;
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--bg-card);
+    background: var(--post-ultra-bg);
     border-radius: 40px;
     padding: 8px 12px;
     display: flex;
@@ -326,47 +807,334 @@ function blockUser(userId) {
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.2s ease;
-    z-index: 1000;
+    transition: all 0.2s;
+    z-index: 100;
     margin-bottom: 8px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--post-ultra-border);
 }
-
-.reaction-container:hover .reaction-picker {
+.reaction-ultra-container:hover .reaction-ultra-picker-main {
     opacity: 1;
     visibility: visible;
 }
-
-.reaction-option {
+.reaction-ultra-option-main {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px;
+    font-size: 20px;
+    padding: 5px;
     border-radius: 50%;
-    transition: all 0.1s ease;
+    transition: transform 0.1s;
+}
+.reaction-ultra-option-main:hover { transform: scale(1.2); }
+
+/* Comments Section */
+.post-ultra-comments {
+    margin-top: 12px;
+    border-top: 1px solid var(--post-ultra-border);
+    padding-top: 12px;
+}
+.comments-ultra-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+.comments-ultra-empty {
+    text-align: center;
+    padding: 40px 20px;
+}
+.empty-comments-icon {
+    font-size: 48px;
+    color: var(--post-ultra-text-secondary);
+    margin-bottom: 12px;
+}
+.comments-ultra-empty h5 {
+    font-size: 16px;
+    color: var(--post-ultra-text);
+    margin-bottom: 4px;
+}
+.comments-ultra-empty p {
+    font-size: 13px;
+    color: var(--post-ultra-text-secondary);
+}
+
+/* Comment Input */
+.comment-ultra-input-wrapper {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.comment-ultra-input-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.comment-ultra-input-container {
+    flex: 1;
+    position: relative;
+}
+.comment-ultra-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--post-ultra-hover);
+    border: none;
+    border-radius: 24px;
+    resize: none;
+    font-size: 14px;
+    color: var(--post-ultra-text);
+}
+.comment-ultra-input:focus {
+    outline: none;
+    border: 1px solid var(--post-ultra-primary);
+}
+.comment-ultra-input-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+.comment-ultra-emoji-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--post-ultra-text-secondary);
+}
+.comment-ultra-submit-btn {
+    padding: 6px 16px;
+    background: var(--post-ultra-primary);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.comment-ultra-emoji-picker {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: var(--post-ultra-bg);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid var(--post-ultra-border);
+}
+.emoji-ultra-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+.emoji-ultra-item {
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    padding: 5px;
+    border-radius: 8px;
+}
+.emoji-ultra-item:hover { background: var(--post-ultra-hover); }
+
+/* Comment Card */
+.comment-ultra {
+    margin-bottom: 16px;
+    animation: commentFadeIn 0.3s ease;
+}
+@keyframes commentFadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.comment-ultra-inner {
+    display: flex;
+    gap: 12px;
+}
+.comment-ultra-avatar {
+    position: relative;
+}
+.comment-ultra-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.comment-ultra-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: #31a24c;
+    border-radius: 50%;
+    border: 2px solid var(--post-ultra-bg);
+}
+.comment-ultra-content {
+    flex: 1;
+    background: var(--post-ultra-hover);
+    border-radius: 18px;
+    padding: 10px 14px;
+}
+.comment-ultra-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.comment-ultra-author strong { font-size: 13px; color: var(--post-ultra-text); }
+.verified-badge { color: #1877f2; font-size: 10px; margin-left: 3px; }
+.comment-ultra-time { font-size: 11px; color: var(--post-ultra-text-secondary); margin-left: 8px; }
+.comment-ultra-more {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--post-ultra-text-secondary);
+    padding: 4px;
+}
+.comment-ultra-body { font-size: 13px; line-height: 1.4; color: var(--post-ultra-text); margin-bottom: 8px; }
+.comment-ultra-reactions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.comment-ultra-reaction-badge {
+    background: var(--post-ultra-bg);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+.comment-ultra-reaction-badge:hover { transform: scale(1.05); background: #e4e6eb; }
+.comment-ultra-footer { display: flex; gap: 16px; margin-top: 6px; }
+.comment-ultra-like-btn, .reply-ultra-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: var(--post-ultra-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 20px;
+}
+.comment-ultra-like-btn:hover, .reply-ultra-btn:hover { background: rgba(0,0,0,0.05); }
+
+/* Reply Form */
+.reply-ultra-form { margin-top: 12px; }
+.reply-ultra-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+.reply-ultra-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.reply-ultra-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--post-ultra-bg);
+    border: 1px solid var(--post-ultra-border);
+    border-radius: 20px;
+    resize: none;
+    font-size: 13px;
+}
+.reply-ultra-actions { display: flex; gap: 8px; margin-left: 8px; }
+.reply-ultra-cancel, .reply-ultra-submit {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.reply-ultra-cancel { background: var(--post-ultra-hover); color: var(--post-ultra-text-secondary); }
+.reply-ultra-submit { background: var(--post-ultra-primary); color: white; }
+
+/* Reaction Picker */
+.reaction-ultra-picker {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: var(--post-ultra-bg);
+    border-radius: 30px;
+    padding: 8px;
+    margin-top: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid var(--post-ultra-border);
+    z-index: 100;
+}
+.reaction-ultra-grid {
+    display: flex;
+    gap: 8px;
+}
+.reaction-ultra-option {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+}
+.reaction-ultra-option:hover { transform: scale(1.15); background: #f0f0f0; }
+
+/* Toast Notifications */
+.toast-ultra {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 10000;
+}
+.toast-ultra.show { transform: translateX(0); }
+.toast-ultra.success { border-left: 4px solid #31a24c; }
+.toast-ultra.error { border-left: 4px solid #e41e3f; }
+.toast-ultra-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: bold;
+}
+.toast-ultra.success .toast-ultra-icon { background: #31a24c20; color: #31a24c; }
+.toast-ultra.error .toast-ultra-icon { background: #e41e3f20; color: #e41e3f; }
+
+/* Media Modal */
+.media-modal-content {
+    background: transparent;
+    border: none;
+}
+.media-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+}
+.media-modal-image, .media-modal-video {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
 }
 
-.reaction-option i { font-size: 18px; }
-.reaction-option:hover {
-    transform: scale(1.2);
-    background: var(--hover-bg);
-}
-
-.reaction-icons {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    font-size: 14px;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-    .action-icon { padding: 6px 8px; }
-    .action-icon i { font-size: 16px; }
-    .reaction-picker { padding: 6px 10px; gap: 4px; }
-    .reaction-option { padding: 4px; }
-    .reaction-option i { font-size: 16px; }
+    .post-ultra-card { padding: 12px; }
+    .post-ultra-avatar { width: 44px; height: 44px; }
+    .comment-ultra-inner { gap: 8px; }
+    .comment-ultra-avatar img { width: 32px; height: 32px; }
+    .comment-ultra-content { padding: 8px 12px; }
+    .comment-ultra-reaction-badge { font-size: 10px; }
+    .reaction-ultra-grid { gap: 4px; }
+    .reaction-ultra-option { font-size: 16px; }
 }
 </style>

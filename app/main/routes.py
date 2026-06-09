@@ -8,20 +8,15 @@ from functools import wraps
 from langdetect import detect, LangDetectException
 from app import db
 from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, MessageForm, CommentForm, ReportForm, StoryForm
-from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
-                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment, FriendRequest, friends, PostMedia, HiddenPost, NotInterestedPost, InterestedPost, SecurityEvent)
 from app.media_helpers import save_media, delete_media, save_multiple_media, delete_multiple_media
 from app.translate import translate
 from app.main import bp
 from spam_service.integration import spam_checker
 from app.profile_helpers import save_profile_picture, save_cover_picture, delete_profile_picture, delete_cover_picture
-from app.notification_helper import send_like_notification, send_comment_notification, send_follow_notification, send_share_notification
 from app.services.recommendation_service import recommendation_engine
 from app.services.report_service import report_service
 from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
-                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment)
-
-import time
+                        PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment, FriendRequest, friends, PostMedia, HiddenPost, NotInterestedPost, InterestedPost, SecurityEvent, CommentReaction)
 lastNotificationTime = 0
 
 @bp.route('/settings/notifications', methods=['GET', 'POST'])
@@ -733,13 +728,44 @@ def user(username):
     posts = db.paginate(query, page=page,
                         per_page=current_app.config['POSTS_PER_PAGE'],
                         error_out=False)
+
+    media_items = []
+    posts_with_media = Post.query.filter(
+        Post.user_id == user.id,
+        Post.media_items.any()
+    ).order_by(Post.timestamp.desc()).all()
+
+    for post in posts_with_media:
+        for media in post.media_items:
+            media_items.append({
+                'id': media.id,
+                'url': media.media_url,
+                'type': media.media_type,
+                'post_id': post.id,
+                'likes_count': post.like_count(),
+                'comments_count': post.comment_count()
+            })
+
+    liked_posts = []
+    user_likes = Like.query.filter_by(user_id=user.id).order_by(Like.timestamp.desc()).all()
+
+    for like in user_likes:
+        post = Post.query.get(like.post_id)
+        if post:
+            liked_posts.append(post)
+
     next_url = url_for('main.user', username=user.username, page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.user', username=user.username, page=posts.prev_num) if posts.has_prev else None
     form = EmptyForm()
 
-    return render_template('user.html', user=user, posts=posts.items,
-                           next_url=next_url, prev_url=prev_url, form=form)
-
+    return render_template('user.html',
+                           user=user,
+                           posts=posts.items,
+                           media_items=media_items,
+                           liked_posts=liked_posts,
+                           next_url=next_url,
+                           prev_url=prev_url,
+                           form=form)
 
 @bp.route('/user/<username>/popup')
 @login_required
@@ -897,57 +923,6 @@ def view_post(post_id):
     return render_template('post_detail.html', title='Post', post=post)
 
 
-@bp.route('/add_comment/<int:post_id>', methods=['POST'])
-@login_required
-def add_comment(post_id):
-    post = db.session.get(Post, post_id)
-    if post is None:
-        flash('Post not found.')
-        return redirect(url_for('main.index'))
-
-    body = request.form.get('body', '').strip()
-    if body:
-        comment = Comment(body=body, user_id=current_user.id, post_id=post_id)
-        db.session.add(comment)
-        db.session.commit()
-
-        if post.author.id != current_user.id:
-            from app.notification_helper import create_notification
-            create_notification(
-                post.author.id,
-                'comment',
-                {
-                    'from_user': current_user.username,
-                    'user_id': current_user.id,
-                    'post_id': post.id,
-                    'comment': body[:100],
-                    'message': f'{current_user.username} commented on your post'
-                }
-            )
-            print(f"Created comment notification for user {post.author.id} from {current_user.username}")
-
-        flash('Comment added.', 'success')
-
-    return redirect(request.referrer or url_for('main.index'))
-
-@bp.route('/delete_comment/<int:comment_id>')
-@login_required
-def delete_comment(comment_id):
-    comment = db.session.get(Comment, comment_id)
-    if comment is None:
-        flash('Comment not found.')
-        return redirect(request.referrer or url_for('main.index'))
-
-    if comment.author != current_user and not current_user.is_admin:
-        flash('You cannot delete this comment.')
-        return redirect(request.referrer or url_for('main.index'))
-
-    db.session.delete(comment)
-    db.session.commit()
-    flash('Comment deleted.', 'info')
-    return redirect(request.referrer or url_for('main.index'))
-
-
 @bp.route('/save_post/<int:post_id>')
 @login_required
 def save_post(post_id):
@@ -1019,24 +994,13 @@ def react_post(post_id, reaction):
         post_reaction = PostReaction(user_id=current_user.id, post_id=post_id, reaction=reaction)
         db.session.add(post_reaction)
         reaction_set = True
+        if reaction == 'like':
+            existing_like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+            if not existing_like:
+                new_like = Like(user_id=current_user.id, post_id=post_id)
+                db.session.add(new_like)
 
     db.session.commit()
-
-    # Send notification if reaction was added and not reacting to own post
-    if reaction_set and post.author.id != current_user.id:
-        from app.notification_helper import create_notification
-        create_notification(
-            post.author.id,
-            'like',
-            {
-                'from_user': current_user.username,
-                'user_id': current_user.id,
-                'post_id': post.id,
-                'reaction': reaction,
-                'message': f'{current_user.username} reacted with {reaction} to your post'
-            }
-        )
-        print(f"Created reaction notification for user {post.author.id} from {current_user.username}")
 
     reaction_counts = post.get_reaction_counts()
     return jsonify({
@@ -1128,9 +1092,7 @@ def send_chat_message():
     try:
         recipient_id = request.form.get('recipient_id', type=int)
         message = request.form.get('message', '').strip()
-
-        if not message and not request.files.get('image'):
-            return jsonify({'error': 'Message cannot be empty'}), 400
+        reply_to_id = request.form.get('reply_to_id', type=int)
 
         if not recipient_id:
             return jsonify({'error': 'Recipient not specified'}), 400
@@ -1139,15 +1101,20 @@ def send_chat_message():
         if recipient is None:
             return jsonify({'error': 'User not found'}), 404
 
-        # Handle image upload
         image_url = None
         if 'image' in request.files:
             file = request.files['image']
             if file and file.filename:
-                from app.media_helpers import save_media
-                filename, media_type = save_media(file, 'chat')
-                if filename:
-                    image_url = filename
+                import os
+                import uuid
+                from flask import current_app
+
+                filename = str(uuid.uuid4()) + '.' + file.filename.rsplit('.', 1)[1].lower()
+                upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'chat')
+                os.makedirs(upload_path, exist_ok=True)
+                file_path = os.path.join(upload_path, filename)
+                file.save(file_path)
+                image_url = f'/static/uploads/chat/{filename}'
 
         chat_message = ChatMessage(
             sender_id=current_user.id,
@@ -1156,23 +1123,12 @@ def send_chat_message():
             image_url=image_url,
             is_read=False,
             is_delivered=False,
+            reply_to_id=reply_to_id,
+            reactions='{}',
             timestamp=datetime.now(timezone.utc)
         )
         db.session.add(chat_message)
         db.session.commit()
-
-        # Send notification to recipient
-        from app.notification_helper import create_notification
-        create_notification(
-            recipient_id,
-            'message',
-            {
-                'from_user': current_user.username,
-                'user_id': current_user.id,
-                'message': message[:50] if message else 'Sent a photo',
-                'type': 'private_message'
-            }
-        )
 
         return jsonify({
             'success': True,
@@ -1180,7 +1136,7 @@ def send_chat_message():
             'image_url': image_url,
             'timestamp': chat_message.timestamp.timestamp(),
             'message_id': chat_message.id,
-            'sender_id': current_user.id
+            'reply_to_id': reply_to_id
         })
     except Exception as e:
         current_app.logger.error(f"Send message error: {e}")
@@ -1200,7 +1156,21 @@ def get_chat_messages(other_user_id):
         ).order_by(ChatMessage.timestamp.asc())
     ).all()
 
-    # Mark messages as read
+    import json
+    result = []
+    for m in messages:
+        result.append({
+            'id': m.id,
+            'sender_id': m.sender_id,
+            'message': m.message,
+            'image_url': m.image_url,
+            'timestamp': m.timestamp.timestamp(),
+            'is_mine': m.sender_id == current_user.id,
+            'status': 'seen' if m.is_read else ('delivered' if m.is_delivered else 'sent'),
+            'reply_to_id': m.reply_to_id,
+            'reactions': json.loads(m.reactions) if m.reactions else {}
+        })
+
     db.session.execute(
         sa.update(ChatMessage)
         .where(
@@ -1212,15 +1182,7 @@ def get_chat_messages(other_user_id):
     )
     db.session.commit()
 
-    return jsonify([{
-        'id': m.id,
-        'sender_id': m.sender_id,
-        'message': m.message,
-        'image_url': m.image_url,
-        'timestamp': m.timestamp.timestamp(),
-        'is_mine': m.sender_id == current_user.id,
-        'status': 'seen' if m.is_read else ('delivered' if m.is_delivered else 'sent')
-    } for m in messages])
+    return jsonify(result)
 
 @bp.route('/send_message/<recipient>', methods=['GET', 'POST'])
 @login_required
@@ -1300,7 +1262,6 @@ def notifications_list():
         for n in notifications:
             data = n.get_data()
 
-            # Handle case where data might be a string or non-dict
             if not isinstance(data, dict):
                 data = {}
 
@@ -1565,9 +1526,8 @@ def reject_post(post_id):
         return redirect(url_for('main.moderation'))
 
     username = post.author.username
-
-    if post.media_url:
-        delete_media(post.media_url)
+    for media in post.media_items.all():
+        delete_media(media.media_url, 'posts')
 
     db.session.delete(post)
     db.session.commit()
@@ -1747,21 +1707,45 @@ def get_story_comments(story_id):
         'time_ago': time_ago(c.timestamp)
     } for c in comments])
 
+
 @bp.route('/send-friend-request/<int:user_id>', methods=['POST'])
 @login_required
 def send_friend_request(user_id):
     user = db.session.get(User, user_id)
-    if user and user != current_user:
-        if current_user.send_friend_request(user):
-            # Send notification to the recipient
-            user.add_notification('friend_request', {
-                'from_user': current_user.username,
-                'user_id': current_user.id,
-                'message': f'{current_user.username} sent you a friend request'
-            })
-            flash(f'Friend request sent to {user.username}', 'success')
+    if not user or user == current_user:
+        flash('Invalid user', 'danger')
+        return redirect(url_for('main.index'))
+
+    if current_user.is_friend_with(user):
+        flash(f'You are already friends with {user.username}', 'warning')
+        return redirect(url_for('main.user', username=user.username))
+
+    existing_request = FriendRequest.query.filter(
+        ((FriendRequest.from_user_id == current_user.id) & (FriendRequest.to_user_id == user.id)) |
+        ((FriendRequest.from_user_id == user.id) & (FriendRequest.to_user_id == current_user.id))
+    ).first()
+
+    if existing_request:
+        if existing_request.status == 'pending':
+            flash(f'Friend request already pending', 'warning')
+        elif existing_request.status == 'accepted':
+            flash(f'You are already friends with {user.username}', 'warning')
         else:
-            flash('Friend request already sent or pending', 'warning')
+            flash(f'Friend request was rejected', 'info')
+        return redirect(url_for('main.user', username=user.username))
+
+    if current_user.send_friend_request(user):
+        from app.notification_helper import create_notification
+        create_notification(
+            user_id=user.id,
+            type='friend_request',
+            message=f'{current_user.username} sent you a friend request',
+            link=url_for('main.friend_requests_page')
+        )
+        flash(f'Friend request sent to {user.username}', 'success')
+    else:
+        flash('Unable to send friend request', 'danger')
+
     return redirect(url_for('main.user', username=user.username))
 
 @bp.route('/accept-friend-request/<int:request_id>', methods=['POST'])
@@ -2162,7 +2146,7 @@ def export_data():
 
     response = jsonify(user_data)
     response.headers[
-        'Content-Disposition'] = f'attachment; filename=connecthub_export_{datetime.now().strftime("%Y%m%d")}.json'
+        'Content-Disposition'] = f'attachment; filename=Zetravox_export_{datetime.now().strftime("%Y%m%d")}.json'
     return response
 
 
@@ -2249,45 +2233,38 @@ def revoke_all_sessions():
 @bp.route('/mark-messages-delivered/<int:sender_id>', methods=['POST'])
 @login_required
 def mark_messages_delivered(sender_id):
-    try:
-        db.session.execute(
-            sa.update(ChatMessage)
-            .where(
-                ChatMessage.sender_id == sender_id,
-                ChatMessage.recipient_id == current_user.id,
-                ChatMessage.is_delivered == False
-            )
-            .values(is_delivered=True)
+    db.session.execute(
+        sa.update(ChatMessage)
+        .where(
+            ChatMessage.sender_id == sender_id,
+            ChatMessage.recipient_id == current_user.id,
+            ChatMessage.is_delivered == False
         )
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False}), 500
+        .values(is_delivered=True)
+    )
+    db.session.commit()
+    return jsonify({'success': True})
+
 
 @bp.route('/mark-messages-seen/<int:sender_id>', methods=['POST'])
 @login_required
 def mark_messages_seen(sender_id):
-    try:
-        db.session.execute(
-            sa.update(ChatMessage)
-            .where(
-                ChatMessage.sender_id == sender_id,
-                ChatMessage.recipient_id == current_user.id,
-                ChatMessage.is_read == False
-            )
-            .values(is_read=True)
+    db.session.execute(
+        sa.update(ChatMessage)
+        .where(
+            ChatMessage.sender_id == sender_id,
+            ChatMessage.recipient_id == current_user.id,
+            ChatMessage.is_read == False
         )
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False}), 500
-
+        .values(is_read=True)
+    )
+    db.session.commit()
+    return jsonify({'success': True})
 
 @bp.route('/conversations-list-api')
 @login_required
 def conversations_list_api():
     try:
-        # Get all users the current user has chatted with
         sent = db.session.execute(
             sa.select(ChatMessage.recipient_id)
             .where(ChatMessage.sender_id == current_user.id)
@@ -2306,7 +2283,6 @@ def conversations_list_api():
         for uid in user_ids:
             user = db.session.get(User, uid)
             if user:
-                # Get last message
                 last_msg = db.session.scalar(
                     sa.select(ChatMessage)
                     .where(
@@ -2317,7 +2293,6 @@ def conversations_list_api():
                     .limit(1)
                 )
 
-                # Count unread
                 unread = db.session.scalar(
                     sa.select(sa.func.count())
                     .select_from(ChatMessage)
@@ -2391,7 +2366,6 @@ def chat(username):
         ).order_by(ChatMessage.timestamp.asc())
     ).all()
 
-    # Mark messages as read
     db.session.execute(
         sa.update(ChatMessage).where(
             ChatMessage.sender_id == other_user.id,
@@ -2407,7 +2381,6 @@ def chat(username):
 @bp.route('/conversations')
 @login_required
 def conversations():
-    # Get all users the current user has chatted with
     sent = db.session.execute(
         sa.select(ChatMessage.recipient_id)
         .where(ChatMessage.sender_id == current_user.id)
@@ -2426,7 +2399,6 @@ def conversations():
     for uid in user_ids:
         user = db.session.get(User, uid)
         if user:
-            # Get last message
             last_msg = db.session.scalar(
                 sa.select(ChatMessage)
                 .where(
@@ -2437,7 +2409,6 @@ def conversations():
                 .limit(1)
             )
 
-            # Count unread
             unread = db.session.scalar(
                 sa.select(sa.func.count())
                 .select_from(ChatMessage)
@@ -2458,3 +2429,653 @@ def conversations():
                            reverse=True)
 
     return render_template('conversations.html', title='Messages', conversations=conversation_list)
+
+
+@bp.route('/react-to-message/<int:message_id>', methods=['POST'])
+@login_required
+def react_to_message(message_id):
+    try:
+        data = request.get_json()
+        reaction = data.get('reaction')
+        valid_reactions = ['❤️', '👍', '😂', '😮']
+
+        if not reaction or reaction not in valid_reactions:
+            return jsonify({'success': False, 'error': 'Invalid reaction'}), 400
+
+        # Get the message
+        message = db.session.get(ChatMessage, message_id)
+        if not message:
+            return jsonify({'success': False, 'error': 'Message not found'}), 404
+        if message.sender_id != current_user.id and message.recipient_id != current_user.id:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+        result = message.add_reaction(current_user.id, reaction)
+
+        reaction_summary = message.reaction_summary
+
+        if result['action'] in ['added', 'updated'] and message.sender_id != current_user.id:
+            from app.notification_helper import create_notification
+            create_notification(
+                user_id=message.sender_id,
+                actor_id=current_user.id,
+                type='message_reaction',
+                message=f"{current_user.username} reacted {reaction} to your message",
+                link=f"/chat/{message.sender_id if message.sender_id != current_user.id else message.recipient_id}"
+            )
+
+        return jsonify({
+            'success': True,
+            'action': result['action'],
+            'reaction': reaction,
+            'message_id': message_id,
+            'reaction_summary': reaction_summary,
+            'user_reaction': reaction if result['action'] != 'removed' else None
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Message reaction error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/delete-message/<int:message_id>', methods=['DELETE'])
+@login_required
+def delete_message(message_id):
+    try:
+        message = db.session.get(ChatMessage, message_id)
+        if not message:
+            return jsonify({'success': False, 'error': 'Message not found'})
+
+        if message.sender_id != current_user.id:
+            return jsonify({'success': False, 'error': 'Unauthorized'})
+
+        if message.image_url:
+            import os
+            file_path = os.path.join('app/static', message.image_url.lstrip('/'))
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+        db.session.delete(message)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/test-react/<int:message_id>')
+@login_required
+def test_react(message_id):
+    return jsonify({'success': True, 'message': f'Test works for message {message_id}'})
+
+
+
+@bp.route('/comment/<int:comment_id>/replies', methods=['GET'])
+@login_required
+def get_comment_replies(comment_id):
+    try:
+        comment = db.session.get(Comment, comment_id)
+        if not comment:
+            return jsonify({'error': 'Comment not found'}), 404
+
+        replies = comment.replies.order_by(Comment.timestamp.asc()).all()
+
+        replies_data = []
+        for reply in replies:
+            replies_data.append({
+                'id': reply.id,
+                'body': reply.body,
+                'timestamp': reply.timestamp.isoformat(),
+                'author': {
+                    'id': reply.author.id,
+                    'username': reply.author.username,
+                    'avatar': reply.author.avatar(32)
+                },
+                'reaction_summary': reply.reaction_summary,
+                'user_reaction': reply.get_user_reaction(current_user.id)
+            })
+
+        return jsonify({'success': True, 'replies': replies_data})
+
+    except Exception as e:
+        current_app.logger.error(f"Get comment replies error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/add_comment/<int:post_id>', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    post = db.session.get(Post, post_id)
+    if post is None:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'Post not found'}), 404
+        flash('Post not found.')
+        return redirect(url_for('main.index'))
+
+    body = request.form.get('body', '').strip()
+    if body:
+        comment = Comment(body=body, user_id=current_user.id, post_id=post_id)
+        db.session.add(comment)
+        db.session.commit()
+
+        if post.author.id != current_user.id:
+            from app.notification_helper import create_notification
+            create_notification(
+                post.author.id,
+                'comment',
+                {
+                    'from_user': current_user.username,
+                    'user_id': current_user.id,
+                    'post_id': post.id,
+                    'comment': body[:100],
+                    'message': f'{current_user.username} commented on your post'
+                }
+            )
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': True,
+                'comment': {
+                    'id': comment.id,
+                    'body': comment.body,
+                    'author': {
+                        'username': comment.author.username,
+                        'avatar': comment.author.avatar(32)
+                    },
+                    'timestamp': comment.timestamp.isoformat()
+                }
+            })
+
+        flash('Comment added.', 'success')
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'error': 'Comment body is empty'}), 400
+
+    return redirect(request.referrer or url_for('main.index'))
+
+@bp.route('/delete_comment/<int:comment_id>')
+@login_required
+def delete_comment(comment_id):
+    comment = db.session.get(Comment, comment_id)
+    if comment is None:
+        flash('Comment not found.')
+        return redirect(request.referrer or url_for('main.index'))
+
+    if comment.author != current_user and not current_user.is_admin:
+        flash('You cannot delete this comment.')
+        return redirect(request.referrer or url_for('main.index'))
+
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted.', 'info')
+    return redirect(request.referrer or url_for('main.index'))
+
+
+@bp.route('/comment/<int:comment_id>/react', methods=['POST'])
+@login_required
+def comment_react(comment_id):
+    try:
+        data = request.get_json()
+        reaction = data.get('reaction')
+
+        valid_reactions = ['❤️', '👍', '😂', '😮', '😡']
+
+        if not reaction or reaction not in valid_reactions:
+            return jsonify({'success': False, 'error': 'Invalid reaction'}), 400
+
+        comment = db.session.get(Comment, comment_id)
+        if not comment:
+            return jsonify({'success': False, 'error': 'Comment not found'}), 404
+
+        result = comment.add_reaction(current_user.id, reaction)
+        reaction_summary = comment.reaction_summary
+
+        return jsonify({
+            'success': True,
+            'action': result['action'],
+            'reaction': reaction,
+            'comment_id': comment_id,
+            'reaction_summary': reaction_summary,
+            'user_reaction': reaction if result['action'] != 'removed' else None
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Comment reaction error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/comment/<int:comment_id>/reply', methods=['POST'])
+@login_required
+def comment_reply(comment_id):
+    try:
+        data = request.get_json()
+        body = data.get('body', '').strip()
+
+        if not body:
+            return jsonify({'success': False, 'error': 'Reply cannot be empty'}), 400
+
+        parent_comment = db.session.get(Comment, comment_id)
+        if not parent_comment:
+            return jsonify({'success': False, 'error': 'Comment not found'}), 404
+
+        reply = Comment(
+            body=body,
+            user_id=current_user.id,
+            post_id=parent_comment.post_id,
+            parent_id=comment_id,
+            timestamp=datetime.now(timezone.utc)
+        )
+
+        db.session.add(reply)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'reply': {
+                'id': reply.id,
+                'body': reply.body,
+                'timestamp': reply.timestamp.isoformat(),
+                'author': {
+                    'id': reply.author.id,
+                    'username': reply.author.username,
+                    'avatar': reply.author.avatar(32)
+                }
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Comment reply error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/comment/<int:comment_id>/delete', methods=['DELETE'])
+@login_required
+def delete_comment_api(comment_id):
+    try:
+        comment = db.session.get(Comment, comment_id)
+        if not comment:
+            return jsonify({'success': False, 'error': 'Comment not found'}), 404
+
+        if comment.author.id != current_user.id and not current_user.is_admin:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+        for reply in comment.replies.all():
+            db.session.delete(reply)
+
+        db.session.delete(comment)
+        db.session.commit()
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Delete comment error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/api/users/<int:user_id>/followers')
+@login_required
+def api_get_followers(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    followers_list = []
+    query = user.followers.select()
+    followers = db.session.scalars(query).all()
+
+    for follower in followers:
+        followers_list.append({
+            'id': follower.id,
+            'username': follower.username,
+            'avatar': follower.avatar(48),
+            'bio': follower.about_me or '',
+            'is_following': current_user.is_following(follower)
+        })
+
+    return jsonify({'followers': followers_list})
+
+
+@bp.route('/api/users/<int:user_id>/following')
+@login_required
+def api_get_following(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    following_list = []
+    query = user.following.select()
+    following = db.session.scalars(query).all()
+
+    for followed in following:
+        following_list.append({
+            'id': followed.id,
+            'username': followed.username,
+            'avatar': followed.avatar(48),
+            'bio': followed.about_me or '',
+            'is_following': current_user.is_following(followed)
+        })
+
+    return jsonify({'following': following_list})
+
+
+@bp.route('/follow-from-modal/<int:user_id>', methods=['POST'])
+@login_required
+def follow_from_modal(user_id):
+    user_to_follow = db.session.get(User, user_id)
+    if not user_to_follow:
+        return jsonify({'error': 'User not found'}), 404
+
+    if user_to_follow.id == current_user.id:
+        return jsonify({'error': 'Cannot follow yourself'}), 400
+
+    if current_user.is_following(user_to_follow):
+        current_user.unfollow(user_to_follow)
+        action = 'unfollowed'
+    else:
+        current_user.follow(user_to_follow)
+        action = 'followed'
+
+    db.session.commit()
+
+    return jsonify({'success': True, 'action': action})
+
+
+@bp.route('/api/users/<int:user_id>/media')
+@login_required
+def api_get_user_media(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    media_items = []
+    posts = Post.query.filter(
+        Post.user_id == user_id,
+        Post.media_items.any()
+    ).order_by(Post.timestamp.desc()).all()
+
+    for post in posts:
+        for media in post.media_items:
+            media_items.append({
+                'id': media.id,
+                'url': media.media_url,
+                'type': media.media_type,
+                'post_id': post.id,
+                'likes_count': post.like_count(),
+                'comments_count': post.comment_count(),
+                'timestamp': post.timestamp.isoformat()
+            })
+
+    return jsonify({'media': media_items})
+
+
+@bp.route('/api/users/<int:user_id>/liked-posts')
+@login_required
+def api_get_liked_posts(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    liked_posts = db.session.query(Post).join(
+        Like, Like.post_id == Post.id
+    ).filter(
+        Like.user_id == user_id,
+        Post.is_spam == False,
+        Post.approved == True
+    ).order_by(Like.timestamp.desc()).all()
+
+    posts_data = []
+    for post in liked_posts:
+        posts_data.append({
+            'id': post.id,
+            'body': post.body,
+            'timestamp': post.timestamp.isoformat(),
+            'author': {
+                'id': post.author.id,
+                'username': post.author.username,
+                'avatar': post.author.avatar(48),
+                'is_verified': post.author.is_verified
+            },
+            'likes_count': post.like_count(),
+            'comments_count': post.comment_count(),
+            'media_items': [{
+                'url': m.media_url,
+                'type': m.media_type
+            } for m in post.media_items.all()] if post.media_items.count() > 0 else [],
+            'user_reaction': post.user_reaction(current_user.id) if current_user.is_authenticated else None,
+            'reaction_counts': post.get_reaction_counts()
+        })
+
+    return jsonify({'liked_posts': posts_data})
+
+
+@bp.route('/follow-user/<int:user_id>', methods=['POST'])
+@login_required
+def follow_user(user_id):
+    user_to_follow = db.session.get(User, user_id)
+    if not user_to_follow:
+        return jsonify({'error': 'User not found'}), 404
+
+    if user_to_follow.id == current_user.id:
+        return jsonify({'error': 'Cannot follow yourself'}), 400
+
+    current_user.follow(user_to_follow)
+    db.session.commit()
+
+    return jsonify({'success': True})
+
+
+@bp.route('/api/debug/followers/<int:user_id>')
+@login_required
+def debug_followers(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    followers_count = user.followers_count()
+    following_count = user.following_count()
+
+    followers_list = []
+    for follower in user.followers.all():
+        followers_list.append(follower.username)
+
+    following_list = []
+    for followed in user.following.all():
+        following_list.append(followed.username)
+
+    return jsonify({
+        'username': user.username,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'followers': followers_list,
+        'following': following_list
+    })
+
+
+@bp.route('/api/debug/likes/<int:user_id>')
+@login_required
+def debug_likes(user_id):
+    from app.models import Like
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    likes = Like.query.filter_by(user_id=user_id).all()
+
+    liked_posts_data = []
+    for like in likes:
+        post = like.post
+        liked_posts_data.append({
+            'post_id': post.id if post else None,
+            'post_body': post.body[:100] if post else 'Post deleted',
+            'liked_at': like.timestamp.isoformat() if like.timestamp else None
+        })
+
+    return jsonify({
+        'username': user.username,
+        'total_likes': len(likes),
+        'liked_posts': liked_posts_data
+    })
+
+
+@bp.route('/api/debug/all-likes')
+@login_required
+def debug_all_likes():
+    all_likes = Like.query.all()
+    likes_data = []
+    for like in all_likes:
+        likes_data.append({
+            'id': like.id,
+            'user_id': like.user_id,
+            'username': like.user.username if like.user else 'Unknown',
+            'post_id': like.post_id,
+            'timestamp': like.timestamp.isoformat() if like.timestamp else None
+        })
+
+    return jsonify({
+        'total_likes_in_system': len(all_likes),
+        'likes': likes_data
+    })
+
+@bp.route('/api/analytics/stats')
+@login_required
+@admin_required
+def api_analytics_stats():
+    from datetime import datetime, timedelta
+
+    total_users = User.query.count()
+    total_posts = Post.query.filter_by(is_spam=False).count()
+    total_likes = Like.query.count()
+    total_comments = Comment.query.count()
+
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    new_users_this_week = User.query.filter(User.last_seen >= week_ago).count()
+
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    active_today = User.query.filter(User.last_seen >= today_start).count()
+
+    return jsonify({
+        'total_users': total_users,
+        'total_posts': total_posts,
+        'total_likes': total_likes,
+        'total_comments': total_comments,
+        'new_users_this_week': new_users_this_week,
+        'active_today': active_today
+    })
+
+
+@bp.route('/api/analytics/user-growth')
+@login_required
+@admin_required
+def api_user_growth():
+    from datetime import datetime, timedelta
+
+    growth_data = []
+    for i in range(30, -1, -1):
+        date = datetime.now(timezone.utc).date() - timedelta(days=i)
+        next_date = date + timedelta(days=1)
+
+        count = User.query.filter(
+            User.last_seen >= datetime.combine(date, datetime.min.time()),
+            User.last_seen < datetime.combine(next_date, datetime.min.time())
+        ).count()
+
+        growth_data.append({
+            'date': date.strftime('%Y-%m-%d'),
+            'count': count
+        })
+
+    return jsonify(growth_data)
+
+@bp.route('/api/analytics/top-users')
+@login_required
+@admin_required
+def api_top_users():
+    from sqlalchemy import func
+
+    top_users = db.session.query(
+        User.id,
+        User.username,
+        func.count(Post.id).label('post_count')
+    ).join(Post, Post.user_id == User.id) \
+        .group_by(User.id, User.username) \
+        .order_by(func.count(Post.id).desc()) \
+        .limit(5).all()
+
+    result = []
+    for user in top_users:
+        user_obj = User.query.get(user.id)
+        result.append({
+            'username': user.username,
+            'avatar': user_obj.avatar(40) if user_obj else None,
+            'post_count': user.post_count
+        })
+
+    return jsonify(result)
+
+
+@bp.route('/api/analytics/activity')
+@login_required
+@admin_required
+def api_activity():
+    from datetime import datetime, timedelta
+
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    posts_data = []
+    comments_data = []
+
+    for i in range(6, -1, -1):
+        date = datetime.now(timezone.utc).date() - timedelta(days=i)
+        next_date = date + timedelta(days=1)
+
+        posts_count = Post.query.filter(
+            Post.timestamp >= datetime.combine(date, datetime.min.time()),
+            Post.timestamp < datetime.combine(next_date, datetime.min.time())
+        ).count()
+
+        comments_count = Comment.query.filter(
+            Comment.timestamp >= datetime.combine(date, datetime.min.time()),
+            Comment.timestamp < datetime.combine(next_date, datetime.min.time())
+        ).count()
+
+        posts_data.append(posts_count)
+        comments_data.append(comments_count)
+
+    return jsonify({
+        'labels': days,
+        'posts': posts_data,
+        'comments': comments_data
+    })
+
+
+@bp.route('/api/analytics/engagement')
+@login_required
+@admin_required
+def api_engagement():
+    total_likes = Like.query.count()
+    total_comments = Comment.query.count()
+    total_shares = SharedPost.query.count()
+    total_bookmarks = SavedPost.query.count()
+
+    return jsonify({
+        'likes': total_likes,
+        'comments': total_comments,
+        'shares': total_shares,
+        'bookmarks': total_bookmarks
+    })
+
+
+@bp.route('/api/ai/chat', methods=['POST'])
+@login_required
+def ai_chat_api():
+    from app.services.ai_service import AIService
+    data = request.get_json()
+    message = data.get('message', '')
+
+    ai_service = AIService()
+    reply = ai_service.chat(message)
+
+    return jsonify({'reply': reply})
+@bp.route('/ai-chat')
+@login_required
+def ai_chat():
+    return render_template('ai_chat.html', title='AI Assistant')
