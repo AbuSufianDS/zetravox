@@ -35,6 +35,7 @@ class Config:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
     DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
+    DEEPSEEK_API_URL = os.environ.get('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1/chat/completions')
     OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
     OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')

@@ -10,78 +10,117 @@
 
 .ai-chat-card {
     background: var(--bg-card);
-    border-radius: 28px;
-    border: 1px solid rgba(102,126,234,0.1);
+    border-radius: 32px;
+    border: 1px solid rgba(102,126,234,0.12);
     overflow: hidden;
-    box-shadow: var(--shadow);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
 }
 
 .chat-header-premium {
-    padding: 24px;
+    padding: 28px 32px;
     background: linear-gradient(135deg, #667eea05, #764ba205);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
 }
 
 .ai-avatar-premium {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 18px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
 }
 
 .ai-avatar-premium i {
-    font-size: 28px;
+    font-size: 30px;
     color: white;
 }
 
-.ai-info-premium h2 {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0;
+.ai-info-premium {
+    flex: 1;
 }
 
-.ai-info-premium p {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin: 4px 0 0;
+.ai-info-premium h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: #10b98120;
+    gap: 8px;
+    background: #10b98115;
     color: #10b981;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 11px;
-    margin-left: 10px;
+    padding: 5px 14px;
+    border-radius: 40px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge i {
+    font-size: 8px;
+}
+
+.ai-info-premium p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 6px 0 0;
 }
 
 .chat-messages-premium {
-    height: 500px;
+    height: 520px;
     overflow-y: auto;
-    padding: 24px;
+    padding: 24px 28px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.message-premium {
-    display: flex;
-    gap: 12px;
-    animation: fadeIn 0.3s ease;
+.chat-messages-premium::-webkit-scrollbar {
+    width: 5px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.chat-messages-premium::-webkit-scrollbar-track {
+    background: var(--hover-bg);
+    border-radius: 10px;
+}
+
+.chat-messages-premium::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+.message-premium {
+    display: flex;
+    gap: 14px;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message-user {
@@ -93,8 +132,8 @@
 }
 
 .message-avatar {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -105,29 +144,36 @@
 .message-user .message-avatar {
     background: linear-gradient(135deg, #667eea, #764ba2);
     order: 2;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.3);
 }
 
 .message-ai .message-avatar {
-    background: #10b98120;
-    color: #10b981;
+    background: #f0f2f5;
+    color: #667eea;
+}
+
+[data-theme="dark"] .message-ai .message-avatar {
+    background: #3a3b3c;
 }
 
 .message-avatar i {
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .message-bubble {
     max-width: 70%;
-    padding: 12px 18px;
-    border-radius: 20px;
+    padding: 14px 20px;
+    border-radius: 24px;
     font-size: 14px;
     line-height: 1.5;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .message-user .message-bubble {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     border-bottom-right-radius: 6px;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.25);
 }
 
 .message-ai .message-bubble {
@@ -139,29 +185,43 @@
 
 .message-time {
     font-size: 10px;
-    margin-top: 6px;
+    margin-top: 8px;
     opacity: 0.6;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-user .message-time {
+    justify-content: flex-end;
 }
 
 .chat-input-premium {
-    padding: 20px 24px;
+    padding: 20px 28px 28px;
     border-top: 1px solid var(--border-color);
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: flex-end;
+    background: var(--bg-card);
+}
+
+.chat-input-wrapper {
+    flex: 1;
+    position: relative;
 }
 
 .chat-input-premium textarea {
-    flex: 1;
+    width: 100%;
     background: var(--hover-bg);
     border: 1px solid var(--border-color);
-    border-radius: 24px;
-    padding: 12px 18px;
+    border-radius: 28px;
+    padding: 14px 20px;
     resize: none;
     font-family: inherit;
     font-size: 14px;
     color: var(--text-primary);
     max-height: 120px;
+    transition: all 0.2s;
 }
 
 .chat-input-premium textarea:focus {
@@ -171,35 +231,45 @@
 }
 
 .send-btn-premium {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     border: none;
     border-radius: 50%;
     color: white;
     cursor: pointer;
     transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.3);
 }
 
 .send-btn-premium:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+    box-shadow: 0 6px 20px rgba(102,126,234,0.4);
 }
 
-/* Typing Indicator */
+.send-btn-premium:disabled {
+    opacity: 0.6;
+    transform: none;
+}
+
 .typing-indicator {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
     background: var(--hover-bg);
-    border-radius: 24px;
+    border-radius: 28px;
     width: fit-content;
+    border: 1px solid var(--border-color);
 }
 
 .typing-dots {
     display: flex;
-    gap: 4px;
+    gap: 5px;
 }
 
 .typing-dots span {
@@ -207,75 +277,91 @@
     height: 8px;
     background: #667eea;
     border-radius: 50%;
-    animation: typing 1.4s infinite;
+    animation: typingWave 1.4s infinite;
 }
 
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes typing {
+@keyframes typingWave {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
     30% { transform: translateY(-10px); opacity: 1; }
 }
 
 .empty-chat-premium {
     text-align: center;
-    padding: 60px 20px;
+    padding: 70px 30px;
 }
 
 .empty-icon-premium {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     background: linear-gradient(135deg, #667eea10, #764ba210);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 24px;
 }
 
 .empty-icon-premium i {
-    font-size: 36px;
+    font-size: 42px;
     color: #667eea;
 }
 
 .empty-chat-premium h3 {
-    font-size: 20px;
-    margin-bottom: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .empty-chat-premium p {
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 14px;
+    margin-bottom: 0;
 }
 
 .suggestion-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
-    margin-top: 24px;
+    margin-top: 28px;
 }
 
 .suggestion-btn {
     background: var(--hover-bg);
     border: 1px solid var(--border-color);
     border-radius: 40px;
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s;
 }
 
 .suggestion-btn:hover {
     border-color: #667eea;
-    background: #667eea10;
+    background: #667eea08;
+    transform: translateY(-2px);
+}
+
+.suggestion-btn:active {
+    transform: translateY(0);
 }
 
 @media (max-width: 768px) {
     .ai-chat-container { padding: 12px; }
+    .chat-header-premium { padding: 20px; }
+    .chat-messages-premium { padding: 16px; height: 420px; }
     .message-bubble { max-width: 85%; }
-    .chat-messages-premium { height: 400px; }
+    .message-bubble { padding: 10px 16px; }
+    .suggestion-buttons { gap: 8px; }
+    .suggestion-btn { padding: 7px 14px; font-size: 12px; }
+    .empty-chat-premium { padding: 40px 20px; }
 }
 </style>
 
@@ -290,10 +376,10 @@
                 <h2>
                     Zetravox AI Assistant
                     <span class="status-badge">
-                        <i class="fas fa-circle" style="font-size: 8px;"></i> Ready
+                        <i class="fas fa-circle"></i> Ready
                     </span>
                 </h2>
-                <p>Your intelligent companion • Ask me anything about Zetravox</p>
+                <p>Powered by advanced AI • Ask me anything about Zetravox</p>
             </div>
         </div>
 
@@ -302,20 +388,22 @@
                 <div class="empty-icon-premium">
                     <i class="fas fa-robot"></i>
                 </div>
-                <h3>Hello! I'm Zetravox AI</h3>
-                <p>Ask me anything about Zetravox or get help with:</p>
+                <h3>Hello, I'm Zetravox AI</h3>
+                <p>Your intelligent assistant for everything Zetravox</p>
                 <div class="suggestion-buttons">
-                    <button class="suggestion-btn" onclick="sendSuggestion('How do I create a post?')">📝 Creating posts</button>
-                    <button class="suggestion-btn" onclick="sendSuggestion('How to connect with friends?')">👥 Finding friends</button>
-                    <button class="suggestion-btn" onclick="sendSuggestion('Privacy settings guide')">🔒 Privacy settings</button>
-                    <button class="suggestion-btn" onclick="sendSuggestion('Tips for growing my network')">📈 Growing network</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('How do I create a post?')">📝 Create post</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('How to connect with friends?')">👥 Find friends</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('Privacy settings guide')">🔒 Privacy</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('Tips to grow my network')">📈 Grow network</button>
                 </div>
             </div>
         </div>
 
         <div class="chat-input-premium">
-            <textarea id="chatInput" placeholder="Ask me anything..." rows="1"></textarea>
-            <button class="send-btn-premium" onclick="sendMessage()">
+            <div class="chat-input-wrapper">
+                <textarea id="chatInput" placeholder="Ask me anything..." rows="1"></textarea>
+            </div>
+            <button class="send-btn-premium" id="sendBtn" onclick="sendMessage()">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
@@ -324,93 +412,78 @@
 </div>
 
 <script>
-let isTyping = false;
-let conversationHistory = [];
+let isWaitingForResponse = false;
 
-// Send message
 async function sendMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
 
-    if (!message) return;
+    if (!message || isWaitingForResponse) return;
 
-    // Clear input
     input.value = '';
     input.style.height = 'auto';
 
-    // Add user message
     addMessage('user', message);
-
-    // Show typing indicator
     showTypingIndicator();
+    isWaitingForResponse = true;
 
-    // Simulate AI response (Replace with actual API when you have key)
-    setTimeout(() => {
+    try {
+        const response = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        const data = await response.json();
         hideTypingIndicator();
 
-        let response = getAIResponse(message);
-        addMessage('ai', response);
-
-        // Save to history
-        conversationHistory.push({ role: 'user', content: message });
-        conversationHistory.push({ role: 'assistant', content: response });
-    }, 1500);
-}
-
-// Get AI response (simulated - replace with real API)
-function getAIResponse(message) {
-    const msg = message.toLowerCase();
-
-    if (msg.includes('post') || msg.includes('create')) {
-        return "To create a post on Zetravox:\n\n1. Click the 'Create Post' button at the top of your feed\n2. Write your thoughts in the text area\n3. Add photos or videos (optional)\n4. Choose privacy settings (Public, Followers, or Only Me)\n5. Click 'Publish' to share with your network!\n\nYou can also schedule posts for later by using the schedule option.";
-    }
-    else if (msg.includes('connect') || msg.includes('friend')) {
-        return "To connect with friends on Zetravox:\n\n1. Visit someone's profile by clicking their username\n2. Click the 'Connect' button on their profile\n3. Or go to 'Discover' page to find new people\n4. You can also accept connection requests from the 'Requests' icon in the navbar\n\nOnce connected, you'll see their posts in your feed and can send private messages!";
-    }
-    else if (msg.includes('privacy')) {
-        return "Privacy settings on Zetravox:\n\n1. Go to Settings > Privacy\n2. You can control:\n   • Who can see your posts (Public, Followers, Only Me)\n   • Who can send you friend requests\n   • Who can message you\n   • Whether your profile appears in search\n3. You can also block users from your profile page\n\nYour privacy is our priority!";
-    }
-    else if (msg.includes('grow') || msg.includes('network')) {
-        return "Tips to grow your Zetravox network:\n\n1. Post regularly - Share interesting content\n2. Engage with others - Like and comment on posts\n3. Use relevant hashtags to reach更多人\n4. Share your profile link on other platforms\n5. Participate in discussions and groups\n6. Be authentic and consistent!\n\nThe more you engage, the more your network will grow!";
-    }
-    else if (msg.includes('message') || msg.includes('chat')) {
-        return "To send private messages on Zetravox:\n\n1. Go to the Messages icon in the navbar\n2. Click on any conversation to open it\n3. Type your message in the chat box\n4. You can also send images and emojis\n5. Real-time notifications for new messages\n\nStart a conversation with your connections today!";
-    }
-    else if (msg.includes('profile') || msg.includes('edit')) {
-        return "To edit your profile:\n\n1. Click on your avatar in the top right\n2. Select 'Edit Profile' from the dropdown\n3. You can update:\n   • Profile picture and cover photo\n   • Bio and personal information\n   • Work and education details\n   • Location and contact info\n4. Click 'Save Changes' when done\n\nMake your profile stand out!";
-    }
-    else {
-        return "Thanks for your question! I'm Zetravox AI. I can help you with:\n\n• Creating and managing posts\n• Connecting with friends\n• Privacy and security settings\n• Growing your network\n• Using messages and chat\n• Editing your profile\n\nWhat would you like to know more about?";
+        if (data.success) {
+            addMessage('ai', data.reply);
+        } else {
+            addMessage('ai', 'I encountered an issue. Please try again in a moment.');
+        }
+    } catch (error) {
+        hideTypingIndicator();
+        addMessage('ai', 'Network connection issue. Please check your internet and try again.');
+    } finally {
+        isWaitingForResponse = false;
     }
 }
 
-// Add message to chat
 function addMessage(role, content) {
     const container = document.getElementById('chatMessages');
-
-    // Remove empty state if present
-    if (container.querySelector('.empty-chat-premium')) {
-        container.innerHTML = '';
-    }
+    const emptyState = container.querySelector('.empty-chat-premium');
+    if (emptyState) emptyState.remove();
 
     const messageDiv = document.createElement('div');
     messageDiv.className = `message-premium message-${role}`;
+
+    const avatarIcon = role === 'user' ? 'fa-user' : 'fa-robot';
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
     messageDiv.innerHTML = `
         <div class="message-avatar">
-            <i class="fas ${role === 'user' ? 'fa-user' : 'fa-robot'}"></i>
+            <i class="fas ${avatarIcon}"></i>
         </div>
         <div class="message-bubble">
             <div>${formatMessage(content)}</div>
-            <div class="message-time">${getCurrentTime()}</div>
+            <div class="message-time">
+                <i class="far fa-clock"></i> ${time}
+            </div>
         </div>
     `;
-    container.appendChild(messageDiv);
 
-    // Scroll to bottom
-    container.scrollTop = container.scrollHeight;
+    container.appendChild(messageDiv);
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-// Show typing indicator
+function formatMessage(content) {
+    return content.replace(/\n/g, '<br>').replace(/`(.*?)`/g, '<code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 6px;">$1</code>');
+}
+
 function showTypingIndicator() {
     const container = document.getElementById('chatMessages');
     const typingDiv = document.createElement('div');
@@ -428,51 +501,36 @@ function showTypingIndicator() {
         </div>
     `;
     container.appendChild(typingDiv);
-    container.scrollTop = container.scrollHeight;
+    typingDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-// Hide typing indicator
 function hideTypingIndicator() {
     const indicator = document.getElementById('typingIndicator');
     if (indicator) indicator.remove();
 }
 
-// Send suggestion
 function sendSuggestion(suggestion) {
     document.getElementById('chatInput').value = suggestion;
     sendMessage();
 }
 
-// Format message (handle line breaks)
-function formatMessage(content) {
-    return content.replace(/\n/g, '<br>');
-}
-
-// Get current time
-function getCurrentTime() {
-    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-// Auto-resize textarea
-const chatInput = document.getElementById('chatInput');
-chatInput.addEventListener('input', function() {
+const textarea = document.getElementById('chatInput');
+textarea.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
-// Send on Enter (Shift+Enter for new line)
-chatInput.addEventListener('keypress', function(e) {
+textarea.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
     }
 });
 
-// Keyboard shortcut (Ctrl+K to focus chat)
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        chatInput.focus();
+        textarea.focus();
     }
 });
 </script>

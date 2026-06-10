@@ -3067,14 +3067,23 @@ def api_engagement():
 @bp.route('/api/ai/chat', methods=['POST'])
 @login_required
 def ai_chat_api():
-    from app.services.ai_service import AIService
-    data = request.get_json()
-    message = data.get('message', '')
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
 
-    ai_service = AIService()
-    reply = ai_service.chat(message)
+        if not message:
+            return jsonify({'error': 'Message is required'}), 400
 
-    return jsonify({'reply': reply})
+        from app.services.deepseek_service import DeepSeekService
+        ai_service = DeepSeekService()
+        reply = ai_service.chat(message)
+
+        return jsonify({'success': True, 'reply': reply})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @bp.route('/ai-chat')
 @login_required
 def ai_chat():

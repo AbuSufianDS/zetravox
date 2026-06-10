@@ -278,7 +278,6 @@
         transform: translateY(-2px);
     }
 
-    /* Premium Contact Items */
     .premium-contact-item {
         display: flex;
         align-items: center;
@@ -487,7 +486,6 @@
 
     <div class="col-lg-6">
 
-        {# Premium Create Post Card #}
         <div class="premium-create-card" data-bs-toggle="modal" data-bs-target="#createPostModal">
             <div class="premium-create-header">
                 <img src="{{ current_user.avatar(52) }}" class="premium-create-avatar">
@@ -515,7 +513,6 @@
             </div>
         </div>
 
-        {# Posts Display #}
         {% for post in posts %}
             {% include '_post.html' %}
         {% else %}
@@ -527,7 +524,6 @@
         </div>
         {% endfor %}
 
-        {# Pagination #}
         {% if next_url or prev_url %}
         <div class="d-flex justify-content-between mt-3">
             {% if prev_url %}
@@ -547,7 +543,6 @@
     <div class="col-lg-3 d-none d-lg-block">
         <div class="premium-sidebar-card">
 
-            {# Birthday Celebrations #}
             {% if upcoming_birthdays %}
                 <div class="premium-section-title">
                     <i class="fas fa-birthday-cake"></i>
@@ -573,7 +568,6 @@
                 <div class="premium-divider"></div>
             {% endif %}
 
-            {# Online Friends Section #}
             <div class="premium-section-title">
                 <i class="fas fa-circle" style="color: #10b981; font-size: 10px;"></i>
                 <span>ONLINE NOW • {{ active_contacts|length }}</span>
@@ -603,7 +597,6 @@
 
             <div class="premium-divider"></div>
 
-            {# Sponsored #}
             <div class="premium-section-title">
                 <i class="fas fa-ad"></i>
                 <span>SPONSORED</span>
@@ -633,7 +626,6 @@
 </div>
 
 <style>
-/* AI Floating Button - Properly Positioned */
 .ai-float-container {
     position: fixed;
     bottom: 30px;
@@ -1168,7 +1160,6 @@
 </style>
 
 <script>
-
 let selectedMediaFiles = [];
 
 function triggerFileUpload() {

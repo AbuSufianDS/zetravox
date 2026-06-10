@@ -42,7 +42,7 @@ def export_posts(user_id):
             _set_task_progress(100 * i // total_posts)
 
         send_email(
-            '[Microblog] Your blog posts',
+            '[zetravox] Your blog posts',
             sender=app.config['ADMINS'][0], recipients=[user.email],
             text_body=render_template('email/export_posts.txt', user=user),
             html_body=render_template('email/export_posts.html', user=user),
