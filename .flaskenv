@@ -1,2 +1,4 @@
-FLASK_APP=microblog.py
-FLASK_DEBUG=1
+@"
+FLASK_APP=zetravox.py
+FLASK_ENV=development
+"@ | Out-File -FilePath .flaskenv -Encoding utf8
