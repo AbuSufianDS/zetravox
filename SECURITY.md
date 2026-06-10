@@ -50,5 +50,5 @@ export DEEPSEEK_API_KEY="your-key-here"
 
 ## Last Updated
 
-June 10, 2025
+June 10, 2026
 "@ | Out-File -FilePath SECURITY.md -Encoding utf8
