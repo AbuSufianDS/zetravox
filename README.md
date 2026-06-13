@@ -336,7 +336,7 @@ Guizhou University, Guiyang, Guizhou Province, China
 - GitHub: [github.com/AbuSufianDS](https://github.com/AbuSufianDS)
 - LinkedIn: [https://www.linkedin.com/in/md-abu-sufian-ds1323](https://linkedin.com/in/md-abu-sufian-ds1323)
 
-**Supervisor:** Lei Zhang
+**Supervisor:**  Professor Xu Ji (徐计) 
 **Department:** Computer Science and Technology, Guizhou University
 **Project Completion:** 10 June 2026
 

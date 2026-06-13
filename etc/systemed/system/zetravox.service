@@ -1,0 +1,25 @@
+[Unit]
+Description=Zetravox Social Media Platform
+After=network.target
+After=postgresql.service
+After=redis.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/zetravox
+Environment="PATH=/var/www/zetravox/venv/bin"
+Environment="FLASK_APP=zetravox.py"
+Environment="FLASK_ENV=production"
+EnvironmentFile=/var/www/zetravox/.env
+
+ExecStart=/var/www/zetravox/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 --access-logfile /var/log/zetravox/access.log --error-logfile /var/log/zetravox/error.log zetravox:app
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

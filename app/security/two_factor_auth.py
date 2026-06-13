@@ -15,7 +15,7 @@ class TwoFactorAuth:
     def get_totp_uri(secret, email):
         return pyotp.totp.TOTP(secret).provisioning_uri(
             name=email,
-            issuer_name="TinyBook"
+            issuer_name="Zetravox"
         )
 
     @staticmethod
