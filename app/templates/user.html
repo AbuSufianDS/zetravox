@@ -541,7 +541,7 @@
 
     <div class="profile-cover">
         {% if user.cover_pic and user.cover_pic != 'default_cover.jpg' and user.cover_pic != 'None' %}
-            <img src="{{ url_for('static', filename='uploads/profiles/' + user.cover_pic) }}"
+            <img src="{{ url_for('static', filename='uploads/covers/' + user.cover_pic) }}"
                  class="profile-cover-image"
                  style="width: 100%; height: 100%; object-fit: cover;">
         {% else %}
@@ -983,7 +983,6 @@ function debugLikes() {
         .then(response => response.json())
         .then(data => {
             console.log('Debug Likes:', data);
-            // Only show toast if there's an actual issue
             if (data.total_likes === 0 && '{{ user.id }}' === '{{ current_user.id }}') {
                 console.log('No liked posts yet. Like some posts to see them here!');
             }

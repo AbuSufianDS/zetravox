@@ -205,8 +205,11 @@ def index():
         db.session.commit()
 
         if 'media_files' in request.files:
+            print("DEBUG: media_files found in request")
             files = request.files.getlist('media_files')
+            print(f"DEBUG: Found {len(files)} files")
             files = [f for f in files if f and f.filename]
+            print(f"DEBUG: After filtering: {len(files)} files")
             if files:
                 saved_media = save_multiple_media(files, 'posts')
                 for idx, media in enumerate(saved_media):
@@ -779,7 +782,15 @@ def user_popup(username):
 @login_required
 def edit_profile():
     form = EditProfileForm(current_user.username)
+
+    if request.method == 'POST':
+        print("=== DEBUG: Edit Profile POST ===")
+        print(f"Profile pic file: {request.files.get('profile_pic')}")
+        print(f"Cover pic file: {request.files.get('cover_pic')}")
+
     if form.validate_on_submit():
+        print("=== DEBUG: Form validated ===")
+
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         current_user.is_private = form.is_private.data == 'True'
@@ -795,14 +806,27 @@ def edit_profile():
         current_user.phone = form.phone.data
 
         if form.profile_pic.data and form.profile_pic.data.filename:
+            print(f"Profile pic filename: {form.profile_pic.data.filename}")
             old_pic = current_user.profile_pic
-            current_user.profile_pic = save_profile_picture(form.profile_pic.data, old_pic)
+            new_pic = save_profile_picture(form.profile_pic.data, old_pic)
+            if new_pic:
+                current_user.profile_pic = new_pic
+                print(f"Profile pic saved as: {new_pic}")
+            else:
+                print("ERROR: Failed to save profile picture")
 
         if form.cover_pic.data and form.cover_pic.data.filename:
+            print(f"Cover pic filename: {form.cover_pic.data.filename}")
             old_cover = current_user.cover_pic
-            current_user.cover_pic = save_cover_picture(form.cover_pic.data, old_cover)
+            new_cover = save_cover_picture(form.cover_pic.data, old_cover)
+            if new_cover:
+                current_user.cover_pic = new_cover
+                print(f"Cover pic saved as: {new_cover}")
+            else:
+                print("ERROR: Failed to save cover picture")
 
         db.session.commit()
+        print("=== DEBUG: Changes committed ===")
         flash('Your changes have been saved.', 'success')
         return redirect(url_for('main.user', username=current_user.username))
 
@@ -822,7 +846,6 @@ def edit_profile():
         form.phone.data = current_user.phone
 
     return render_template('edit_profile.html', title='Edit Profile', form=form)
-
 
 @bp.route('/follow/<username>', methods=['POST'])
 @login_required
@@ -1024,7 +1047,7 @@ def pin_post(post_id):
     return redirect(request.referrer or url_for('main.user', username=current_user.username))
 
 
-@bp.route('/delete_post/<int:post_id>')
+@bp.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required
 def delete_post(post_id):
     post = db.session.get(Post, post_id)
@@ -1035,6 +1058,23 @@ def delete_post(post_id):
     if post.author != current_user and not current_user.is_admin:
         flash('You cannot delete this post.')
         return redirect(url_for('main.index'))
+
+    Like.query.filter_by(post_id=post_id).delete()
+
+    PostReaction.query.filter_by(post_id=post_id).delete()
+
+    Comment.query.filter_by(post_id=post_id).delete()
+
+    SavedPost.query.filter_by(post_id=post_id).delete()
+
+    SharedPost.query.filter_by(original_post_id=post_id).delete()
+
+    NotInterestedPost.query.filter_by(post_id=post_id).delete()
+    InterestedPost.query.filter_by(post_id=post_id).delete()
+
+    HiddenPost.query.filter_by(post_id=post_id).delete()
+
+    SpamReport.query.filter_by(post_id=post_id).delete()
 
     for media in post.media_items.all():
         delete_media(media.media_url, 'posts')
@@ -1116,11 +1156,30 @@ def send_chat_message():
                 file.save(file_path)
                 image_url = f'/static/uploads/chat/{filename}'
 
+        audio_url = None
+        if 'audio' in request.files:
+            audio_file = request.files['audio']
+            if audio_file and audio_file.filename:
+                import os
+                import uuid
+                from flask import current_app
+
+                ext = audio_file.filename.rsplit('.', 1)[1].lower() if '.' in audio_file.filename else 'webm'
+                filename = str(uuid.uuid4()) + '.' + ext
+
+                audio_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'chat', 'audio')
+                os.makedirs(audio_path, exist_ok=True)
+
+                file_path = os.path.join(audio_path, filename)
+                audio_file.save(file_path)
+                audio_url = f'/static/uploads/chat/audio/{filename}'
+
         chat_message = ChatMessage(
             sender_id=current_user.id,
             recipient_id=recipient_id,
             message=message,
             image_url=image_url,
+            audio_url=audio_url,
             is_read=False,
             is_delivered=False,
             reply_to_id=reply_to_id,
@@ -1134,6 +1193,7 @@ def send_chat_message():
             'success': True,
             'message': message,
             'image_url': image_url,
+            'audio_url': audio_url,  # <-- ADDED
             'timestamp': chat_message.timestamp.timestamp(),
             'message_id': chat_message.id,
             'reply_to_id': reply_to_id
@@ -1164,6 +1224,7 @@ def get_chat_messages(other_user_id):
             'sender_id': m.sender_id,
             'message': m.message,
             'image_url': m.image_url,
+            'audio_url': m.audio_url,
             'timestamp': m.timestamp.timestamp(),
             'is_mine': m.sender_id == current_user.id,
             'status': 'seen' if m.is_read else ('delivered' if m.is_delivered else 'sent'),
@@ -2442,7 +2503,6 @@ def react_to_message(message_id):
         if not reaction or reaction not in valid_reactions:
             return jsonify({'success': False, 'error': 'Invalid reaction'}), 400
 
-        # Get the message
         message = db.session.get(ChatMessage, message_id)
         if not message:
             return jsonify({'success': False, 'error': 'Message not found'}), 404
@@ -2450,14 +2510,12 @@ def react_to_message(message_id):
             return jsonify({'success': False, 'error': 'Unauthorized'}), 403
 
         result = message.add_reaction(current_user.id, reaction)
-
         reaction_summary = message.reaction_summary
 
         if result['action'] in ['added', 'updated'] and message.sender_id != current_user.id:
             from app.notification_helper import create_notification
             create_notification(
                 user_id=message.sender_id,
-                actor_id=current_user.id,
                 type='message_reaction',
                 message=f"{current_user.username} reacted {reaction} to your message",
                 link=f"/chat/{message.sender_id if message.sender_id != current_user.id else message.recipient_id}"

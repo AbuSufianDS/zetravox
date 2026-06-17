@@ -641,6 +641,7 @@ class ChatMessage(db.Model):
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     message = db.Column(db.String(1000))
     image_url = db.Column(db.String(500))
+    audio_url = db.Column(db.String(256), nullable=True)
     is_read = db.Column(db.Boolean, default=False)
     is_delivered = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

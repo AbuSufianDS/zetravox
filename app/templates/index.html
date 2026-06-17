@@ -842,6 +842,7 @@
                         </div>
                     </div>
 
+                    <!-- UPDATED: File input with id="mediaFileInput" -->
                     <input type="file" name="media_files" id="mediaFileInput" class="file-input-hidden" accept="image/*,video/*" multiple>
                 </div>
 
@@ -1160,71 +1161,33 @@
 </style>
 
 <script>
-let selectedMediaFiles = [];
-
+// UPDATED: Simple file handling with URL.createObjectURL
 function triggerFileUpload() {
     document.getElementById('mediaFileInput').click();
 }
 
 document.getElementById('mediaFileInput').addEventListener('change', function(e) {
     const files = Array.from(e.target.files);
-    files.forEach(file => addMediaFile(file));
-    this.value = '';
+    if (files.length > 0) {
+        const previewContainer = document.getElementById('mediaPreviewModern');
+        const grid = document.getElementById('mediaGridModern');
+        previewContainer.style.display = 'block';
+        grid.innerHTML = files.map((file, index) => `
+            <div class="media-item-modern">
+                ${file.type.startsWith('image') ?
+                    `<img src="${URL.createObjectURL(file)}">` :
+                    `<video src="${URL.createObjectURL(file)}"></video>`
+                }
+                <div style="position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,0.6);color:white;padding:2px 6px;border-radius:12px;font-size:10px;">${index + 1}</div>
+            </div>
+        `).join('');
+    }
 });
 
-function addMediaFile(file) {
-    if (selectedMediaFiles.length >= 10) {
-        alert('Maximum 10 files allowed');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        selectedMediaFiles.push({
-            file: file,
-            preview: e.target.result,
-            type: file.type.startsWith('image') ? 'image' : 'video',
-            id: Date.now() + Math.random()
-        });
-        updateMediaPreview();
-    };
-    reader.readAsDataURL(file);
-}
-
-function updateMediaPreview() {
-    const previewContainer = document.getElementById('mediaPreviewModern');
-    const grid = document.getElementById('mediaGridModern');
-
-    if (selectedMediaFiles.length === 0) {
-        previewContainer.style.display = 'none';
-        return;
-    }
-
-    previewContainer.style.display = 'block';
-    grid.innerHTML = selectedMediaFiles.map((media, index) => `
-        <div class="media-item-modern" data-id="${media.id}">
-            ${media.type === 'image' ?
-                `<img src="${media.preview}">` :
-                `<video src="${media.preview}"></video>`
-            }
-            <button type="button" class="media-remove-btn" onclick="removeMediaFile('${media.id}')">
-                <i class="fas fa-times"></i>
-            </button>
-            <div style="position: absolute; bottom: 5px; left: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;">${index + 1}</div>
-        </div>
-    `).join('');
-}
-
-function removeMediaFile(mediaId) {
-    selectedMediaFiles = selectedMediaFiles.filter(m => m.id != mediaId);
-    updateMediaPreview();
-}
-
 function clearMediaPreview() {
-    if (confirm('Remove all media?')) {
-        selectedMediaFiles = [];
-        updateMediaPreview();
-    }
+    document.getElementById('mediaFileInput').value = '';
+    document.getElementById('mediaPreviewModern').style.display = 'none';
+    document.getElementById('mediaGridModern').innerHTML = '';
 }
 
 function insertRandomEmoji() {

@@ -672,9 +672,15 @@
                                 <img src="{{ message.image_url }}" class="message-image" onclick="showFullImage('{{ message.image_url }}')" alt="Message image">
                                 {% endif %}
 
+                                {% if message.audio_url %}
+                                <audio controls style="max-width: 200px; border-radius: 20px; margin-top: 8px;">
+                                    <source src="{{ message.audio_url }}" type="audio/webm">
+                                </audio>
+                                {% endif %}
+
                                 <p class="message-text">{{ message.message }}</p>
 
-                                <!-- Reaction Badges - Fixed without merge filter -->
+                                <!-- Reaction Badges -->
                                 {% if message.reaction_list.count() > 0 %}
                                 <div class="reaction-badges">
                                     {% set reaction_counts = {} %}
@@ -730,6 +736,9 @@
                         </button>
                         <button class="toolbar-btn" onclick="document.getElementById('imageFile').click()" title="Send photo">
                             <i class="fas fa-image"></i>
+                        </button>
+                        <button class="toolbar-btn" id="recordBtn" onclick="toggleRecording()" title="Voice message">
+                            <i class="fas fa-microphone"></i>
                         </button>
                     </div>
 
@@ -805,6 +814,9 @@ let lastMsgTime = {{ messages[-1].timestamp.timestamp() if messages else 0 }};
 let selectedImageFile = null;
 let replyToData = null;
 let msgInterval = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
 
 // Utility Functions
 function showFullImage(url) {
@@ -831,68 +843,136 @@ function formatMsgTime(timestamp) {
 
 function showNotification(message, type = 'info') {
     if (type === 'error') {
-        alert('Error: ' + message);
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 }
 
-// Reaction Functions
-function reactToMsg(msgId, reaction) {
-    fetch(`/react-to-message/${msgId}`, {
+// ==================== RECORDING FUNCTIONS ====================
+async function toggleRecording() {
+    if (isRecording) {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        isRecording = false;
+        document.getElementById('recordBtn').innerHTML = '<i class="fas fa-microphone"></i>';
+        document.getElementById('recordBtn').style.color = '';
+    } else {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                if (audioBlob.size > 0) {
+                    sendAudioMessage(audioBlob);
+                }
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            document.getElementById('recordBtn').innerHTML = '<i class="fas fa-stop" style="color: red;"></i>';
+            document.getElementById('recordBtn').style.color = 'red';
+
+            setTimeout(() => {
+                if (isRecording) {
+                    toggleRecording();
+                }
+            }, 60000);
+
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            alert('Could not access microphone. Please allow microphone access.');
+        }
+    }
+}
+
+function sendAudioMessage(audioBlob) {
+    const formData = new FormData();
+    formData.append('recipient_id', recipientId);
+    formData.append('message', '');
+    formData.append('audio', audioBlob, 'voice-message.webm');
+    if (replyToData) {
+        formData.append('reply_to_id', replyToData.id);
+    }
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+
+    fetch('/send_chat_message', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
         },
-        body: JSON.stringify({ reaction: reaction })
+        body: formData
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            const msgDiv = document.querySelector(`.message[data-message-id="${msgId}"]`);
-            if (msgDiv) {
-                updateReactionBadges(msgDiv, data);
-            }
+            location.reload();
         } else {
-            console.error('Reaction error:', data.error);
-            showNotification('Failed to add reaction', 'error');
+            alert('Failed to send voice message');
+        }
+    })
+    .catch(error => {
+        console.error('Send audio error:', error);
+        alert('Error sending voice message');
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
+    });
+}
+
+// ==================== REACTION FUNCTION ====================
+function reactToMsg(msgId, reaction) {
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                     document.getElementById('csrfToken')?.value;
+
+    if (!csrfToken) {
+        showNotification('Please refresh the page and try again.', 'error');
+        return;
+    }
+
+    fetch(`/react-to-message/${msgId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ reaction: reaction })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showNotification(data.error || 'Failed to add reaction', 'error');
         }
     })
     .catch(error => {
         console.error('Fetch error:', error);
-        showNotification('Network error', 'error');
+        showNotification('Network error. Please try again.', 'error');
     });
-}
-
-function updateReactionBadges(msgDiv, data) {
-    let badgesDiv = msgDiv.querySelector('.reaction-badges');
-
-    if (data.action === 'removed') {
-        if (badgesDiv && Object.keys(data.reaction_summary).length === 0) {
-            badgesDiv.remove();
-        } else if (badgesDiv) {
-            rebuildReactionBadges(badgesDiv, data.reaction_summary, msgDiv.dataset.messageId);
-        }
-    } else {
-        if (!badgesDiv) {
-            badgesDiv = document.createElement('div');
-            badgesDiv.className = 'reaction-badges';
-            msgDiv.querySelector('.message-bubble').appendChild(badgesDiv);
-        }
-        rebuildReactionBadges(badgesDiv, data.reaction_summary, msgDiv.dataset.messageId);
-    }
-}
-
-function rebuildReactionBadges(container, reactions, msgId) {
-    container.innerHTML = '';
-    for (const [reactionChar, count] of Object.entries(reactions)) {
-        const badge = document.createElement('span');
-        badge.className = 'reaction-badge';
-        badge.innerHTML = `${reactionChar} ${count}`;
-        badge.setAttribute('data-reaction', reactionChar);
-        badge.setAttribute('data-msg-id', msgId);
-        badge.onclick = () => reactToMsg(msgId, reactionChar);
-        container.appendChild(badge);
-    }
 }
 
 // Reply Function
@@ -985,7 +1065,7 @@ function sendMsg() {
 }
 
 // Add Message to Chat
-function addMessageToChat(msg, isMine, msgTime, msgId, imgUrl, replyId) {
+function addMessageToChat(msg, isMine, msgTime, msgId, imgUrl, audioUrl, replyId) {
     const container = document.getElementById('messagesArea');
     if (container.querySelector('.empty-chat')) {
         container.innerHTML = '';
@@ -1023,6 +1103,12 @@ function addMessageToChat(msg, isMine, msgTime, msgId, imgUrl, replyId) {
         content += `<img src="${imgUrl}" class="message-image" onclick="showFullImage('${imgUrl}')" alt="Message image">`;
     }
 
+    if (audioUrl) {
+        content += `<audio controls style="max-width: 200px; border-radius: 20px; margin-top: 8px;">
+                        <source src="${audioUrl}" type="audio/webm">
+                    </audio>`;
+    }
+
     content += `<p class="message-text">${escapeHtml(msg)}</p>
                 <div class="message-time">${formatMsgTime(msgTime)}`;
 
@@ -1035,7 +1121,6 @@ function addMessageToChat(msg, isMine, msgTime, msgId, imgUrl, replyId) {
     container.appendChild(msgDiv);
     scrollBottom();
 
-    // Attach event listeners to new buttons
     attachButtonListeners(msgDiv);
 }
 
@@ -1061,7 +1146,7 @@ function fetchNewMsgs() {
             if (msgs && msgs.length > 0) {
                 for (const m of msgs) {
                     if (m.timestamp > lastMsgTime) {
-                        addMessageToChat(m.message, m.is_mine, m.timestamp, m.id, m.image_url, m.reply_to_id);
+                        addMessageToChat(m.message, m.is_mine, m.timestamp, m.id, m.image_url, m.audio_url, m.reply_to_id);
                         lastMsgTime = m.timestamp;
                     }
                 }
@@ -1210,7 +1295,7 @@ document.querySelectorAll('.reaction-badge').forEach(badge => {
 
 // Initialize
 if (msgInterval) clearInterval(msgInterval);
-msgInterval = setInterval(fetchNewMsgs, 3000);
+msgInterval = setInterval(fetchNewMsgs, 5000);
 scrollBottom();
 msgInput.focus();
 markAsDelivered();

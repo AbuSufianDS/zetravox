@@ -14,14 +14,17 @@ from flask_wtf.file import MultipleFileField
 class EditProfileForm(FlaskForm):
     username = StringField(_l('Username'), validators=[DataRequired()])
     about_me = TextAreaField(_l('About me'), validators=[Length(min=0, max=140)])
+
     profile_pic = FileField(_l('Profile Picture'), validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], _('Images only!'))
     ])
     cover_pic = FileField(_l('Cover Photo'), validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'gif'], _('Images only!'))
     ])
+
     is_private = SelectField(_l('Account Privacy'), choices=[
-        ('False', 'Public'), ('True', 'Private')
+        ('False', 'Public'),
+        ('True', 'Private')
     ], coerce=lambda x: x == 'True')
 
     relationship_status = SelectField(_l('Relationship Status'), choices=[
@@ -68,7 +71,6 @@ class EditProfileForm(FlaskForm):
             user = db.session.scalar(sa.select(User).where(User.username == username.data))
             if user is not None:
                 raise ValidationError(_('Please use a different username.'))
-
 
 class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')

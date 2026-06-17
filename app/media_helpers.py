@@ -4,7 +4,7 @@ from PIL import Image
 from flask import current_app
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm', 'mp3', 'wav', 'ogg', 'm4a', 'webm'}
 MAX_FILE_SIZE = 50 * 1024 * 1024
 MAX_FILES = 10
 
@@ -48,24 +48,21 @@ def save_media(file, folder='posts'):
 
 def save_multiple_media(files, folder='posts'):
     saved_files = []
-
     if not files:
         return saved_files
-
     if not isinstance(files, list):
         files = [files]
-
+    files = [f for f in files if f and f.filename]
+    if not files:
+        return saved_files
     upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', folder)
     os.makedirs(upload_dir, exist_ok=True)
-
     for file in files:
         if file and file.filename and allowed_file(file.filename):
             ext = file.filename.rsplit('.', 1)[1].lower()
             filename = str(uuid.uuid4()) + '.' + ext
             filepath = os.path.join(upload_dir, filename)
-
             media_type = 'image' if ext in ['png', 'jpg', 'jpeg', 'gif'] else 'video'
-
             try:
                 if media_type == 'image':
                     img = Image.open(file)
@@ -75,7 +72,6 @@ def save_multiple_media(files, folder='posts'):
                     img.save(filepath, optimize=True, quality=85)
                 else:
                     file.save(filepath)
-
                 saved_files.append({
                     'filename': filename,
                     'media_type': media_type,
@@ -84,8 +80,8 @@ def save_multiple_media(files, folder='posts'):
             except Exception as e:
                 current_app.logger.error(f"Error saving media {file.filename}: {e}")
                 continue
-
     return saved_files
+
 
 def delete_media(filename, folder='posts'):
     if filename and filename not in ['default.jpg', 'default_cover.jpg', 'None', '']:

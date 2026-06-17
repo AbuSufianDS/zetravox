@@ -351,12 +351,12 @@ select.form-control-premium {
                     <div class="avatar-upload-section">
                         <div class="avatar-preview">
                             {% if current_user.profile_pic and current_user.profile_pic != 'default.jpg' and current_user.profile_pic != 'None' %}
-                                <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
-                                     class="avatar-preview-img" id="avatarPreviewImg">
-                            {% else %}
-                                <img src="{{ current_user.avatar(140) }}"
-                                     class="avatar-preview-img" id="avatarPreviewImg">
-                            {% endif %}
+    <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
+         class="avatar-preview-img" id="avatarPreviewImg">
+{% else %}
+    <img src="{{ current_user.avatar(140) }}"
+         class="avatar-preview-img" id="avatarPreviewImg">
+{% endif %}
                             <label for="profile_pic" class="avatar-upload-btn">
                                 <i class="fas fa-camera"></i>
                             </label>
@@ -369,12 +369,12 @@ select.form-control-premium {
                     </div>
 
                     <div class="cover-preview">
-                        {% if current_user.cover_pic and current_user.cover_pic != 'default_cover.jpg' %}
-                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.cover_pic) }}"
-                                 class="cover-preview-img" id="coverPreviewImg">
-                        {% else %}
-                            <div class="cover-preview-img" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
-                        {% endif %}
+                        {% if current_user.cover_pic and current_user.cover_pic != 'default_cover.jpg' and current_user.cover_pic != 'None' %}
+    <img src="{{ url_for('static', filename='uploads/covers/' + current_user.cover_pic) }}"
+         class="cover-preview-img" id="coverPreviewImg">
+{% else %}
+    <div class="cover-preview-img" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+{% endif %}
                         <label for="cover_pic" class="cover-upload-btn">
                             <i class="fas fa-camera me-2"></i> Change Cover
                         </label>
