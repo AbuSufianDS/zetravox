@@ -1654,20 +1654,11 @@ def flagged_posts():
                            next_url=next_url, prev_url=prev_url)
 
 
-@bp.route('/admin/analytics')
+@bp.route('/analytics')
 @login_required
 @admin_required
 def analytics():
-    total_users = db.session.query(User).count()
-    active_today = db.session.query(User).filter(
-        User.last_seen > datetime.now(timezone.utc) - timedelta(days=1)
-    ).count()
-    total_posts = db.session.query(Post).count()
-    spam_posts = db.session.query(Post).filter(Post.is_spam == True).count()
-
-    return render_template('admin/analytics.html', title='Analytics',
-                           total_users=total_users, active_today=active_today,
-                           total_posts=total_posts, spam_posts=spam_posts)
+    return render_template('admin/report_dashboard.html', title='Analytics')
 
 
 @bp.route('/saved')
