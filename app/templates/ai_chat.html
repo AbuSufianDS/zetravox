@@ -84,63 +84,6 @@
     margin: 6px 0 0;
 }
 
-/* ─── Usage Banner ─── */
-.ai-usage-banner {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-glass);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin: 16px 28px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.ai-usage-banner .usage-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.ai-usage-banner .usage-label {
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-
-.ai-usage-banner .usage-count {
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--text-primary);
-}
-
-.ai-usage-banner .usage-total {
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-.ai-usage-banner .upgrade-btn {
-    padding: 6px 16px;
-    font-size: 12px;
-    background: linear-gradient(135deg, #FDCB6E, #E17055);
-    border: none;
-    border-radius: 40px;
-    color: #000;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.ai-usage-banner .upgrade-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
-}
-
 /* ─── Chat Messages ─── */
 .chat-messages-premium {
     height: 520px;
@@ -322,54 +265,6 @@
     transform: none;
 }
 
-/* ─── Chat Limit Banner ─── */
-.chat-limit-banner {
-    text-align: center;
-    padding: 40px 20px;
-    background: var(--bg-surface);
-    border-radius: 16px;
-    margin: 0 28px 20px;
-    border: 1px solid var(--border-glass);
-}
-
-.chat-limit-banner i {
-    font-size: 36px;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 12px;
-}
-
-.chat-limit-banner h5 {
-    color: var(--text-primary);
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-
-.chat-limit-banner p {
-    color: var(--text-secondary);
-    font-size: 13px;
-    margin-bottom: 16px;
-}
-
-.chat-limit-banner .upgrade-btn-large {
-    padding: 10px 32px;
-    background: linear-gradient(135deg, #FDCB6E, #E17055);
-    border: none;
-    border-radius: 40px;
-    color: #000;
-    font-weight: 700;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s;
-}
-
-.chat-limit-banner .upgrade-btn-large:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(253, 203, 110, 0.4);
-}
-
 /* ─── Typing Indicator ─── */
 .typing-indicator {
     display: flex;
@@ -478,20 +373,10 @@
     .suggestion-buttons { gap: 8px; }
     .suggestion-btn { padding: 7px 14px; font-size: 12px; }
     .empty-chat-premium { padding: 40px 20px; }
-    .ai-usage-banner { margin: 12px 16px 0; padding: 10px 14px; }
     .chat-input-premium { padding: 16px 16px 20px; }
-    .chat-limit-banner { margin: 0 16px 16px; padding: 30px 16px; }
 }
 
 @media (max-width: 480px) {
-    .ai-usage-banner {
-        flex-direction: column;
-        text-align: center;
-    }
-    .ai-usage-banner .upgrade-btn {
-        width: 100%;
-        justify-content: center;
-    }
     .ai-info-premium h2 {
         font-size: 18px;
     }
@@ -521,23 +406,6 @@
             </div>
         </div>
 
-        <!-- ─── VIP Usage Banner (for non-VIP users) ─── -->
-        {% if not current_user.is_vip %}
-        <div class="ai-usage-banner">
-            <div class="usage-info">
-                <span class="usage-label">
-                    <i class="fas fa-message" style="color: #667eea;"></i>
-                    Free messages remaining:
-                </span>
-                <span class="usage-count">{{ current_user.ai_chat_remaining }}</span>
-                <span class="usage-total">/ 20</span>
-            </div>
-            <a href="{{ url_for('main.vip') }}" class="upgrade-btn">
-                <i class="fas fa-crown"></i> Upgrade to VIP
-            </a>
-        </div>
-        {% endif %}
-
         <!-- ─── Chat Messages ─── -->
         <div class="chat-messages-premium" id="chatMessages">
             <div class="empty-chat-premium">
@@ -556,7 +424,6 @@
         </div>
 
         <!-- ─── Chat Input ─── -->
-        {% if current_user.can_use_ai_chat or current_user.is_vip %}
         <div class="chat-input-premium">
             <div class="chat-input-wrapper">
                 <textarea id="chatInput" placeholder="Ask me anything..." rows="1"></textarea>
@@ -565,24 +432,12 @@
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
-        {% else %}
-        <div class="chat-limit-banner">
-            <i class="fas fa-lock"></i>
-            <h5>You've used all 20 free messages</h5>
-            <p>Upgrade to VIP for unlimited AI chat access</p>
-            <a href="{{ url_for('main.vip') }}" class="upgrade-btn-large">
-                <i class="fas fa-crown"></i> Upgrade Now
-            </a>
-        </div>
-        {% endif %}
 
     </div>
 </div>
 
 <script>
 let isWaitingForResponse = false;
-
-{% if current_user.can_use_ai_chat or current_user.is_vip %}
 
 async function sendMessage() {
     const input = document.getElementById('chatInput');
@@ -612,20 +467,6 @@ async function sendMessage() {
 
         if (data.success) {
             addMessage('ai', data.reply);
-
-            // Update remaining messages count if not VIP
-            {% if not current_user.is_vip %}
-            if (data.remaining !== undefined) {
-                const countEl = document.querySelector('.usage-count');
-                if (countEl) {
-                    countEl.textContent = data.remaining;
-                }
-                // Check if limit reached
-                if (data.remaining <= 0) {
-                    location.reload();
-                }
-            }
-            {% endif %}
         } else {
             addMessage('ai', data.error || 'I encountered an issue. Please try again in a moment.');
         }
@@ -636,23 +477,6 @@ async function sendMessage() {
         isWaitingForResponse = false;
     }
 }
-
-{% else %}
-
-// VIP-only mode - disable input
-document.addEventListener('DOMContentLoaded', function() {
-    const input = document.querySelector('.chat-input-premium textarea');
-    const sendBtn = document.querySelector('.send-btn-premium');
-    if (input) input.disabled = true;
-    if (sendBtn) sendBtn.disabled = true;
-});
-
-async function sendMessage() {
-    // This should not be called when not VIP
-    alert('Please upgrade to VIP to use AI chat.');
-}
-
-{% endif %}
 
 // ─── Helper Functions ──────────────────────────────────────────
 function addMessage(role, content) {
@@ -714,16 +538,11 @@ function hideTypingIndicator() {
 }
 
 function sendSuggestion(suggestion) {
-    {% if current_user.can_use_ai_chat or current_user.is_vip %}
     document.getElementById('chatInput').value = suggestion;
     sendMessage();
-    {% else %}
-    alert('Please upgrade to VIP to use AI chat.');
-    {% endif %}
 }
 
 // ─── Event Listeners ──────────────────────────────────────────
-{% if current_user.can_use_ai_chat or current_user.is_vip %}
 const textarea = document.getElementById('chatInput');
 if (textarea) {
     textarea.addEventListener('input', function() {
@@ -745,7 +564,6 @@ document.addEventListener('keydown', function(e) {
         if (textarea) textarea.focus();
     }
 });
-{% endif %}
 </script>
 
 {% endblock %}
