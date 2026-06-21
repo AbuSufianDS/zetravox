@@ -853,7 +853,7 @@ document.getElementById('glSearchInput')?.addEventListener('keypress', function(
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 🎯 KEYBOARD SHORTCUTS - Fixed Professional Version
+// 🎯 KEYBOARD SHORTCUTS - Fully Fixed Professional Version
 // ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
     // ── Ctrl+K / ⌘K: Focus Search ──
@@ -864,13 +864,17 @@ document.addEventListener('keydown', function(e) {
             searchInput.focus();
             searchInput.select();
         }
+        return;
     }
 
-    // ── Ctrl+Shift+T / ⌘+Shift+T: Open AI Chat ──
-    // (Safe - no browser conflict like Ctrl+T)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 't') {
+    // ── Alt+T: Open AI Chat ──
+    // ✅ SAFE - NO browser default conflict!
+    // ✅ Works on Windows, Mac, Linux
+    // ✅ Not used by any major browser
+    if (e.altKey && e.key === 't') {
         e.preventDefault();
         window.location.href = '/ai-chat';
+        return;
     }
 
     // ── Escape: Close dropdowns & blur search ──
@@ -882,6 +886,7 @@ document.addEventListener('keydown', function(e) {
             d.style.opacity = '0';
             d.style.visibility = 'hidden';
         });
+        return;
     }
 });
 
