@@ -305,15 +305,11 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
 
     @property
     def can_use_ai_chat(self):
-        if self.is_vip:
-            return True
-        return self.ai_chat_used < 20
+        return True
 
     @property
     def ai_chat_remaining(self):
-        if self.is_vip:
-            return '∞'
-        return max(0, 20 - self.ai_chat_used)
+        return '∞'
 
     def increment_ai_chat_usage(self):
         self.ai_chat_used += 1
