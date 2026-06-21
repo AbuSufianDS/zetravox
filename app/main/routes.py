@@ -166,15 +166,20 @@ def admin_required(f):
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
-
 @bp.before_app_request
 def before_request():
     if current_user.is_authenticated:
-        current_user.last_seen = datetime.now(timezone.utc)
-        current_user.last_active = datetime.now(timezone.utc)
+        try:
+            # Update last_seen without auto-commit
+            current_user.last_seen = datetime.now(timezone.utc)
+            current_user.last_active = datetime.now(timezone.utc)
+            # Use db.session.commit() only when needed
+            # This prevents connection corruption
+        except Exception as e:
+            current_app.logger.error(f"Error updating last_seen: {e}")
+            db.session.rollback()
         g.search_form = SearchForm()
     g.locale = str(get_locale())
-
 
 from datetime import datetime, timezone
 
