@@ -858,10 +858,10 @@ document.addEventListener('keydown', function(e) {
     }
 
     // Ctrl+T for AI Chat
-    if ((e.ctrlKey || e.metaKey) && e.key === 't') {
-        e.preventDefault();
-        window.location.href = '/ai-chat';
-    }
+   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+    e.preventDefault();
+    window.location.href = '/ai-chat';
+}
 
     // Escape to close
     if (e.key === 'Escape') {
