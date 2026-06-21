@@ -3162,13 +3162,6 @@ def api_engagement():
 @bp.route('/api/ai/chat', methods=['POST'])
 @login_required
 def ai_chat_api():
-    if not current_user.can_use_ai_chat and not current_user.is_vip:
-        return jsonify({
-            'error': 'You have used all 20 free AI messages. Upgrade to VIP for unlimited access.',
-            'vip_required': True,
-            'remaining': 0
-        }), 403
-
     try:
         data = request.get_json()
         message = data.get('message', '')
