@@ -1547,13 +1547,11 @@ def download_engagement_report():
     return send_file(filepath, as_attachment=True, download_name=filename, mimetype='text/csv')
 
 
-@bp.route('/admin/report-dashboard')
+@bp.route('/report-dashboard')
 @login_required
 @admin_required
 def report_dashboard():
-    reports = report_service.get_all_reports()
-    return render_template('admin/report_dashboard.html', title='Reports', reports=reports)
-
+    return render_template('admin/report_dashboard.html', title='Analytics Dashboard')
 
 @bp.route('/admin/moderation')
 @login_required
