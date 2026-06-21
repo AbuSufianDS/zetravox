@@ -1220,29 +1220,39 @@
             </a>
 
             {% if current_user.is_admin %}
-            <div class="ix-menu-divider"></div>
-            <div class="ix-menu-section">{{ _('Admin Panel') }}</div>
+<div class="ix-menu-divider"></div>
+<div class="ix-menu-section">{{ _('Admin Panel') }}</div>
 
-            <a href="{{ url_for('admin.moderation') }}" class="ix-menu-item">
-                <i class="fas fa-flag"></i>
-                {{ _('Moderation') }}
-            </a>
+<a href="{{ url_for('admin.moderation') }}" class="ix-menu-item">
+    <i class="fas fa-flag"></i>
+    {{ _('Moderation') }}
+</a>
 
-            <a href="{{ url_for('admin.feedback_dashboard') }}" class="ix-menu-item">
-                <i class="fas fa-comment-dots"></i>
-                {{ _('Feedback') }}
-            </a>
+<a href="{{ url_for('admin.feedback_dashboard') }}" class="ix-menu-item">
+    <i class="fas fa-comment-dots"></i>
+    {{ _('Feedback') }}
+</a>
 
-            <a href="{{ url_for('admin.help_dashboard') }}" class="ix-menu-item">
-                <i class="fas fa-life-ring"></i>
-                {{ _('Help Requests') }}
-            </a>
+<a href="{{ url_for('admin.help_dashboard') }}" class="ix-menu-item">
+    <i class="fas fa-life-ring"></i>
+    {{ _('Help Requests') }}
+</a>
 
-            <a href="{{ url_for('admin.vip_verification') }}" class="ix-menu-item">
-                <i class="fas fa-crown"></i>
-                {{ _('VIP Verification') }}
-            </a>
-            {% endif %}
+<a href="{{ url_for('admin.vip_verification') }}" class="ix-menu-item">
+    <i class="fas fa-crown"></i>
+    {{ _('VIP Verification') }}
+</a>
+
+<a href="{{ url_for('admin.analytics') }}" class="ix-menu-item">
+    <i class="fas fa-chart-line"></i>
+    {{ _('Analytics') }}
+</a>
+
+<a href="{{ url_for('admin.report_dashboard') }}" class="ix-menu-item">
+    <i class="fas fa-chart-bar"></i>
+    {{ _('Reports') }}
+</a>
+{% endif %}
         </div>
     </aside>
 
