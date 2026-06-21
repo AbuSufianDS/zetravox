@@ -818,6 +818,7 @@ function updateThemeIcon() {
 <script>
 updateThemeIcon();
 
+// ─── Language Menu ──────────────────────────────────────────
 function toggleLangMenu() {
     const menu = document.getElementById('langMenu');
     if (menu) {
@@ -828,6 +829,7 @@ function toggleLangMenu() {
     }
 }
 
+// ─── Close dropdowns on outside click ──────────────────────
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.gl-notif-trigger') && !e.target.closest('.gl-notif-dropdown')) {
         document.querySelectorAll('.gl-notif-dropdown').forEach(d => {
@@ -843,29 +845,39 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// ─── Search ──────────────────────────────────────────────────
 document.getElementById('glSearchInput')?.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         window.location.href = `/search?q=${encodeURIComponent(this.value)}`;
     }
 });
 
-// ─── KEYBOARD SHORTCUTS ──────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// 🎯 KEYBOARD SHORTCUTS - Fixed Professional Version
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
-    // Ctrl+K for search
+    // ── Ctrl+K / ⌘K: Focus Search ──
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        document.getElementById('glSearchInput')?.focus();
+        const searchInput = document.getElementById('glSearchInput');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
     }
 
-    // Ctrl+T for AI Chat
-   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
-    e.preventDefault();
-    window.location.href = '/ai-chat';
-}
+    // ── Ctrl+Shift+T / ⌘+Shift+T: Open AI Chat ──
+    // (Safe - no browser conflict like Ctrl+T)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 't') {
+        e.preventDefault();
+        window.location.href = '/ai-chat';
+    }
 
-    // Escape to close
+    // ── Escape: Close dropdowns & blur search ──
     if (e.key === 'Escape') {
-        document.getElementById('glSearchInput')?.blur();
+        const searchInput = document.getElementById('glSearchInput');
+        if (searchInput) searchInput.blur();
+
         document.querySelectorAll('.gl-dropdown, .gl-notif-dropdown, .gl-lang-menu, .gl-admin-dropdown').forEach(d => {
             d.style.opacity = '0';
             d.style.visibility = 'hidden';
@@ -873,6 +885,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// ─── Notifications ──────────────────────────────────────────
 let notifInterval = null;
 
 function updateUnreadCount() {
@@ -1010,6 +1023,7 @@ if (notifInterval) clearInterval(notifInterval);
 notifInterval = setInterval(checkNotifs, 30000);
 checkNotifs();
 
+// ─── Auto-close alerts ──────────────────────────────────────
 setTimeout(function() {
     document.querySelectorAll('.gl-alert').forEach(alert => {
         const bsAlert = bootstrap.Alert.getInstance(alert);
@@ -1017,6 +1031,7 @@ setTimeout(function() {
     });
 }, 8000);
 
+// ─── Global Functions ──────────────────────────────────────
 function applaudPost(postId, reaction) {
     fetch(`/react_post/${postId}/${reaction}`)
         .then(r => r.json())
