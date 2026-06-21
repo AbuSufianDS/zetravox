@@ -488,14 +488,6 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             return self.vip_membership.vip_level
         return 'free'
 
-    @property
-    def can_use_ai_chat(self):
-        if self.is_vip:
-            return True
-        from datetime import datetime
-        today = datetime.utcnow().date()
-        return False
-
     @staticmethod
     def check_token(token):
         user = db.session.scalar(sa.select(User).where(User.token == token))

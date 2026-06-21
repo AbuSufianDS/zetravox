@@ -1045,7 +1045,10 @@ def react_post(post_id, reaction):
         return jsonify({'error': 'Post not found'}), 404
 
     existing = db.session.scalar(
-        sa.select(PostReaction).where(PostReaction.user_id == current_user.id, PostReaction.post_id == post_id)
+        sa.select(PostReaction).where(
+            PostReaction.user_id == current_user.id,
+            PostReaction.post_id == post_id
+        )
     )
 
     reaction_set = False
@@ -1054,27 +1057,53 @@ def react_post(post_id, reaction):
         if existing.reaction == reaction:
             db.session.delete(existing)
             reaction_set = False
+            if reaction == 'like':
+                like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+                if like:
+                    db.session.delete(like)
+                    print(f" Removed like: user {current_user.id} -> post {post_id}")
         else:
+            old_reaction = existing.reaction
             existing.reaction = reaction
             reaction_set = True
+
+            if reaction in ['like', 'love', 'haha', 'wow', 'sad', 'angry']:
+                like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+                if not like:
+                    new_like = Like(user_id=current_user.id, post_id=post_id)
+                    db.session.add(new_like)
+                    print(f" Added like: user {current_user.id} -> post {post_id}")
+            elif old_reaction == 'like':
+                like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+                if like:
+                    db.session.delete(like)
+                    print(f" Removed like: user {current_user.id} -> post {post_id}")
     else:
-        post_reaction = PostReaction(user_id=current_user.id, post_id=post_id, reaction=reaction)
+        post_reaction = PostReaction(
+            user_id=current_user.id,
+            post_id=post_id,
+            reaction=reaction
+        )
         db.session.add(post_reaction)
         reaction_set = True
+
         if reaction == 'like':
-            existing_like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
-            if not existing_like:
+            like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+            if not like:
                 new_like = Like(user_id=current_user.id, post_id=post_id)
                 db.session.add(new_like)
+                print(f" Added like: user {current_user.id} -> post {post_id}")
 
     db.session.commit()
 
     reaction_counts = post.get_reaction_counts()
+    total_reactions = sum(reaction_counts.values()) if reaction_counts else 0
+
     return jsonify({
         'reaction_set': reaction_set,
         'reaction': reaction if reaction_set else None,
         'counts': reaction_counts,
-        'total': sum(reaction_counts.values())
+        'total': total_reactions
     })
 
 @bp.route('/pin_post/<int:post_id>')
@@ -3233,15 +3262,6 @@ def add_inner_circle(user_id):
     if existing:
         flash('User is already in your inner circle.', 'info')
         return redirect(url_for('main.inner_circle'))
-
-    if not current_user.is_vip:
-        current_count = InnerCircleMembership.query.filter_by(
-            user_id=current_user.id,
-            is_active=True
-        ).count()
-        if current_count >= 5:
-            flash('You have reached the free limit of 5 Inner Circle members. Upgrade to VIP for unlimited members.', 'warning')
-            return redirect(url_for('main.vip'))
 
     membership = InnerCircleMembership(
         user_id=current_user.id,
