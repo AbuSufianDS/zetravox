@@ -1,0 +1,30 @@
+[33mc6efcb9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fixed delete post, image upload, edit profile, chat reactions, voice messages - ready for deployment
+[33m12fc9f5[m Make test file
+[33m02e0842[m make clear and perfect
+[33m76d6ddf[m make clear and perfect
+[33mdc57e9b[m Initial commit: Zetravox social media platform
+[33mca5c020[m readme.md
+[33m49fa524[m mit license
+[33m4961d02[m Add professional README documentation
+[33m3f5009f[m Add AGPL-3.0 license with copyright information
+[33m598f381[m Rebrand: Complete migration from ConnectHub to Zetravox
+[33m03f09eb[m Fix issue
+[33m6fd18fa[m Fix issue
+[33m4387b0a[m Fix issue
+[33m125add9[m Fix memory issues and port binding for Render
+[33m50f0062[m Just delate one unusual file
+[33m70fef5c[m Just delate one unusual file
+[33m7d021a6[m Completely disable spam detection to fix memory issue
+[33m6004de4[m Remove heavy ML packages for Render
+[33mc665496[m Remove hardcoded API key, use environment variable
+[33m2d82af7[m Find api key for forget pass
+[33m6cf51af[m Add Brevo email integration for password reset OTP
+[33mbdf06ea[m Fix OTP function name conflict
+[33m9d4b575[m Fix OTP to print to console instead of email
+[33me816880[m Fix database configuration
+[33mfe66b42[m Update render.yaml for proper deployment
+[33mbcde0bc[m Add psycopg2 for PostgreSQL support
+[33mb9c1f63[m Add password reset with OTP functionality
+[33m140d30b[m Fix notification system - add read column and improve notification handling
+[33md464db9[m ConnectHub v1.0 - Complete Social Media Platform
+[33maebd5c1[m Initial commit: TinyBook social media platform - Complete user authentication system - Posts with images/videos (up to 10 files) - Stories system with 24h expiry - Real-time chat messaging - Notification system with preferences - Friend system with requests - Block/unblock users - Private account option - Multiple feeds (For You, Discover, Trending, Following) - Hashtag system and trending - Admin dashboard with moderation - 2FA authentication - Security features (rate limiting, session management) - Dark/Light theme support - Fully responsive design

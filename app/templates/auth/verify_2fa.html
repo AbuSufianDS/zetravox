@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+/* ===== 2FA VERIFICATION PAGE ===== */
+.verify-2fa-page {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.verify-2fa-container {
+    max-width: 420px;
+    width: 100%;
+}
+
+/* ===== CARD ===== */
+.verify-2fa-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== HEADER ===== */
+.verify-2fa-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.verify-2fa-header .icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+    color: white;
+}
+
+.verify-2fa-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.verify-2fa-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ===== INFO TEXT ===== */
+.verify-2fa-info {
+    text-align: center;
+    padding: 16px;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    margin-bottom: 28px;
+}
+
+.verify-2fa-info i {
+    color: #667eea;
+    margin-right: 8px;
+}
+
+.verify-2fa-info span {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* ===== OTP INPUT ===== */
+.otp-input-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.otp-digit {
+    width: 48px;
+    height: 58px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.otp-digit:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.otp-digit-filled {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+/* ===== VERIFY BUTTON ===== */
+.btn-verify {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-verify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+}
+
+.btn-verify:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ===== BACKUP SECTION ===== */
+.backup-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.backup-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #667eea;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+}
+
+.backup-toggle:hover {
+    color: #764ba2;
+}
+
+.backup-toggle i {
+    font-size: 14px;
+}
+
+.backup-input-group {
+    margin-top: 16px;
+    display: none;
+}
+
+.backup-input-group.show {
+    display: block;
+}
+
+.backup-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.backup-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+}
+
+.backup-input:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.backup-submit {
+    padding: 12px 20px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.backup-submit:hover {
+    background: var(--hover-bg);
+    border-color: #667eea;
+}
+
+.backup-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* ===== BACK TO LOGIN ===== */
+.back-to-login {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.back-to-login:hover {
+    color: #667eea;
+}
+
+.back-to-login i {
+    margin-right: 6px;
+}
+
+/* ===== ERROR TEXT ===== */
+.error-text {
+    color: #ef4444;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] .verify-2fa-card {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .verify-2fa-info {
+    background: var(--hover-bg);
+}
+
+[data-theme="dark"] .otp-digit {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .backup-input {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .backup-submit {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .backup-submit:hover {
+    background: var(--bg-card);
+    border-color: #667eea;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .verify-2fa-card {
+        padding: 28px 20px;
+    }
+
+    .otp-digit {
+        width: 40px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .otp-input-group {
+        gap: 8px;
+    }
+
+    .backup-input-wrapper {
+        flex-direction: column;
+    }
+}
+</style>
+
+<div class="verify-2fa-page">
+    <div class="verify-2fa-container">
+        <div class="verify-2fa-card">
+
+            <!-- ===== HEADER ===== -->
+            <div class="verify-2fa-header">
+                <div class="icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2>Two-Factor Authentication</h2>
+                <p>Enter the 6-digit code from your authenticator app</p>
+            </div>
+
+            <!-- ===== INFO ===== -->
+            <div class="verify-2fa-info">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Open your authenticator app and enter the code</span>
+            </div>
+
+            <!-- ===== OTP FORM ===== -->
+            <form method="POST" id="verify2faForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+
+                <div class="otp-input-group" id="otpContainer">
+                    <input type="text" class="otp-digit" id="digit1" maxlength="1" inputmode="numeric" pattern="[0-9]" autofocus>
+                    <input type="text" class="otp-digit" id="digit2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-digit" id="digit3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-digit" id="digit4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-digit" id="digit5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-digit" id="digit6" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                </div>
+
+                <input type="hidden" name="otp_code" id="otpCode">
+
+                <button type="submit" class="btn-verify" id="verifyBtn">
+                    <i class="fas fa-check-circle me-2"></i>Verify & Sign In
+                </button>
+            </form>
+
+            <!-- ===== BACKUP CODE ===== -->
+            <div class="backup-section">
+                <button type="button" class="backup-toggle" onclick="toggleBackup()">
+                    <i class="fas fa-key"></i>
+                    Use a backup code instead
+                </button>
+
+                <div class="backup-input-group" id="backupGroup">
+                    <form method="POST" id="backupForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                        <div class="backup-input-wrapper">
+                            <input type="text" name="backup_code" class="backup-input"
+                                   placeholder="Enter backup code (e.g., 12345-67890)"
+                                   id="backupCodeInput">
+                            <button type="submit" class="backup-submit">
+                                <i class="fas fa-check"></i> Use
+                            </button>
+                        </div>
+                    </form>
+                    <div class="backup-note">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Backup codes are one-time use. You received them when setting up 2FA.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BACK TO LOGIN ===== -->
+            <a href="{{ url_for('auth.login') }}" class="back-to-login">
+                <i class="fas fa-arrow-left"></i> Back to Login
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== OTP INPUT =====
+const digits = document.querySelectorAll('.otp-digit');
+
+digits.forEach((input, index) => {
+    input.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+
+        if (this.value.length === 1 && index < digits.length - 1) {
+            digits[index + 1].focus();
+        }
+
+        updateOtpCode();
+
+        const allFilled = Array.from(digits).every(d => d.value.length === 1);
+        if (allFilled) {
+            document.getElementById('verifyBtn').click();
+        }
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+            digits[index - 1].focus();
+        }
+    });
+
+    input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        const numbers = paste.replace(/[^0-9]/g, '').slice(0, 6);
+
+        numbers.split('').forEach((num, i) => {
+            if (i < digits.length) {
+                digits[i].value = num;
+            }
+        });
+
+        updateOtpCode();
+
+        const lastFilled = numbers.length - 1;
+        if (lastFilled < digits.length - 1) {
+            digits[lastFilled + 1].focus();
+        } else {
+            digits[digits.length - 1].focus();
+        }
+
+        const allFilled = Array.from(digits).every(d => d.value.length === 1);
+        if (allFilled) {
+            document.getElementById('verifyBtn').click();
+        }
+    });
+});
+
+function updateOtpCode() {
+    let code = '';
+    digits.forEach(d => code += d.value);
+    document.getElementById('otpCode').value = code;
+}
+
+// ===== BACKUP CODE =====
+function toggleBackup() {
+    const group = document.getElementById('backupGroup');
+    group.classList.toggle('show');
+    if (group.classList.contains('show')) {
+        document.getElementById('backupCodeInput').focus();
+    }
+}
+
+// ===== FORM SUBMISSION =====
+document.getElementById('verify2faForm').addEventListener('submit', function(e) {
+    updateOtpCode();
+    const code = document.getElementById('otpCode').value;
+    if (code.length !== 6) {
+        e.preventDefault();
+        alert('Please enter all 6 digits');
+        return false;
+    }
+});
+
+document.getElementById('backupCodeInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('backupForm').submit();
+    }
+});
+</script>
+{% endblock %}

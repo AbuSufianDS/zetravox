@@ -265,39 +265,39 @@ input:checked + .slider:before {
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
                 <a href="{{ url_for('main.screen_protection') }}" class="settings-nav-item active">
                     <i class="fas fa-mobile-alt"></i>
-                    <span>Screen Protection</span>
+                    <span>{{ _('Screen Protection') }}</span>
                 </a>
             </div>
         </div>
@@ -307,42 +307,42 @@ input:checked + .slider:before {
                 <div class="screen-card-header">
                     <h5>
                         <i class="fas fa-mobile-alt" style="color: #667eea;"></i>
-                        Screen Protection
+                        {{ _('Screen Protection') }}
                     </h5>
                 </div>
                 <div class="screen-card-body">
                     <div class="alert-info-custom">
                         <i class="fas fa-shield-alt"></i>
-                        <div class="text">Screen protection helps keep your account secure when you're away from your device. Enable these features to add an extra layer of security.</div>
+                        <div class="text">{{ _('Screen protection helps keep your account secure when you\'re away from your device. Enable these features to add an extra layer of security.') }}</div>
                     </div>
 
                     <!-- Auto-lock Timer -->
                     <div class="setting-group">
                         <div class="setting-label">
                             <i class="fas fa-clock"></i>
-                            <span>Auto-lock Timer</span>
+                            <span>{{ _('Auto-lock Timer') }}</span>
                         </div>
                         <select class="form-select-custom" id="autoLockTimer">
-                            <option value="never">Never</option>
-                            <option value="1">After 1 minute</option>
-                            <option value="5">After 5 minutes</option>
-                            <option value="15">After 15 minutes</option>
-                            <option value="30">After 30 minutes</option>
-                            <option value="60">After 1 hour</option>
+                            <option value="never">{{ _('Never') }}</option>
+                            <option value="1">{{ _('After 1 minute') }}</option>
+                            <option value="5">{{ _('After 5 minutes') }}</option>
+                            <option value="15">{{ _('After 15 minutes') }}</option>
+                            <option value="30">{{ _('After 30 minutes') }}</option>
+                            <option value="60">{{ _('After 1 hour') }}</option>
                         </select>
-                        <div class="switch-desc mt-2">Automatically lock your session after a period of inactivity</div>
+                        <div class="switch-desc mt-2">{{ _('Automatically lock your session after a period of inactivity') }}</div>
                     </div>
 
                     <!-- PIN Protection -->
                     <div class="setting-group">
                         <div class="setting-label">
                             <i class="fas fa-key"></i>
-                            <span>PIN Protection</span>
+                            <span>{{ _('PIN Protection') }}</span>
                         </div>
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Require PIN to access Zetravox</div>
-                                <div class="switch-desc">Add a numeric PIN as an extra security layer</div>
+                                <div class="switch-label">{{ _('Require PIN to access Zetravox') }}</div>
+                                <div class="switch-desc">{{ _('Add a numeric PIN as an extra security layer') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="pinProtection" onchange="togglePinSettings(this.checked)">
@@ -351,16 +351,16 @@ input:checked + .slider:before {
                         </div>
                         <div id="pinSettings" style="display: none;" class="pin-settings">
                             <div class="pin-input-group">
-                                <label>Set PIN Code</label>
+                                <label>{{ _('Set PIN Code') }}</label>
                                 <input type="password" id="pinCode" class="pin-input" placeholder="••••" maxlength="6" pattern="[0-9]+">
-                                <div class="switch-desc mt-1">4-6 digit numeric code</div>
+                                <div class="switch-desc mt-1">{{ _('4-6 digit numeric code') }}</div>
                             </div>
                             <div class="pin-input-group">
-                                <label>Confirm PIN Code</label>
+                                <label>{{ _('Confirm PIN Code') }}</label>
                                 <input type="password" id="confirmPin" class="pin-input" placeholder="••••" maxlength="6" pattern="[0-9]+">
                             </div>
                             <button class="btn-primary-gradient" onclick="savePin()">
-                                <i class="fas fa-save me-2"></i>Save PIN
+                                <i class="fas fa-save me-2"></i>{{ _('Save PIN') }}
                             </button>
                         </div>
                     </div>
@@ -369,13 +369,13 @@ input:checked + .slider:before {
                     <div class="setting-group">
                         <div class="setting-label">
                             <i class="fas fa-fingerprint"></i>
-                            <span>Biometric Authentication</span>
-                            <span class="coming-soon-badge">Coming Soon</span>
+                            <span>{{ _('Biometric Authentication') }}</span>
+                            <span class="coming-soon-badge">{{ _('Coming Soon') }}</span>
                         </div>
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Use fingerprint / Face ID</div>
-                                <div class="switch-desc">Quick and secure access using your device's biometric sensor</div>
+                                <div class="switch-label">{{ _('Use fingerprint / Face ID') }}</div>
+                                <div class="switch-desc">{{ _('Quick and secure access using your device\'s biometric sensor') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="biometricAuth" disabled>
@@ -388,12 +388,12 @@ input:checked + .slider:before {
                     <div class="setting-group">
                         <div class="setting-label">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span>Inactivity Logout</span>
+                            <span>{{ _('Inactivity Logout') }}</span>
                         </div>
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Auto logout after inactivity</div>
-                                <div class="switch-desc">Sign out automatically when you're inactive for an extended period</div>
+                                <div class="switch-label">{{ _('Auto logout after inactivity') }}</div>
+                                <div class="switch-desc">{{ _('Sign out automatically when you\'re inactive for an extended period') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="inactivityLogout">
@@ -409,7 +409,7 @@ input:checked + .slider:before {
                 <div class="screen-card-header">
                     <h5>
                         <i class="fas fa-lightbulb" style="color: #f59e0b;"></i>
-                        Security Tips
+                        {{ _('Security Tips') }}
                     </h5>
                 </div>
                 <div class="screen-card-body">
@@ -418,8 +418,8 @@ input:checked + .slider:before {
                             <div class="d-flex gap-3">
                                 <i class="fas fa-check-circle" style="color: #10b981;"></i>
                                 <div>
-                                    <div class="fw-semibold">Use Strong PINs</div>
-                                    <div class="switch-desc">Avoid using common combinations like 1234 or 0000</div>
+                                    <div class="fw-semibold">{{ _('Use Strong PINs') }}</div>
+                                    <div class="switch-desc">{{ _('Avoid using common combinations like 1234 or 0000') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -427,8 +427,8 @@ input:checked + .slider:before {
                             <div class="d-flex gap-3">
                                 <i class="fas fa-check-circle" style="color: #10b981;"></i>
                                 <div>
-                                    <div class="fw-semibold">Enable Auto-lock</div>
-                                    <div class="switch-desc">Prevents unauthorized access when you step away</div>
+                                    <div class="fw-semibold">{{ _('Enable Auto-lock') }}</div>
+                                    <div class="switch-desc">{{ _('Prevents unauthorized access when you step away') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -436,8 +436,8 @@ input:checked + .slider:before {
                             <div class="d-flex gap-3">
                                 <i class="fas fa-check-circle" style="color: #10b981;"></i>
                                 <div>
-                                    <div class="fw-semibold">Don't Share Your PIN</div>
-                                    <div class="switch-desc">Keep your PIN confidential for maximum security</div>
+                                    <div class="fw-semibold">{{ _('Don\'t Share Your PIN') }}</div>
+                                    <div class="switch-desc">{{ _('Keep your PIN confidential for maximum security') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -445,8 +445,8 @@ input:checked + .slider:before {
                             <div class="d-flex gap-3">
                                 <i class="fas fa-check-circle" style="color: #10b981;"></i>
                                 <div>
-                                    <div class="fw-semibold">Regular Updates</div>
-                                    <div class="switch-desc">Change your PIN periodically for better security</div>
+                                    <div class="fw-semibold">{{ _('Regular Updates') }}</div>
+                                    <div class="switch-desc">{{ _('Change your PIN periodically for better security') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -468,22 +468,22 @@ function savePin() {
     const confirmPin = document.getElementById('confirmPin').value;
 
     if(pin !== confirmPin) {
-        alert('PIN codes do not match');
+        alert('{{ _('PIN codes do not match') }}');
         return;
     }
 
     if(pin.length < 4 || pin.length > 6) {
-        alert('PIN must be 4-6 digits');
+        alert('{{ _('PIN must be 4-6 digits') }}');
         return;
     }
 
     if(!/^\d+$/.test(pin)) {
-        alert('PIN must contain only numbers');
+        alert('{{ _('PIN must contain only numbers') }}');
         return;
     }
 
     localStorage.setItem('app_pin', pin);
-    alert('PIN saved successfully');
+    alert('{{ _('PIN saved successfully') }}');
 
     document.getElementById('pinCode').value = '';
     document.getElementById('confirmPin').value = '';

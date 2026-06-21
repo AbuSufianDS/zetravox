@@ -174,39 +174,39 @@
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
                 <a href="{{ url_for('main.screen_protection') }}" class="settings-nav-item">
                     <i class="fas fa-mobile-alt"></i>
-                    <span>Screen Protection</span>
+                    <span>{{ _('Screen Protection') }}</span>
                 </a>
             </div>
         </div>
@@ -216,49 +216,49 @@
                 <div class="dashboard-icon">
                     <i class="fas fa-sliders-h"></i>
                 </div>
-                <h1 class="dashboard-title">Settings Dashboard</h1>
-                <p class="dashboard-subtitle">Manage your Zetravox experience</p>
+                <h1 class="dashboard-title">{{ _('Settings Dashboard') }}</h1>
+                <p class="dashboard-subtitle">{{ _('Manage your Zetravox experience') }}</p>
                 <p class="dashboard-description">
-                    Customize your profile, security preferences, notification settings, and more from one central location.
+                    {{ _('Customize your profile, security preferences, notification settings, and more from one central location.') }}
                 </p>
 
                 <div class="quick-links">
                     <a href="{{ url_for('main.account_settings') }}" class="quick-link-btn">
-                        <i class="fas fa-user"></i> Profile
+                        <i class="fas fa-user"></i> {{ _('Profile') }}
                     </a>
                     <a href="{{ url_for('main.security_settings') }}" class="quick-link-btn">
-                        <i class="fas fa-shield-alt"></i> Security
+                        <i class="fas fa-shield-alt"></i> {{ _('Security') }}
                     </a>
                     <a href="{{ url_for('main.notification_settings') }}" class="quick-link-btn">
-                        <i class="fas fa-bell"></i> Alerts
+                        <i class="fas fa-bell"></i> {{ _('Alerts') }}
                     </a>
                     <a href="{{ url_for('main.privacy_settings') }}" class="quick-link-btn">
-                        <i class="fas fa-lock"></i> Privacy
+                        <i class="fas fa-lock"></i> {{ _('Privacy') }}
                     </a>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number">{{ current_user.get_friend_count() }}</div>
-                        <div class="stat-label">Connections</div>
+                        <div class="stat-label">{{ _('Connections') }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">{{ current_user.posts_count() }}</div>
-                        <div class="stat-label">Posts</div>
+                        <div class="stat-label">{{ _('Posts') }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">{{ current_user.followers_count() }}</div>
-                        <div class="stat-label">Followers</div>
+                        <div class="stat-label">{{ _('Followers') }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">{{ current_user.points }}</div>
-                        <div class="stat-label">Points</div>
+                        <div class="stat-label">{{ _('Points') }}</div>
                     </div>
                 </div>
 
                 <div class="mt-4">
                     <a href="{{ url_for('main.user', username=current_user.username) }}" class="quick-link-btn" style="background: var(--hover-bg);">
-                        <i class="fas fa-eye"></i> View My Profile
+                        <i class="fas fa-eye"></i> {{ _('View My Profile') }}
                     </a>
                 </div>
             </div>

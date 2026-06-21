@@ -202,13 +202,13 @@
         <div class="codes-card-header">
             <h5>
                 <i class="fas fa-code"></i>
-                Backup Codes
+                {{ _('Backup Codes') }}
             </h5>
         </div>
         <div class="codes-card-body">
             <div class="warning-message">
                 <i class="fas fa-exclamation-triangle"></i>
-                <div class="text">Save these backup codes in a secure place. You'll need them to access your account if you lose your phone.</div>
+                <div class="text">{{ _('Save these backup codes in a secure place. You\'ll need them to access your account if you lose your phone.') }}</div>
             </div>
 
             <div class="codes-container">
@@ -218,30 +218,30 @@
                     {% endfor %}
                 </div>
                 <div class="code-label">
-                    <i class="fas fa-shield-alt me-1"></i>One-time use only
+                    <i class="fas fa-shield-alt me-1"></i>{{ _('One-time use only') }}
                 </div>
             </div>
 
             <div class="alert-custom">
                 <i class="fas fa-info-circle"></i>
-                <div class="text">Each code can only be used once. After using a code, it will be invalidated.</div>
+                <div class="text">{{ _('Each code can only be used once. After using a code, it will be invalidated.') }}</div>
             </div>
 
             <div class="button-group">
                 <button onclick="window.print()" class="print-btn">
-                    <i class="fas fa-print"></i> Print Codes
+                    <i class="fas fa-print"></i> {{ _('Print Codes') }}
                 </button>
                 <button onclick="copyCodes()" class="print-btn">
-                    <i class="fas fa-copy"></i> Copy Codes
+                    <i class="fas fa-copy"></i> {{ _('Copy Codes') }}
                 </button>
             </div>
 
             <a href="{{ url_for('main.security_settings') }}" class="btn-primary-gradient mt-3">
-                <i class="fas fa-check-circle me-2"></i>I've Saved My Codes
+                <i class="fas fa-check-circle me-2"></i>{{ _('I\'ve Saved My Codes') }}
             </a>
 
             <a href="{{ url_for('main.security_settings') }}" class="btn-outline-custom">
-                <i class="fas fa-arrow-left me-2"></i>Back to Security Settings
+                <i class="fas fa-arrow-left me-2"></i>{{ _('Back to Security Settings') }}
             </a>
         </div>
     </div>
@@ -262,11 +262,11 @@ function copyCodes() {
         toast.style.minWidth = '250px';
         toast.style.borderRadius = '12px';
         toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        toast.innerHTML = '<i class="fas fa-check-circle me-2"></i>Backup codes copied to clipboard!';
+        toast.innerHTML = '<i class="fas fa-check-circle me-2"></i>{{ _('Backup codes copied to clipboard!') }}';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }).catch(() => {
-        alert('Failed to copy codes. Please copy them manually.');
+        alert('{{ _('Failed to copy codes. Please copy them manually.') }}');
     });
 }
 

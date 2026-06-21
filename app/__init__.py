@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
-from flask import Flask, request, current_app
+from flask import Flask, request, current_app, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -23,7 +23,11 @@ if IS_RENDER:
 
 
 def get_locale():
-    return request.accept_languages.best_match(current_app.config['LANGUAGES'])
+    if 'locale' in session:
+        lang = session['locale']
+        if lang in current_app.config.get('LANGUAGES', ['en']):
+            return lang
+    return request.accept_languages.best_match(current_app.config.get('LANGUAGES', ['en']))
 
 
 db = SQLAlchemy()
@@ -48,6 +52,10 @@ def create_app(config_class=Config):
     babel.init_app(app, locale_selector=get_locale)
     csrf.init_app(app)
 
+    @app.context_processor
+    def inject_session():
+        return dict(session=session)
+
     def add_missing_columns():
         try:
             from sqlalchemy import inspect, text
@@ -62,6 +70,8 @@ def create_app(config_class=Config):
                     print("Added 'read' column to notification table")
         except Exception as e:
             print(f"Note: Could not add read column (may already exist): {e}")
+
+
 
 
     from app.security.security_limiter import limiter
@@ -92,6 +102,12 @@ def create_app(config_class=Config):
 
     from app.api import bp as api_bp
     app.register_blueprint(api_bp, url_prefix='/api')
+
+    from app.human_verification import human_verification_bp
+    app.register_blueprint(human_verification_bp)
+
+    from app.admin import bp as admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/admin')
 
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:

@@ -254,35 +254,35 @@
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item active">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
             </div>
         </div>
@@ -292,7 +292,7 @@
                 <div class="blocked-card-header">
                     <h5>
                         <i class="fas fa-user-slash" style="color: #ef4444;"></i>
-                        Blocked Users
+                        {{ _('Blocked Users') }}
                     </h5>
                 </div>
                 <div class="blocked-card-body">
@@ -308,21 +308,21 @@
                                                 {{ blocked_user.username }}
                                                 {% if blocked_user.is_verified %}
                                                 <span class="verified-badge">
-                                                    <i class="fas fa-check-circle me-1"></i>Verified
+                                                    <i class="fas fa-check-circle me-1"></i>{{ _('Verified') }}
                                                 </span>
                                                 {% endif %}
                                             </div>
                                             <div class="user-meta">
                                                 <span>
                                                     <i class="fas fa-calendar-alt me-1"></i>
-                                                    Blocked: {{ blocked_user.blocked_at.strftime('%b %d, %Y') if blocked_user.blocked_at else 'Recently' }}
+                                                    {{ _('Blocked') }}: {{ blocked_user.blocked_at.strftime('%b %d, %Y') if blocked_user.blocked_at else _('Recently') }}
                                                 </span>
                                             </div>
                                         </div>
                                         <form action="{{ url_for('main.unblock_user', user_id=blocked_user.id) }}" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <button type="submit" class="btn-unblock" onclick="return confirm('Unblock {{ blocked_user.username }}? They will be able to interact with you again.')">
-                                                <i class="fas fa-user-check me-1"></i>Unblock
+                                            <button type="submit" class="btn-unblock" onclick="return confirm('{{ _('Unblock') }} {{ blocked_user.username }}? {{ _('They will be able to interact with you again.') }}')">
+                                                <i class="fas fa-user-check me-1"></i>{{ _('Unblock') }}
                                             </button>
                                         </form>
                                     </div>
@@ -333,9 +333,9 @@
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-user-slash"></i>
-                            <h6>No Blocked Users</h6>
-                            <p>You haven't blocked anyone yet</p>
-                            <small class="text-muted">When you block someone, they will appear here</small>
+                            <h6>{{ _('No Blocked Users') }}</h6>
+                            <p>{{ _('You haven\'t blocked anyone yet') }}</p>
+                            <small class="text-muted">{{ _('When you block someone, they will appear here') }}</small>
                         </div>
                     {% endif %}
                 </div>
@@ -345,34 +345,34 @@
                 <div class="info-card-header">
                     <h5>
                         <i class="fas fa-info-circle" style="color: #667eea;"></i>
-                        About Blocking
+                        {{ _('About Blocking') }}
                     </h5>
                 </div>
                 <div class="info-card-body">
                     <div class="alert-warning-custom">
                         <i class="fas fa-shield-alt"></i>
-                        <div class="text">Blocked users will not be notified that you have blocked them.</div>
+                        <div class="text">{{ _('Blocked users will not be notified that you have blocked them.') }}</div>
                     </div>
                     <ul class="info-list">
                         <li>
                             <i class="fas fa-ban text-danger-icon"></i>
-                            <span>Blocked users cannot follow you or view your profile</span>
+                            <span>{{ _('Blocked users cannot follow you or view your profile') }}</span>
                         </li>
                         <li>
                             <i class="fas fa-envelope text-danger-icon"></i>
-                            <span>Blocked users cannot send you messages</span>
+                            <span>{{ _('Blocked users cannot send you messages') }}</span>
                         </li>
                         <li>
                             <i class="fas fa-comment text-danger-icon"></i>
-                            <span>Blocked users cannot reply to your posts</span>
+                            <span>{{ _('Blocked users cannot reply to your posts') }}</span>
                         </li>
                         <li>
                             <i class="fas fa-eye-slash text-danger-icon"></i>
-                            <span>You won't see their posts in your stream</span>
+                            <span>{{ _('You won\'t see their posts in your stream') }}</span>
                         </li>
                         <li>
                             <i class="fas fa-user-check text-success-icon"></i>
-                            <span>Unblocking restores normal interaction immediately</span>
+                            <span>{{ _('Unblocking restores normal interaction immediately') }}</span>
                         </li>
                     </ul>
                 </div>

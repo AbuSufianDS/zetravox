@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - Zetravox{% endblock %}
+
+{% block content %}
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   FEEDBACK PAGE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.fb-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.fb-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.fb-card:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.fb-card-header {
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(253,203,110,0.08), rgba(225,112,85,0.08));
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.fb-card-header .fb-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #FDCB6E, #E17055);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.fb-card-header h4 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.fb-card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.fb-card-body {
+    padding: 28px;
+}
+
+/* ─── Form ─── */
+.fb-form-group {
+    margin-bottom: 18px;
+}
+
+.fb-form-group label {
+    font-weight: 600;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.fb-form-group .fb-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+}
+
+.fb-form-group .fb-input:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.08);
+}
+
+.fb-form-group .fb-input::placeholder {
+    color: var(--text-muted);
+}
+
+.fb-form-group .fb-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.fb-form-group .fb-error {
+    color: #FF6B6B;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* ─── Star Rating ─── */
+.fb-stars {
+    display: flex;
+    gap: 6px;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.fb-stars .fb-star {
+    transition: var(--transition);
+    color: var(--border-glass);
+    user-select: none;
+}
+
+.fb-stars .fb-star.active {
+    color: #FDCB6E;
+}
+
+.fb-stars .fb-star:hover {
+    transform: scale(1.2);
+}
+
+/* ─── Submit Button ─── */
+.fb-btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--grad-main);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.fb-btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.fb-btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ─── Feedback History ─── */
+.fb-history {
+    margin-top: 32px;
+}
+
+.fb-history h5 {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fb-item {
+    padding: 16px;
+    background: var(--bg-surface-hover);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    border-left: 3px solid var(--clr-primary-light);
+    transition: var(--transition);
+}
+
+.fb-item:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.fb-item .fb-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.fb-item .fb-item-category {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--clr-primary-light);
+}
+
+.fb-item .fb-item-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: var(--radius-full);
+    text-transform: capitalize;
+}
+
+.fb-item .fb-item-status.pending { background: rgba(253,203,110,0.15); color: #FDCB6E; }
+.fb-item .fb-item-status.resolved { background: rgba(0,184,148,0.15); color: #00B894; }
+.fb-item .fb-item-status.rejected { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+
+.fb-item .fb-item-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.fb-item .fb-item-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+.fb-item .fb-item-meta .fb-stars-small {
+    color: #FDCB6E;
+}
+
+.fb-item .fb-item-response {
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: rgba(0,184,148,0.04);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: #00B894;
+    border-left: 2px solid #00B894;
+}
+
+.fb-item .fb-item-response i {
+    margin-right: 6px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .fb-container { padding: 12px; }
+    .fb-card-header { padding: 18px 20px; flex-wrap: wrap; }
+    .fb-card-body { padding: 20px; }
+}
+
+@media (max-width: 480px) {
+    .fb-card-header h4 { font-size: 17px; }
+    .fb-stars { font-size: 28px; }
+}
+</style>
+
+<div class="fb-container">
+    <div class="fb-card">
+
+        <!-- ─── Header ─── -->
+        <div class="fb-card-header">
+            <div class="fb-icon">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <div>
+                <h4>Your Feedback Matters</h4>
+                <p>Help us make Zetravox better for everyone</p>
+            </div>
+        </div>
+
+        <!-- ─── Body ─── -->
+        <div class="fb-card-body">
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="fb-form-group">
+                    <label>Category</label>
+                    {{ form.category(class="fb-input") }}
+                    {% for error in form.category.errors %}
+                        <div class="fb-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="fb-form-group">
+                    <label>Rating</label>
+                    <div class="fb-stars" id="fbStars">
+                        <span class="fb-star" data-value="1">☆</span>
+                        <span class="fb-star" data-value="2">☆</span>
+                        <span class="fb-star" data-value="3">☆</span>
+                        <span class="fb-star" data-value="4">☆</span>
+                        <span class="fb-star" data-value="5">☆</span>
+                    </div>
+                    {{ form.rating(class="fb-input", style="display:none;") }}
+                    {% for error in form.rating.errors %}
+                        <div class="fb-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="fb-form-group">
+                    <label>Your Message</label>
+                    {{ form.message(class="fb-input", rows="5", placeholder="Share your thoughts, suggestions, or report any issues...") }}
+                    <div class="fb-hint" id="fbCharCount">0 / 1000 characters</div>
+                    {% for error in form.message.errors %}
+                        <div class="fb-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="fb-btn-submit">
+                    <i class="fas fa-paper-plane"></i> Send Feedback
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ─── Feedback History ─── -->
+    {% if feedbacks %}
+    <div class="fb-history">
+        <h5>📋 Your Previous Feedback</h5>
+        {% for fb in feedbacks %}
+        <div class="fb-item">
+            <div class="fb-item-header">
+                <span class="fb-item-category">{{ fb.category|capitalize }}</span>
+                <span class="fb-item-status {{ fb.status }}">{{ fb.status|capitalize }}</span>
+            </div>
+            <div class="fb-item-message">{{ fb.message[:150] }}{% if fb.message|length > 150 %}...{% endif %}</div>
+            <div class="fb-item-meta">
+                {{ fb.created_at.strftime('%B %d, %Y') }}
+                {% if fb.rating > 0 %}
+                <span class="fb-stars-small">• {{ '⭐' * fb.rating }}</span>
+                {% endif %}
+            </div>
+            {% if fb.admin_response %}
+            <div class="fb-item-response">
+                <i class="fas fa-reply"></i> {{ fb.admin_response[:150] }}{% if fb.admin_response|length > 150 %}...{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// ─── Star Rating ──────────────────────────────────────────────
+const stars = document.querySelectorAll('#fbStars .fb-star');
+const ratingInput = document.querySelector('select[name="rating"]');
+
+stars.forEach(star => {
+    star.addEventListener('click', function() {
+        const value = parseInt(this.dataset.value);
+        stars.forEach(s => s.classList.remove('active'));
+        stars.forEach((s, index) => {
+            if (index < value) s.classList.add('active');
+        });
+        if (ratingInput) ratingInput.value = value;
+    });
+
+    star.addEventListener('mouseenter', function() {
+        const value = parseInt(this.dataset.value);
+        stars.forEach((s, index) => {
+            if (index < value) s.style.color = '#FDCB6E';
+        });
+    });
+
+    star.addEventListener('mouseleave', function() {
+        stars.forEach(s => {
+            if (!s.classList.contains('active')) {
+                s.style.color = '';
+            }
+        });
+    });
+});
+
+// ─── Character Counter ──────────────────────────────────────
+const messageInput = document.querySelector('textarea[name="message"]');
+const charCount = document.getElementById('fbCharCount');
+
+if (messageInput) {
+    messageInput.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = `${count} / 1000 characters`;
+        if (count > 1000) {
+            charCount.style.color = '#FF6B6B';
+        } else {
+            charCount.style.color = '';
+        }
+    });
+}
+</script>
+{% endblock %}

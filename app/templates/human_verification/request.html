@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Human Verification - Zetravox{% endblock %}
+
+{% block content %}
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   HUMAN VERIFICATION PAGE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.hv-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.hv-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.hv-card:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.hv-card-header {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hv-card-header .hv-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--grad-main);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.hv-card-header h4 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.hv-card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.hv-card-body {
+    padding: 24px;
+}
+
+/* ─── Status Cards ─── */
+.hv-status {
+    text-align: center;
+    padding: 40px 24px;
+}
+
+.hv-status-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 36px;
+}
+
+.hv-status-icon.success {
+    background: rgba(0, 184, 148, 0.12);
+    color: #00B894;
+}
+
+.hv-status-icon.pending {
+    background: rgba(253, 203, 110, 0.12);
+    color: #FDCB6E;
+}
+
+.hv-status-icon.rejected {
+    background: rgba(255, 107, 107, 0.12);
+    color: #FF6B6B;
+}
+
+.hv-status-icon.info {
+    background: rgba(116, 185, 255, 0.12);
+    color: #74B9FF;
+}
+
+.hv-status h5 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.hv-status p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+.hv-status .hv-meta {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: var(--bg-surface-hover);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.hv-status .hv-meta i {
+    margin-right: 6px;
+}
+
+.hv-status .hv-reason {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 107, 107, 0.06);
+    border: 1px solid rgba(255, 107, 107, 0.15);
+    border-radius: var(--radius-sm);
+    color: #FF6B6B;
+    font-size: 13px;
+}
+
+.hv-status .hv-btn {
+    margin-top: 16px;
+    padding: 10px 28px;
+    background: var(--grad-main);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.hv-status .hv-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.hv-status .hv-btn-outline {
+    margin-top: 16px;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.hv-status .hv-btn-outline:hover {
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+}
+
+/* ─── Info Alert ─── */
+.hv-alert {
+    padding: 14px 18px;
+    background: rgba(116, 185, 255, 0.06);
+    border: 1px solid rgba(116, 185, 255, 0.12);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.hv-alert i {
+    color: #74B9FF;
+    font-size: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.hv-alert-content {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.hv-alert-content strong {
+    color: var(--text-primary);
+}
+
+/* ─── Form ─── */
+.hv-form-group {
+    margin-bottom: 20px;
+}
+
+.hv-form-group label {
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.hv-form-group label i {
+    color: var(--clr-primary-light);
+}
+
+.hv-form-group .hv-file-area {
+    padding: 20px;
+    border: 2px dashed var(--border-glass);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-hover);
+    transition: var(--transition);
+    cursor: pointer;
+    text-align: center;
+}
+
+.hv-form-group .hv-file-area:hover {
+    border-color: var(--clr-primary);
+    background: rgba(102,126,234,0.04);
+}
+
+.hv-form-group .hv-file-area i {
+    font-size: 32px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.hv-form-group .hv-file-area p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+}
+
+.hv-form-group .hv-file-area .hv-file-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.hv-form-group input[type="file"] {
+    display: none;
+}
+
+.hv-form-group .hv-file-selected {
+    display: none;
+    padding: 10px 14px;
+    background: rgba(0, 184, 148, 0.06);
+    border: 1px solid rgba(0, 184, 148, 0.15);
+    border-radius: var(--radius-sm);
+    color: #00B894;
+    font-size: 13px;
+    align-items: center;
+    gap: 8px;
+}
+
+.hv-form-group .hv-file-selected i {
+    font-size: 18px;
+}
+
+.hv-submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--grad-main);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.hv-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.hv-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ─── Benefits Section ─── */
+.hv-benefits {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--bg-surface-hover);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-glass);
+}
+
+.hv-benefits h6 {
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.hv-benefits h6 i {
+    color: #00B894;
+}
+
+.hv-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hv-benefits ul li {
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hv-benefits ul li i {
+    color: #00B894;
+    font-size: 14px;
+    width: 18px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .hv-container { padding: 12px; }
+    .hv-card-header { padding: 16px; flex-wrap: wrap; }
+    .hv-card-body { padding: 16px; }
+    .hv-status { padding: 30px 16px; }
+    .hv-status-icon { width: 64px; height: 64px; font-size: 28px; }
+    .hv-benefits { padding: 16px; }
+}
+
+@media (max-width: 480px) {
+    .hv-card-header h4 { font-size: 17px; }
+    .hv-status h5 { font-size: 17px; }
+}
+</style>
+
+<div class="hv-container">
+
+    <!-- ─── Main Card ─── -->
+    <div class="hv-card">
+
+        <!-- ─── Header ─── -->
+        <div class="hv-card-header">
+            <div class="hv-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+                <h4>Human Verification</h4>
+                <p>Verify your account to earn the Human-First badge</p>
+            </div>
+        </div>
+
+        <!-- ─── Body ─── -->
+        <div class="hv-card-body">
+
+            {% if current_user.is_human_verified %}
+            <!-- ═══ ALREADY VERIFIED ═══ -->
+            <div class="hv-status">
+                <div class="hv-status-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h5>You're Already Verified! 🎉</h5>
+                <p>Your account has the Human-First badge.</p>
+                <div class="hv-meta">
+                    <i class="fas fa-calendar"></i>
+                    Verified since {{ current_user.human_verified_at.strftime('%B %d, %Y') }}
+                </div>
+                <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('main.user', username=current_user.username) }}" class="hv-btn">
+                        <i class="fas fa-user"></i> View Profile
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="hv-btn-outline">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                </div>
+            </div>
+
+            {% elif current_user.verification_status == 'pending' %}
+            <!-- ═══ PENDING ═══ -->
+            <div class="hv-status">
+                <div class="hv-status-icon pending">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <h5>Verification Request Pending</h5>
+                <p>Your verification request is being reviewed by an admin.</p>
+                <div class="hv-meta">
+                    <i class="fas fa-calendar"></i>
+                    Requested on: {{ current_user.verification_requested_at.strftime('%B %d, %Y at %I:%M %p') }}
+                </div>
+                <div style="margin-top: 16px;">
+                    <a href="{{ url_for('main.index') }}" class="hv-btn-outline">
+                        <i class="fas fa-home"></i> Return Home
+                    </a>
+                </div>
+            </div>
+
+            {% elif current_user.verification_status == 'rejected' %}
+            <!-- ═══ REJECTED ═══ -->
+            <div class="hv-status">
+                <div class="hv-status-icon rejected">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h5>Verification Request Rejected</h5>
+                <p>Your verification request was not approved.</p>
+                {% if current_user.verification_notes %}
+                <div class="hv-reason">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Reason: {{ current_user.verification_notes }}
+                </div>
+                {% endif %}
+                <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('human_verification.request_verification') }}" class="hv-btn">
+                        <i class="fas fa-redo"></i> Try Again
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="hv-btn-outline">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- ═══ REQUEST FORM ═══ -->
+
+            <!-- Info Alert -->
+            <div class="hv-alert">
+                <i class="fas fa-info-circle"></i>
+                <div class="hv-alert-content">
+                    <strong>How it works:</strong> Upload a short video introducing yourself.
+                    An admin will review and verify your account within <strong>24-48 hours</strong>.
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="hv-form-group">
+                    <label>
+                        <i class="fas fa-video"></i> Verification Video
+                    </label>
+                    <div class="hv-file-area" onclick="document.getElementById('videoInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload your verification video</p>
+                        <div class="hv-file-hint">MP4, WebM, MOV, AVI • Max 20MB</div>
+                    </div>
+                    <input type="file" name="verification_video" id="videoInput" accept="video/*" required>
+                    <div class="hv-file-selected" id="fileSelected">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="fileName">video.mp4</span>
+                        <span style="margin-left: auto; font-size: 12px; color: var(--text-muted); cursor: pointer;" onclick="clearFile()">✕</span>
+                    </div>
+                    <small style="color: var(--text-muted); font-size: 12px; display: block; margin-top: 6px;">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Please say your username and why you want to be verified on Zetravox.
+                    </small>
+                </div>
+
+                <button type="submit" class="hv-submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Verification Request
+                </button>
+            </form>
+
+            <!-- Benefits -->
+            <div class="hv-benefits">
+                <h6>
+                    <i class="fas fa-check-circle"></i>
+                    Benefits of Human Verification:
+                </h6>
+                <ul>
+                    <li><i class="fas fa-check"></i> Human-First badge on your profile</li>
+                    <li><i class="fas fa-check"></i> Increased trust and credibility</li>
+                    <li><i class="fas fa-check"></i> Priority in search results</li>
+                    <li><i class="fas fa-check"></i> Exclusive access to verified-only features</li>
+                </ul>
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── File Upload Handling ──────────────────────────────────────
+document.getElementById('videoInput')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const selected = document.getElementById('fileSelected');
+    const fileName = document.getElementById('fileName');
+
+    if (file) {
+        selected.style.display = 'flex';
+        fileName.textContent = file.name;
+        // Update file area style
+        document.querySelector('.hv-file-area').style.borderColor = '#00B894';
+        document.querySelector('.hv-file-area').style.background = 'rgba(0,184,148,0.04)';
+    }
+});
+
+function clearFile() {
+    const input = document.getElementById('videoInput');
+    const selected = document.getElementById('fileSelected');
+    input.value = '';
+    selected.style.display = 'none';
+    document.querySelector('.hv-file-area').style.borderColor = '';
+    document.querySelector('.hv-file-area').style.background = '';
+}
+
+// ─── Form Submit Prevention ────────────────────────────────────
+document.querySelector('form')?.addEventListener('submit', function(e) {
+    const btn = document.getElementById('submitBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+    }
+});
+</script>
+
+{% endblock %}

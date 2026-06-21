@@ -334,39 +334,39 @@
             <div class="settings-sidebar-premium">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item-premium active">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item-premium">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item-premium">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item-premium">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
                 <a href="{{ url_for('main.screen_protection') }}" class="settings-nav-item-premium">
                     <i class="fas fa-mobile-alt"></i>
-                    <span>Screen Protection</span>
+                    <span>{{ _('Screen Protection') }}</span>
                 </a>
             </div>
         </div>
@@ -377,21 +377,21 @@
                 <div class="security-card-header-premium">
                     <h5>
                         <i class="fas fa-key" style="color: #667eea;"></i>
-                        Password
+                        {{ _('Password') }}
                     </h5>
                     <button class="btn-primary-gradient-premium" id="showPasswordFormBtn">
-                        <i class="fas fa-edit"></i> Change Password
+                        <i class="fas fa-edit"></i> {{ _('Change Password') }}
                     </button>
                 </div>
                 <div class="security-card-body-premium">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
-                            <div class="fw-semibold">Password Status</div>
-                            <div class="info-text-premium">Last changed: {{ current_user.last_password_change.strftime('%B %d, %Y') if current_user.last_password_change else 'Never' }}</div>
+                            <div class="fw-semibold">{{ _('Password Status') }}</div>
+                            <div class="info-text-premium">{{ _('Last changed') }}: {{ current_user.last_password_change.strftime('%B %d, %Y') if current_user.last_password_change else _('Never') }}</div>
                         </div>
                         <div>
                             <span class="status-badge-premium status-badge-enabled">
-                                <i class="fas fa-shield-alt"></i> Protected
+                                <i class="fas fa-shield-alt"></i> {{ _('Protected') }}
                             </span>
                         </div>
                     </div>
@@ -400,12 +400,12 @@
                         <form method="POST" action="{{ url_for('main.change_password') }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Current Password</label>
-                                <input type="password" name="current_password" class="form-control-premium" placeholder="Enter your current password" required>
+                                <label class="form-label fw-semibold">{{ _('Current Password') }}</label>
+                                <input type="password" name="current_password" class="form-control-premium" placeholder="{{ _('Enter your current password') }}" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">New Password</label>
-                                <input type="password" name="new_password" class="form-control-premium" id="newPassword" placeholder="Enter new password" required>
+                                <label class="form-label fw-semibold">{{ _('New Password') }}</label>
+                                <input type="password" name="new_password" class="form-control-premium" id="newPassword" placeholder="{{ _('Enter new password') }}" required>
                                 <div class="password-strength" id="passwordStrength">
                                     <div class="strength-bar">
                                         <div class="strength-fill" id="strengthFill"></div>
@@ -414,16 +414,16 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Confirm New Password</label>
-                                <input type="password" name="confirm_password" class="form-control-premium" id="confirmPassword" placeholder="Confirm your new password" required>
+                                <label class="form-label fw-semibold">{{ _('Confirm New Password') }}</label>
+                                <input type="password" name="confirm_password" class="form-control-premium" id="confirmPassword" placeholder="{{ _('Confirm your new password') }}" required>
                                 <div id="passwordMatchMsg" class="info-text-premium"></div>
                             </div>
                             <div class="d-flex gap-3 flex-wrap">
                                 <button type="submit" class="btn-primary-gradient-premium">
-                                    <i class="fas fa-save"></i> Update Password
+                                    <i class="fas fa-save"></i> {{ _('Update Password') }}
                                 </button>
                                 <button type="button" class="btn-outline-danger-premium" id="hidePasswordFormBtn">
-                                    Cancel
+                                    {{ _('Cancel') }}
                                 </button>
                             </div>
                         </form>
@@ -435,15 +435,15 @@
                 <div class="security-card-header-premium">
                     <h5>
                         <i class="fas fa-mobile-alt" style="color: #667eea;"></i>
-                        Two-Factor Authentication
+                        {{ _('Two-Factor Authentication') }}
                     </h5>
                     {% if current_user.two_factor_enabled %}
                     <span class="status-badge-premium status-badge-enabled">
-                        <i class="fas fa-check-circle"></i> Enabled
+                        <i class="fas fa-check-circle"></i> {{ _('Enabled') }}
                     </span>
                     {% else %}
                     <span class="status-badge-premium status-badge-disabled">
-                        <i class="fas fa-exclamation-circle"></i> Disabled
+                        <i class="fas fa-exclamation-circle"></i> {{ _('Disabled') }}
                     </span>
                     {% endif %}
                 </div>
@@ -451,27 +451,27 @@
                     {% if current_user.two_factor_enabled %}
                     <div class="alert-premium alert-success-premium">
                         <i class="fas fa-shield-alt me-2"></i>
-                        Your account is protected with two-factor authentication. This adds an extra layer of security.
+                        {{ _('Your account is protected with two-factor authentication. This adds an extra layer of security.') }}
                     </div>
                     <form method="POST" action="{{ url_for('main.disable_2fa') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Enter OTP to disable</label>
-                                <input type="text" name="otp_code" class="form-control-premium" placeholder="6-digit code" required pattern="[0-9]{6}" maxlength="6">
+                                <label class="form-label fw-semibold">{{ _('Enter OTP to disable') }}</label>
+                                <input type="text" name="otp_code" class="form-control-premium" placeholder="{{ _('6-digit code') }}" required pattern="[0-9]{6}" maxlength="6">
                             </div>
                         </div>
                         <button type="submit" class="btn-outline-danger-premium mt-3">
-                            <i class="fas fa-times"></i> Disable 2FA
+                            <i class="fas fa-times"></i> {{ _('Disable 2FA') }}
                         </button>
                     </form>
                     {% else %}
                     <div class="d-flex align-items-start gap-4 flex-wrap">
                         <i class="fas fa-shield-alt fa-3x" style="color: #667eea;"></i>
                         <div>
-                            <p>Add an extra layer of security to your account. Two-factor authentication requires a verification code from your phone when you log in.</p>
-                            <a href="{{ url_for('main.enable_2fa') }}" class="btn-primary-gradient-premium">
-                                <i class="fas fa-plus"></i> Enable Two-Factor Authentication
+                            <p>{{ _('Add an extra layer of security to your account. Two-factor authentication requires a verification code from your phone when you log in.') }}</p>
+                            <a href="{{ url_for('security.enable_2fa') }}" class="btn-primary-gradient-premium">
+                                <i class="fas fa-plus"></i> {{ _('Enable Two-Factor Authentication') }}
                             </a>
                         </div>
                     </div>
@@ -483,10 +483,10 @@
                 <div class="security-card-header-premium">
                     <h5>
                         <i class="fas fa-history" style="color: #667eea;"></i>
-                        Recent Security Events
+                        {{ _('Recent Security Events') }}
                     </h5>
                     <a href="{{ url_for('main.login_history') }}" class="btn-primary-gradient-premium" style="padding: 8px 20px; font-size: 13px;">
-                        View All <i class="fas fa-arrow-right"></i>
+                        {{ _('View All') }} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="security-card-body-premium">
@@ -501,7 +501,7 @@
                                     <div class="event-title-premium">{{ event.event_type.replace('_', ' ').title() }}</div>
                                     <div class="event-meta-premium">
                                         <span><i class="fas fa-map-marker-alt"></i> {{ event.ip_address }}</span>
-                                        <span><i class="fas fa-browser"></i> {{ event.user_agent[:30] if event.user_agent else 'Unknown' }}</span>
+                                        <span><i class="fas fa-browser"></i> {{ event.user_agent[:30] if event.user_agent else _('Unknown') }}</span>
                                     </div>
                                 </div>
                                 <div class="event-time-premium">
@@ -512,7 +512,7 @@
                         {% else %}
                             <div class="text-center py-4">
                                 <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">No security events recorded</p>
+                                <p class="text-muted">{{ _('No security events recorded') }}</p>
                             </div>
                         {% endif %}
                     </div>
@@ -523,26 +523,26 @@
                 <div class="security-card-header-premium">
                     <h5>
                         <i class="fas fa-database" style="color: #667eea;"></i>
-                        Data & Privacy
+                        {{ _('Data & Privacy') }}
                     </h5>
                 </div>
                 <div class="security-card-body-premium">
                     <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                         <div>
-                            <div class="fw-semibold">Export Your Data</div>
-                            <div class="info-text-premium">Download a copy of your Zetravox data in JSON format</div>
+                            <div class="fw-semibold">{{ _('Export Your Data') }}</div>
+                            <div class="info-text-premium">{{ _('Download a copy of your Zetravox data in JSON format') }}</div>
                         </div>
                         <a href="{{ url_for('main.export_posts') }}" class="btn-primary-gradient-premium" style="padding: 8px 24px;">
-                            <i class="fas fa-download"></i> Export
+                            <i class="fas fa-download"></i> {{ _('Export') }}
                         </a>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fw-semibold text-danger">Delete Account</div>
-                            <div class="info-text-premium">Permanently delete your account and all associated data</div>
+                            <div class="fw-semibold text-danger">{{ _('Delete Account') }}</div>
+                            <div class="info-text-premium">{{ _('Permanently delete your account and all associated data') }}</div>
                         </div>
                         <button class="btn-outline-danger-premium" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                            <i class="fas fa-trash"></i> Delete Account
+                            <i class="fas fa-trash"></i> {{ _('Delete Account') }}
                         </button>
                     </div>
                 </div>
@@ -555,24 +555,24 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-premium">
             <div class="modal-header modal-header-premium">
-                <h5 class="modal-title text-danger">Delete Account</h5>
+                <h5 class="modal-title text-danger">{{ _('Delete Account') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
                     <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
-                    <p class="fw-semibold">Are you absolutely sure you want to delete your account?</p>
-                    <p class="text-muted small">This action <strong>cannot be undone</strong>. All your posts, connections, messages, and data will be permanently removed.</p>
+                    <p class="fw-semibold">{{ _('Are you absolutely sure you want to delete your account?') }}</p>
+                    <p class="text-muted small">{{ _('This action cannot be undone. All your posts, connections, messages, and data will be permanently removed.') }}</p>
                 </div>
                 <div class="alert alert-warning d-flex align-items-center gap-2">
                     <i class="fas fa-exclamation-triangle"></i>
-                    Type <strong class="text-danger mx-1">DELETE</strong> to confirm
+                    {{ _('Type') }} <strong class="text-danger mx-1">DELETE</strong> {{ _('to confirm') }}
                 </div>
                 <input type="text" id="confirmDelete" class="form-control-premium" placeholder="DELETE">
             </div>
             <div class="modal-footer border-0 pt-0 pb-4">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn-outline-danger-premium" id="confirmDeleteBtn" disabled>Permanently Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                <button type="button" class="btn-outline-danger-premium" id="confirmDeleteBtn" disabled>{{ _('Permanently Delete') }}</button>
             </div>
         </div>
     </div>
@@ -608,26 +608,26 @@ function checkPasswordStrength(password) {
 
     if (strength === 1) {
         strengthFill.className = 'strength-fill weak';
-        strengthText.textContent = 'Weak password';
+        strengthText.textContent = '{{ _('Weak password') }}';
     } else if (strength === 2) {
         strengthFill.className = 'strength-fill medium';
-        strengthText.textContent = 'Medium password';
+        strengthText.textContent = '{{ _('Medium password') }}';
     } else if (strength === 3) {
         strengthFill.className = 'strength-fill strong';
-        strengthText.textContent = 'Strong password';
+        strengthText.textContent = '{{ _('Strong password') }}';
     } else {
         strengthFill.className = 'strength-fill very-strong';
-        strengthText.textContent = 'Very strong password';
+        strengthText.textContent = '{{ _('Very strong password') }}';
     }
 }
 
 function checkPasswordMatch() {
     if (confirmPassword.value.length > 0) {
         if (newPassword.value === confirmPassword.value) {
-            passwordMatchMsg.innerHTML = '<i class="fas fa-check-circle me-1" style="color: #10b981;"></i> Passwords match';
+            passwordMatchMsg.innerHTML = '<i class="fas fa-check-circle me-1" style="color: #10b981;"></i> {{ _('Passwords match') }}';
             passwordMatchMsg.style.color = '#10b981';
         } else {
-            passwordMatchMsg.innerHTML = '<i class="fas fa-exclamation-circle me-1" style="color: #ef4444;"></i> Passwords do not match';
+            passwordMatchMsg.innerHTML = '<i class="fas fa-exclamation-circle me-1" style="color: #ef4444;"></i> {{ _('Passwords do not match') }}';
             passwordMatchMsg.style.color = '#ef4444';
         }
     } else {

@@ -82,10 +82,11 @@ class PostForm(FlaskForm):
     media_files = MultipleFileField(_l('Add Photos/Videos'), validators=[
         FileAllowed(['png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm'], _('Images and videos only!'))
     ])
-    privacy = SelectField(_l('Privacy'), choices=[
-        ('public', '🌍 Public'),
-        ('followers', '👥 Followers Only'),
-        ('only_me', '🔒 Only Me')
+    privacy = SelectField('Privacy', choices=[
+        ('public', 'Public'),
+        ('followers', 'Followers Only'),
+        ('inner_circle', 'Inner Circle Only'),
+        ('private', 'Only Me')
     ], default='public')
     schedule_date = DateTimeField(_l('Schedule for later'), validators=[Optional()], format='%Y-%m-%d %H:%M')
     submit = SubmitField(_l('Post'))
@@ -165,3 +166,41 @@ class NotificationSettingsForm(FlaskForm):
     notify_email_messages = BooleanField(_l('Email when I receive a message'), default=False)
 
     submit = SubmitField(_l('Save Notification Settings'))
+
+class VIPUpgradeForm(FlaskForm):
+    plan = SelectField('Select Plan', choices=[
+        ('premium', 'Premium - $4.99/month'),
+        ('elite', 'Elite - $9.99/month'),
+        ('ultimate', 'Ultimate - $19.99/month')
+    ], default='premium')
+    submit = SubmitField('Upgrade to VIP')
+
+
+class FeedbackForm(FlaskForm):
+    category = SelectField('Category', choices=[
+        ('general', 'General Feedback'),
+        ('feature', 'Feature Request'),
+        ('bug', 'Bug Report'),
+        ('suggestion', 'Suggestion')
+    ], default='general')
+    message = TextAreaField('Your Feedback', validators=[DataRequired(), Length(min=10, max=1000)])
+    rating = SelectField('Rating', choices=[
+        ('5', '⭐ Excellent'),
+        ('4', '⭐ Good'),
+        ('3', '⭐ Average'),
+        ('2', '⭐ Poor'),
+        ('1', '⭐ Terrible')
+    ], default='5')
+    submit = SubmitField('Send Feedback')
+
+
+class HelpForm(FlaskForm):
+    subject = StringField('Subject', validators=[DataRequired(), Length(min=5, max=200)])
+    message = TextAreaField('Describe your issue', validators=[DataRequired(), Length(min=10, max=2000)])
+    priority = SelectField('Priority', choices=[
+        ('low', 'Low - Not urgent'),
+        ('normal', 'Normal - Need help soon'),
+        ('high', 'High - Need help quickly'),
+        ('urgent', 'Urgent - Critical issue')
+    ], default='normal')
+    submit = SubmitField('Send Help Request')

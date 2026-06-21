@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Management - Admin{% endblock %}
+
+{% block content %}
+<style>
+.admin-feedback {
+    padding: 20px;
+}
+
+.admin-feedback .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-feedback .stat-card {
+    background: var(--bg-card);
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.admin-feedback .stat-card .number {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.admin-feedback .stat-card .label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.feedback-list {
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.feedback-item-admin {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.feedback-item-admin:last-child {
+    border-bottom: none;
+}
+
+.feedback-item-admin .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.feedback-item-admin .user {
+    font-weight: 600;
+}
+
+.feedback-item-admin .user .badge-vip {
+    font-size: 10px;
+    background: #ffd700;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+}
+
+.feedback-item-admin .category {
+    font-size: 12px;
+    padding: 2px 12px;
+    border-radius: 20px;
+    background: #667eea20;
+    color: #667eea;
+}
+
+.feedback-item-admin .status-badge {
+    font-size: 12px;
+    padding: 2px 12px;
+    border-radius: 20px;
+}
+
+.feedback-item-admin .status-badge.pending { background: #fef3c7; color: #f59e0b; }
+.feedback-item-admin .status-badge.resolved { background: #d1fae5; color: #10b981; }
+.feedback-item-admin .status-badge.rejected { background: #fee2e2; color: #ef4444; }
+
+.feedback-item-admin .message {
+    font-size: 14px;
+    padding: 8px 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.feedback-item-admin .rating {
+    display: flex;
+    gap: 2px;
+    font-size: 16px;
+}
+
+.feedback-item-admin .admin-response {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #dbeafe30;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+}
+
+.feedback-item-admin .admin-response .response-text {
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.btn-response {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-response.approve { background: #10b981; color: white; }
+.btn-response.reject { background: #ef4444; color: white; }
+.btn-response.resolve { background: #3b82f6; color: white; }
+
+.btn-response:hover {
+    transform: scale(1.05);
+}
+
+.response-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.response-form textarea {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 60px;
+}
+</style>
+
+<div class="admin-feedback">
+    <h2 class="mb-4">📋 Feedback Management</h2>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="number">{{ total }}</div>
+            <div class="label">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ pending }}</div>
+            <div class="label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ resolved }}</div>
+            <div class="label">Resolved</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ avg_rating }}</div>
+            <div class="label">Avg Rating</div>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="feedback-list">
+        {% for fb in feedbacks %}
+        <div class="feedback-item-admin">
+            <div class="header">
+                <div class="user">
+                    <a href="{{ url_for('main.user', username=fb.user.username) }}" class="text-decoration-none">
+                        {{ fb.user.username }}
+                    </a>
+                    {% if fb.user.is_vip %}
+                    <span class="badge-vip">👑 VIP</span>
+                    {% endif %}
+                    <span class="category">{{ fb.category|capitalize }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rating">
+                        {% for i in range(1,6) %}
+                            {% if i <= fb.rating %}⭐{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="status-badge {{ fb.status }}">{{ fb.status|capitalize }}</span>
+                    <span class="text-muted small">{{ fb.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+
+            <div class="message">{{ fb.message }}</div>
+
+            {% if fb.admin_response %}
+            <div class="admin-response">
+                <strong><i class="fas fa-reply me-1"></i> Admin Response:</strong>
+                <div class="response-text">{{ fb.admin_response }}</div>
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-2 mt-2">
+                <form method="POST" action="{{ url_for('admin.respond_feedback', feedback_id=fb.id) }}" class="w-100">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="response-form">
+                        <textarea name="response" placeholder="Write your response..." 
+                                  {% if fb.status == 'resolved' %}disabled{% endif %}>{{ fb.admin_response or '' }}</textarea>
+                        <div class="d-flex flex-column gap-1">
+                            <button type="submit" name="action" value="resolve" class="btn-response resolve" 
+                                    {% if fb.status == 'resolved' %}disabled{% endif %}>
+                                <i class="fas fa-check"></i> Resolve
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn-response reject"
+                                    {% if fb.status == 'resolved' %}disabled{% endif %}>
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center p-5 text-muted">
+            <i class="fas fa-comment-slash fa-3x mb-3"></i>
+            <p>No feedback yet</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

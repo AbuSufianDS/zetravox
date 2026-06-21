@@ -2,90 +2,200 @@
 
 {% block content %}
 <style>
-.enable-2fa-container {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.qr-card {
-    background: var(--bg-card);
-    border: none;
-    border-radius: 24px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-
-.qr-card-header {
-    padding: 24px;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--bg-card);
-    text-align: center;
-}
-
-.qr-card-header h5 {
-    margin: 0;
-    font-weight: 700;
+/* ===== 2FA ENABLE PAGE ===== */
+.enable-2fa-page {
+    min-height: calc(100vh - 200px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    padding: 40px 20px;
 }
 
-.qr-card-header h5 i {
-    color: #667eea;
+.enable-2fa-container {
+    max-width: 520px;
+    width: 100%;
 }
 
-.qr-card-body {
-    padding: 32px;
+/* ===== CARD ===== */
+.enable-2fa-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== HEADER ===== */
+.enable-2fa-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.enable-2fa-header .icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+    color: white;
+}
+
+.enable-2fa-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.enable-2fa-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ===== QR CODE ===== */
+.qr-section {
+    text-align: center;
+    padding: 24px;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    margin-bottom: 20px;
 }
 
 .qr-code-container {
     background: white;
-    padding: 20px;
-    border-radius: 20px;
+    padding: 16px;
+    border-radius: 16px;
     display: inline-block;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .qr-code {
-    max-width: 200px;
+    max-width: 180px;
     height: auto;
+    display: block;
+}
+
+.qr-section .or-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 12px 0 8px;
 }
 
 .secret-code {
-    background: var(--hover-bg);
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-family: 'Monaco', 'Menlo', monospace;
+    display: inline-block;
+    background: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
     font-size: 14px;
     letter-spacing: 1px;
-    word-break: break-all;
-    display: inline-block;
-    margin: 12px 0;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
-.input-group-custom {
-    margin: 20px 0;
+/* ===== BACKUP CODES ===== */
+.backup-codes-section {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
 }
 
-.input-label {
-    font-weight: 600;
-    margin-bottom: 8px;
+[data-theme="dark"] .backup-codes-section {
+    background: #2d2d1a;
+    border-color: #f59e0b40;
+}
+
+.backup-codes-section h6 {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.backup-codes-section h6 i {
+    color: #f59e0b;
+}
+
+.backup-codes-section p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+}
+
+.backup-codes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.backup-code-item {
+    background: var(--bg-card);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .backup-code-item {
+    background: #1a1a2e;
+}
+
+.btn-copy-codes {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.btn-copy-codes:hover {
+    background: var(--hover-bg);
+    border-color: #667eea;
+}
+
+/* ===== FORM ===== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
     display: block;
-    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
 }
 
 .otp-input {
-    background: var(--bg-card);
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-primary);
     border: 2px solid var(--border-color);
-    border-radius: 14px;
-    padding: 14px 16px;
+    border-radius: 12px;
     font-size: 20px;
     text-align: center;
     letter-spacing: 8px;
-    font-family: monospace;
-    width: 100%;
+    font-family: 'Courier New', monospace;
+    color: var(--text-primary);
+    transition: all 0.2s;
 }
 
 .otp-input:focus {
@@ -94,117 +204,209 @@
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.btn-verify {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 14px;
+/* ===== BUTTON ===== */
+.btn-enable {
+    width: 100%;
     padding: 14px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: white;
-    width: 100%;
-    transition: all 0.3s;
     cursor: pointer;
+    transition: all 0.3s;
 }
 
-.btn-verify:hover {
+.btn-enable:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
 }
 
+/* ===== BACK LINK ===== */
 .back-link {
     display: block;
     text-align: center;
-    margin-top: 20px;
+    margin-top: 16px;
+    font-size: 14px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 14px;
+    transition: color 0.2s;
 }
 
 .back-link:hover {
     color: #667eea;
 }
 
+.back-link i {
+    margin-right: 6px;
+}
+
+/* ===== INFO TEXT ===== */
 .info-text {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
+    text-align: center;
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid var(--border-color);
 }
 
-.steps {
-    text-align: left;
-    margin-top: 24px;
-    padding: 20px;
-    background: var(--hover-bg);
-    border-radius: 16px;
+/* ===== STEPS ===== */
+.steps-section {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: var(--bg-primary);
+    border-radius: 12px;
 }
 
-.steps h6 {
+.steps-section h6 {
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
 }
 
-.steps ol {
+.steps-section ol {
     margin: 0;
     padding-left: 20px;
 }
 
-.steps li {
-    margin-bottom: 8px;
+.steps-section li {
     font-size: 13px;
     color: var(--text-secondary);
+    margin-bottom: 4px;
 }
 
-.steps li:last-child {
+.steps-section li:last-child {
     margin-bottom: 0;
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] .enable-2fa-card {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .qr-section {
+    background: var(--hover-bg);
+}
+
+[data-theme="dark"] .qr-code-container {
+    background: white;
+}
+
+[data-theme="dark"] .otp-input {
+    background: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .steps-section {
+    background: var(--hover-bg);
+}
+
+[data-theme="dark"] .secret-code {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .enable-2fa-card {
+        padding: 28px 20px;
+    }
+
+    .qr-code {
+        max-width: 140px;
+    }
+
+    .backup-codes-grid {
+        gap: 4px;
+    }
+
+    .backup-code-item {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
 }
 </style>
 
-<div class="enable-2fa-container">
-    <div class="qr-card">
-        <div class="qr-card-header">
-            <h5>
-                <i class="fas fa-mobile-alt"></i>
-                Two-Factor Authentication
-            </h5>
-        </div>
-        <div class="qr-card-body text-center">
-            <div class="qr-code-container">
-                <img src="data:image/png;base64,{{ qr_code }}" class="qr-code" alt="QR Code">
+<div class="enable-2fa-page">
+    <div class="enable-2fa-container">
+        <div class="enable-2fa-card">
+
+            <!-- ===== HEADER ===== -->
+            <div class="enable-2fa-header">
+                <div class="icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2>Two-Factor Authentication</h2>
+                <p>Add an extra layer of security to your account</p>
             </div>
 
-            <p class="text-muted small">Can't scan the QR code?</p>
-            <div class="secret-code">
-                <i class="fas fa-key me-2"></i>{{ secret }}
+            <!-- ===== QR CODE ===== -->
+            <div class="qr-section">
+                <div class="qr-code-container">
+                    {% if qr_code %}
+                        <img src="data:image/png;base64,{{ qr_code }}" class="qr-code" alt="QR Code">
+                    {% else %}
+                        <div class="text-center p-2">
+                            <i class="fas fa-qrcode fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="or-text">Or enter the secret manually</div>
+                <div class="secret-code">{{ secret }}</div>
             </div>
 
+            <!-- ===== BACKUP CODES ===== -->
+            {% if backup_codes %}
+            <div class="backup-codes-section">
+                <h6>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Save Your Backup Codes
+                </h6>
+                <p>Store these codes in a safe place. Each code can only be used once.</p>
+                <div class="backup-codes-grid">
+                    {% for code in backup_codes %}
+                    <span class="backup-code-item">{{ code }}</span>
+                    {% endfor %}
+                </div>
+                <button onclick="copyBackupCodes()" class="btn-copy-codes">
+                    <i class="fas fa-copy me-1"></i> Copy Codes
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- ===== VERIFICATION FORM ===== -->
             <form method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                <div class="input-group-custom">
-                    <label class="input-label">
-                        <i class="fas fa-shield-alt me-1"></i> Verification Code
-                    </label>
-                    <input type="text" name="otp_code" class="otp-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autocomplete="off">
+                <div class="form-group">
+                    <label class="form-label">Verification Code</label>
+                    <input type="text" name="otp_code" class="otp-input"
+                           placeholder="000000" maxlength="6"
+                           pattern="[0-9]{6}" required autocomplete="off">
                 </div>
 
-                <button type="submit" class="btn-verify">
+                <button type="submit" class="btn-enable">
                     <i class="fas fa-check-circle me-2"></i>Verify & Enable
                 </button>
             </form>
 
+            <!-- ===== BACK LINK ===== -->
             <a href="{{ url_for('main.security_settings') }}" class="back-link">
-                <i class="fas fa-arrow-left me-1"></i> Back to Security Settings
+                <i class="fas fa-arrow-left"></i> Back to Security Settings
             </a>
 
+            <!-- ===== INFO ===== -->
             <div class="info-text">
                 <i class="fas fa-info-circle me-1"></i>
-                Use an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy
+                Use Google Authenticator, Microsoft Authenticator, or Authy
             </div>
 
-            <div class="steps">
-                <h6><i class="fas fa-list-ol me-2"></i>Setup Instructions:</h6>
+            <!-- ===== STEPS ===== -->
+            <div class="steps-section">
+                <h6><i class="fas fa-list-ol me-2"></i>Setup Instructions</h6>
                 <ol>
                     <li>Download an authenticator app on your phone</li>
                     <li>Scan the QR code with the app</li>
@@ -212,16 +414,55 @@
                     <li>Click "Verify & Enable" to activate 2FA</li>
                 </ol>
             </div>
+
         </div>
     </div>
 </div>
 
 <script>
+// ===== OTP INPUT =====
 const otpInput = document.querySelector('.otp-input');
 if (otpInput) {
-    otpInput.addEventListener('input', function(e) {
+    otpInput.addEventListener('input', function() {
         this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
     });
+}
+
+// ===== COPY BACKUP CODES =====
+function copyBackupCodes() {
+    const codes = document.querySelectorAll('.backup-code-item');
+    if (!codes.length) return;
+
+    const codeText = Array.from(codes).map(el => el.textContent.trim()).join('\n');
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(codeText).then(() => {
+            const btn = document.querySelector('.btn-copy-codes');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+            btn.style.borderColor = '#10b981';
+            btn.style.color = '#10b981';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }, 3000);
+        }).catch(() => {
+            fallbackCopy(codeText);
+        });
+    } else {
+        fallbackCopy(codeText);
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    alert('Backup codes copied to clipboard!');
 }
 </script>
 {% endblock %}

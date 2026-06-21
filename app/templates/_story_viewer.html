@@ -1,452 +1,1117 @@
+<!-- ========== PROFESSIONAL STORY VIEWER ========== -->
 <div id="storyViewerModal" class="story-viewer-modal" style="display: none;">
     <div class="story-viewer-overlay">
         <div class="story-viewer-container">
+
+            <!-- Close Button -->
             <button class="story-close-btn" onclick="closeStoryViewer()">
                 <i class="fas fa-times"></i>
             </button>
+
+            <!-- Main Content -->
             <div class="story-viewer-content">
+
+                <!-- Media Area -->
                 <div class="story-viewer-main" id="storyViewerMain">
                     <img id="storyImage" class="story-media" style="display: none;">
                     <video id="storyVideo" class="story-media" controls style="display: none;"></video>
+
+                    <!-- Text Story -->
                     <div id="storyTextContent" class="story-text-container" style="display: none;">
                         <div class="story-text-content">
-                            <div class="story-author-info">
-                                <img id="storyTextAvatar" class="rounded-circle" style="width: 48px; height: 48px;">
+                            <div class="story-text-author">
+                                <img id="storyTextAvatar" class="story-text-avatar">
                                 <div>
-                                    <div id="storyTextAuthor" class="fw-bold text-white"></div>
-                                    <div id="storyTextTime" class="small text-white-50"></div>
+                                    <div id="storyTextAuthor" class="story-text-name"></div>
+                                    <div id="storyTextTime" class="story-text-time"></div>
                                 </div>
                             </div>
                             <div id="storyTextBody" class="story-text-body"></div>
-                            <div id="storyOriginalPost" class="story-original-post mt-3" style="display: none;">
-                                <a id="storyOriginalPostLink" href="#" class="text-white text-decoration-none">
-                                    <i class="fas fa-eye me-2"></i>View Original Post
-                                </a>
-                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="story-progress-container">
+                        <div class="story-progress-bar" id="storyProgressBar"></div>
+                    </div>
+
+                    <!-- User Info Overlay -->
+                    <div class="story-user-overlay">
+                        <img id="storyUserAvatar" class="story-user-avatar">
+                        <div>
+                            <div id="storyUserName" class="story-user-name"></div>
+                            <div id="storyUserTime" class="story-user-time"></div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Sidebar -->
                 <div class="story-viewer-sidebar">
-                    <div class="story-info">
-                        <img id="storyAuthorAvatar" class="story-author-avatar">
-                        <div class="story-author-details">
-                            <strong id="storyAuthorName"></strong>
-                            <small id="storyTime"></small>
+                    <div class="story-sidebar-header">
+                        <div class="story-sidebar-user">
+                            <img id="storySidebarAvatar" class="story-sidebar-avatar">
+                            <div>
+                                <div id="storySidebarName" class="story-sidebar-name"></div>
+                                <div id="storySidebarTime" class="story-sidebar-time"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="story-caption" id="storyCaption"></div>
-                    <div class="story-reactions">
-                        <div class="reaction-container story-reaction-container">
-                            <button class="story-react-btn" id="storyReactBtn">
-                                <i class="far fa-smile"></i> React
+
+                        <!-- Three Dots with Dropdown -->
+                        <div class="story-dropdown-container">
+                            <button class="story-sidebar-more" onclick="toggleStoryDropdown()">
+                                <i class="fas fa-ellipsis-h"></i>
                             </button>
-                            <div class="reaction-picker story-reaction-picker">
-                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'like')">
-                                    <span class="reaction-emoji">👍</span>
-                                    <span class="reaction-label">Applaud</span>
-                                </button>
-                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'love')">
-                                    <span class="reaction-emoji">❤️</span>
-                                    <span class="reaction-label">Love</span>
-                                </button>
-                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'haha')">
-                                    <span class="reaction-emoji">😂</span>
-                                    <span class="reaction-label">Funny</span>
-                                </button>
-                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'wow')">
-                                    <span class="reaction-emoji">😮</span>
-                                    <span class="reaction-label">Amazing</span>
-                                </button>
-                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'sad')">
-                                    <span class="reaction-emoji">😢</span>
-                                    <span class="reaction-label">Sad</span>
-                                </button>
-                                <button class="reaction-option" onclick="reactToMoment(currentStoryId, 'angry')">
-                                    <span class="reaction-emoji">😠</span>
-                                    <span class="reaction-label">Angry</span>
-                                </button>
+                            <div class="story-dropdown-menu" id="storyDropdownMenu">
+                                <div class="story-dropdown-item" onclick="shareStory()">
+                                    <i class="fas fa-share-alt"></i> Share Story
+                                </div>
+                                <div class="story-dropdown-item" onclick="saveStory()">
+                                    <i class="fas fa-bookmark"></i> Save Story
+                                </div>
+                                <div class="story-dropdown-item" onclick="copyStoryLink()">
+                                    <i class="fas fa-link"></i> Copy Link
+                                </div>
+                                <div class="story-dropdown-divider"></div>
+                                <div class="story-dropdown-item" onclick="viewUserProfile()">
+                                    <i class="fas fa-user"></i> View Profile
+                                </div>
+                                <div class="story-dropdown-item text-danger" onclick="reportStory()">
+                                    <i class="fas fa-flag"></i> Report Story
+                                </div>
                             </div>
                         </div>
-                        <div class="story-reaction-count" id="storyReactionCount">0</div>
                     </div>
-                    <div class="story-comments-section">
-                        <div class="story-comments-list">
-                            <div class="story-comments-header">
-                                <i class="fas fa-comment-dots"></i> Replies
-                            </div>
-                            <div id="storyComments"></div>
+
+                    <div class="story-sidebar-caption" id="storySidebarCaption"></div>
+
+                    <div class="story-sidebar-actions">
+                        <button class="story-react-btn" onclick="toggleReactionPicker()">
+                            <i class="far fa-heart"></i> React
+                        </button>
+                        <div class="story-reaction-picker" id="storyReactionPicker">
+                            <span onclick="reactToStory(currentStoryId, '❤️')">❤️</span>
+                            <span onclick="reactToStory(currentStoryId, '👍')">👍</span>
+                            <span onclick="reactToStory(currentStoryId, '😂')">😂</span>
+                            <span onclick="reactToStory(currentStoryId, '😮')">😮</span>
+                            <span onclick="reactToStory(currentStoryId, '😢')">😢</span>
+                            <span onclick="reactToStory(currentStoryId, '🔥')">🔥</span>
                         </div>
-                        <div class="story-comment-input">
-                            <input type="text" id="storyCommentInput" placeholder="Send a reply..." class="story-comment-field">
-                            <button onclick="sendMomentComment(currentStoryId)" class="story-comment-send">
+                        <span class="story-reaction-count" id="storyReactionCount">0</span>
+                    </div>
+
+                    <div class="story-sidebar-comments">
+                        <div class="story-comments-header">
+                            <i class="fas fa-comment-dots"></i> Replies
+                        </div>
+                        <div class="story-comments-list" id="storyCommentsList">
+                            <div class="story-no-comments">No replies yet</div>
+                        </div>
+                        <div class="story-comment-input-area">
+                            <input type="text" id="storyCommentInput" placeholder="Write a reply..." class="story-comment-input">
+                            <button onclick="sendStoryComment(currentStoryId)" class="story-comment-send-btn">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Navigation -->
+                <button class="story-nav-btn story-nav-prev" onclick="prevStory()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="story-nav-btn story-nav-next" onclick="nextStory()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+
             </div>
-            <button class="story-nav-prev" onclick="prevStory()">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="story-nav-next" onclick="nextStory()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
         </div>
     </div>
 </div>
 
 <style>
+/* ========== PROFESSIONAL STORY VIEWER STYLES ========== */
+
 .story-viewer-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10000;
-    background: rgba(0,0,0,0.95);
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
 }
+
 .story-viewer-overlay {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
     height: 100%;
-}
-.story-viewer-container {
-    position: relative;
-    width: 90%;
-    max-width: 1100px;
-    height: 80%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
+.story-viewer-container {
+    width: 95%;
+    max-width: 1200px;
+    height: 90vh;
+    max-height: 900px;
+    position: relative;
+}
+
 .story-close-btn {
     position: absolute;
-    top: -40px;
+    top: -50px;
     right: 0;
     background: none;
     border: none;
     color: white;
-    font-size: 24px;
+    font-size: 28px;
     cursor: pointer;
-    z-index: 10;
+    z-index: 20;
+    padding: 10px;
+    transition: transform 0.3s;
 }
+
+.story-close-btn:hover {
+    transform: scale(1.2);
+}
+
 .story-viewer-content {
     display: flex;
     width: 100%;
     height: 100%;
-    background: black;
-    border-radius: 16px;
+    background: #1a1a2e;
+    border-radius: 24px;
     overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
 }
+
 .story-viewer-main {
     flex: 2;
+    position: relative;
+    background: #0d0d1a;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: black;
-    position: relative;
+    overflow: hidden;
 }
+
 .story-media {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    border-radius: 0;
 }
+
+.story-progress-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 16px 20px 0 20px;
+}
+
+.story-progress-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: width 0.3s linear;
+    width: 0%;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+}
+
+.story-user-overlay {
+    position: absolute;
+    top: 30px;
+    left: 24px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.story-user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+}
+
+.story-user-name {
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.story-user-time {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
 .story-text-container {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 40px;
 }
+
 .story-text-content {
     text-align: center;
     color: white;
-    max-width: 90%;
+    max-width: 600px;
 }
-.story-author-info {
+
+.story-text-author {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 2rem;
     justify-content: center;
+    margin-bottom: 30px;
 }
-.story-author-info img {
-    width: 48px;
-    height: 48px;
+
+.story-text-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
 }
+
+.story-text-name {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.story-text-time {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
 .story-text-body {
-    font-size: 1.2rem;
+    font-size: 22px;
     line-height: 1.6;
     white-space: pre-line;
 }
-.story-original-post {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255,255,255,0.2);
-}
+
 .story-viewer-sidebar {
-    width: 320px;
-    background: white;
+    width: 340px;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
-    border-left: 1px solid #e4e6eb;
+    flex-shrink: 0;
 }
-.story-info {
+
+[data-theme="dark"] .story-viewer-sidebar {
+    background: #1e1e2e;
+}
+
+.story-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color, #e4e6eb);
+}
+
+.story-sidebar-user {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px;
-    border-bottom: 1px solid #e4e6eb;
 }
-.story-author-avatar {
-    width: 48px;
-    height: 48px;
+
+.story-sidebar-avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
-.story-author-details {
-    flex: 1;
+
+.story-sidebar-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary, #1a1a2e);
 }
-.story-author-details strong {
-    display: block;
-    font-size: 15px;
-}
-.story-author-details small {
+
+.story-sidebar-time {
     font-size: 11px;
-    color: #65676b;
+    color: var(--text-secondary, #65676b);
 }
-.story-caption {
-    padding: 16px;
-    font-size: 14px;
-    color: #1a1a2e;
-    border-bottom: 1px solid #e4e6eb;
-}
-.story-reactions {
-    padding: 12px 16px;
-    border-bottom: 1px solid #e4e6eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.story-react-btn {
-    background: #f0f2f5;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    cursor: pointer;
-}
-.story-react-btn:hover {
-    background: #e4e6eb;
-}
-.story-reaction-container {
+
+/* ===== THREE DOTS DROPDOWN ===== */
+.story-dropdown-container {
     position: relative;
 }
+
+.story-sidebar-more {
+    background: none;
+    border: none;
+    color: var(--text-secondary, #65676b);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    font-size: 20px;
+}
+
+.story-sidebar-more:hover {
+    background: var(--hover-bg, #f0f2f5);
+}
+
+.story-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: var(--bg-card, #ffffff);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    padding: 8px 0;
+    display: none;
+    z-index: 100;
+    border: 1px solid var(--border-color, #e4e6eb);
+    animation: storyDropdownFade 0.2s ease;
+}
+
+[data-theme="dark"] .story-dropdown-menu {
+    background: #242526;
+}
+
+.story-dropdown-menu.show {
+    display: block;
+}
+
+@keyframes storyDropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.story-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--text-primary, #1a1a2e);
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.story-dropdown-item:hover {
+    background: var(--hover-bg, #f0f2f5);
+}
+
+.story-dropdown-item i {
+    width: 18px;
+    color: var(--text-secondary, #65676b);
+}
+
+.story-dropdown-item.text-danger {
+    color: #ef4444;
+}
+
+.story-dropdown-item.text-danger i {
+    color: #ef4444;
+}
+
+.story-dropdown-divider {
+    height: 1px;
+    background: var(--border-color, #e4e6eb);
+    margin: 4px 0;
+}
+
+.story-dropdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    display: none;
+}
+
+.story-dropdown-overlay.show {
+    display: block;
+}
+
+.story-sidebar-caption {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--text-primary, #1a1a2e);
+    border-bottom: 1px solid var(--border-color, #e4e6eb);
+    line-height: 1.5;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.story-sidebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color, #e4e6eb);
+    position: relative;
+}
+
+.story-react-btn {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 14px;
+    color: var(--text-secondary, #65676b);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.story-react-btn:hover {
+    background: var(--hover-bg, #f0f2f5);
+}
+
 .story-reaction-picker {
+    position: absolute;
     bottom: 100%;
     left: 0;
+    background: var(--bg-card, #ffffff);
+    border-radius: 40px;
+    padding: 8px 12px;
+    display: none;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color, #e4e6eb);
     margin-bottom: 8px;
 }
+
+.story-reaction-picker.show {
+    display: flex;
+}
+
+.story-reaction-picker span {
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.story-reaction-picker span:hover {
+    transform: scale(1.3);
+}
+
 .story-reaction-count {
     font-size: 13px;
-    color: #65676b;
+    color: var(--text-secondary, #65676b);
+    margin-left: auto;
 }
-.story-comments-section {
+
+.story-sidebar-comments {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
+
+.story-comments-header {
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-secondary, #65676b);
+    border-bottom: 1px solid var(--border-color, #e4e6eb);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .story-comments-list {
     flex: 1;
     overflow-y: auto;
-    padding: 16px;
+    padding: 12px 20px;
 }
-.story-comments-header {
-    font-weight: 600;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e4e6eb;
+
+.story-no-comments {
+    text-align: center;
+    color: var(--text-secondary, #65676b);
+    font-size: 13px;
+    padding: 30px 0;
 }
-.story-comment {
+
+.story-comment-item {
     display: flex;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
+
 .story-comment-avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
 }
+
 .story-comment-bubble {
-    flex: 1;
-    background: #f0f2f5;
+    background: var(--hover-bg, #f0f2f5);
     padding: 8px 12px;
-    border-radius: 18px;
+    border-radius: 16px;
+    flex: 1;
 }
+
 .story-comment-author {
     font-weight: 600;
     font-size: 12px;
-    display: block;
-    margin-bottom: 2px;
+    color: var(--text-primary, #1a1a2e);
 }
+
 .story-comment-text {
     font-size: 13px;
-    margin: 0;
+    color: var(--text-primary, #1a1a2e);
+    margin-top: 2px;
     word-wrap: break-word;
 }
+
 .story-comment-time {
     font-size: 10px;
-    color: #65676b;
+    color: var(--text-secondary, #65676b);
     margin-top: 4px;
     display: block;
 }
-.story-comment-input {
-    padding: 12px 16px;
-    border-top: 1px solid #e4e6eb;
+
+.story-comment-input-area {
     display: flex;
     gap: 8px;
-    align-items: center;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color, #e4e6eb);
+    background: var(--bg-card, #ffffff);
 }
-.story-comment-field {
+
+[data-theme="dark"] .story-comment-input-area {
+    background: #1e1e2e;
+}
+
+.story-comment-input {
     flex: 1;
+    padding: 10px 16px;
     border: none;
-    background: #f0f2f5;
-    padding: 8px 12px;
-    border-radius: 20px;
+    border-radius: 40px;
+    background: var(--hover-bg, #f0f2f5);
+    font-size: 13px;
     outline: none;
+    color: var(--text-primary, #1a1a2e);
 }
-.story-comment-send {
-    background: none;
-    border: none;
-    color: #1877f2;
-    cursor: pointer;
-    padding: 8px;
+
+.story-comment-input::placeholder {
+    color: var(--text-secondary, #65676b);
 }
-.story-nav-prev, .story-nav-next {
-    position: absolute;
-    background: rgba(0,0,0,0.5);
-    border: none;
-    color: white;
+
+.story-comment-send-btn {
     width: 40px;
     height: 40px;
+    border: none;
     border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
     cursor: pointer;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
 }
+
+.story-comment-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.story-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%) scale(1.1);
+}
+
 .story-nav-prev {
     left: -60px;
 }
+
 .story-nav-next {
     right: -60px;
 }
-.story-nav-prev:hover, .story-nav-next:hover {
-    background: rgba(0,0,0,0.8);
+
+/* ===== TOAST NOTIFICATION ===== */
+.story-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg-card, #ffffff);
+    padding: 14px 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 999999;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color, #e4e6eb);
 }
-.no-comments {
-    text-align: center;
-    padding: 24px;
-    color: #65676b;
-    font-size: 13px;
+
+[data-theme="dark"] .story-toast {
+    background: #242526;
+}
+
+.story-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.story-toast.success .story-toast-icon {
+    color: #10b981;
+}
+
+.story-toast.error .story-toast-icon {
+    color: #ef4444;
+}
+
+.story-toast-icon {
+    font-size: 20px;
+}
+
+.story-toast span {
+    font-size: 14px;
+    color: var(--text-primary, #1a1a2e);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .story-viewer-container {
+        width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .story-viewer-content {
+        border-radius: 0;
+        flex-direction: column;
+    }
+
+    .story-viewer-main {
+        flex: 1;
+        min-height: 50vh;
+    }
+
+    .story-viewer-sidebar {
+        width: 100%;
+        height: 45vh;
+        border-top: 1px solid var(--border-color, #e4e6eb);
+    }
+
+    .story-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .story-nav-prev {
+        left: 10px;
+    }
+
+    .story-nav-next {
+        right: 10px;
+    }
+
+    .story-close-btn {
+        top: 10px;
+        right: 16px;
+        font-size: 22px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        padding: 8px 12px;
+    }
+
+    .story-user-overlay {
+        top: 20px;
+        left: 16px;
+    }
+
+    .story-user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .story-user-name {
+        font-size: 13px;
+    }
+
+    .story-text-body {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .story-viewer-sidebar {
+        height: 40vh;
+    }
+
+    .story-user-overlay {
+        top: 16px;
+        left: 12px;
+    }
+
+    .story-user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .story-user-name {
+        font-size: 12px;
+    }
 }
 </style>
 
 <script>
+// ========== STORY VIEWER JAVASCRIPT ==========
+
 let currentStoryIndex = 0;
 let currentStories = [];
 let currentStoryId = null;
+let progressInterval = null;
 
-function openMomentViewer(storyId) {
-    fetch(`/story-data/${storyId}`)
-        .then(response => response.json())
-        .then(story => {
-            currentStories = [story];
-            currentStoryIndex = 0;
-            currentStoryId = story.id;
-            document.getElementById('storyViewerModal').style.display = 'flex';
-            loadMoment(currentStoryIndex);
-        });
+// ===== OPEN VIEWER =====
+function openMomentViewer(stories, index) {
+    if (typeof stories === 'number') {
+        fetch(`/story-data/${stories}`)
+            .then(response => response.json())
+            .then(story => {
+                currentStories = [story];
+                currentStoryIndex = 0;
+                currentStoryId = story.id;
+                document.getElementById('storyViewerModal').style.display = 'flex';
+                loadStory(currentStoryIndex);
+            })
+            .catch(error => {
+                console.error('Error loading story:', error);
+                alert('Could not load story');
+            });
+        return;
+    }
+
+    if (!stories || stories.length === 0) return;
+    currentStories = stories;
+    currentStoryIndex = index || 0;
+    currentStoryId = currentStories[currentStoryIndex].id;
+    document.getElementById('storyViewerModal').style.display = 'flex';
+    loadStory(currentStoryIndex);
 }
 
-function loadMoment(index) {
+// ===== LOAD STORY =====
+function loadStory(index) {
     const story = currentStories[index];
     if (!story) return;
     currentStoryId = story.id;
 
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+
     const imgEl = document.getElementById('storyImage');
     const videoEl = document.getElementById('storyVideo');
     const textEl = document.getElementById('storyTextContent');
+    const mainEl = document.getElementById('storyViewerMain');
 
     imgEl.style.display = 'none';
     videoEl.style.display = 'none';
     textEl.style.display = 'none';
 
-    if (story.media_type === 'image') {
-        imgEl.src = `/static/uploads/stories/${story.media_url}`;
-        imgEl.style.display = 'block';
-    } else if (story.media_type === 'video') {
-        videoEl.src = `/static/uploads/stories/${story.media_url}`;
-        videoEl.style.display = 'block';
-    } else if (story.media_type === 'text') {
-        textEl.style.display = 'flex';
-        textEl.style.background = story.bg_color ? getGradientBackground(story.bg_color) : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-        document.getElementById('storyTextAvatar').src = story.author_avatar;
-        document.getElementById('storyTextAuthor').innerHTML = story.author_name;
-        document.getElementById('storyTextTime').innerHTML = story.time_ago;
-        document.getElementById('storyTextBody').innerHTML = story.caption.replace(/\n/g, '<br>');
-
-        if (story.shared_post_id) {
-            document.getElementById('storyOriginalPost').style.display = 'block';
-            document.getElementById('storyOriginalPostLink').href = `/post/${story.shared_post_id}`;
-        } else {
-            document.getElementById('storyOriginalPost').style.display = 'none';
-        }
+    let mediaUrl = story.media_url || '';
+    if (mediaUrl && !mediaUrl.startsWith('/') && !mediaUrl.startsWith('http')) {
+        mediaUrl = '/static/uploads/stories/' + mediaUrl;
     }
 
-    document.getElementById('storyAuthorAvatar').src = story.author_avatar;
-    document.getElementById('storyAuthorName').innerHTML = story.author_name;
-    document.getElementById('storyTime').innerHTML = story.time_ago;
-    document.getElementById('storyCaption').innerHTML = story.caption || '';
-    document.getElementById('storyReactionCount').innerHTML = story.reaction_count || 0;
-    loadMomentComments(story.id);
+    const mediaType = story.media_type || 'image';
+
+    if (mediaType === 'image' && mediaUrl) {
+        imgEl.src = mediaUrl;
+        imgEl.style.display = 'block';
+        startProgress();
+    } else if (mediaType === 'video' && mediaUrl) {
+        videoEl.src = mediaUrl;
+        videoEl.style.display = 'block';
+        videoEl.load();
+        videoEl.onplay = function() { startProgress(); };
+        videoEl.onended = function() { nextStory(); };
+    } else {
+        textEl.style.display = 'flex';
+        textEl.style.background = story.bg_color || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        document.getElementById('storyTextAvatar').src = story.author_avatar || '';
+        document.getElementById('storyTextAuthor').textContent = story.author_name || 'Unknown';
+        document.getElementById('storyTextTime').textContent = story.time_ago || 'Just now';
+        document.getElementById('storyTextBody').textContent = story.caption || 'No content';
+        startProgress();
+    }
+
+    document.getElementById('storySidebarAvatar').src = story.author_avatar || '';
+    document.getElementById('storySidebarName').textContent = story.author_name || 'Unknown';
+    document.getElementById('storySidebarTime').textContent = story.time_ago || 'Just now';
+    document.getElementById('storySidebarCaption').textContent = story.caption || '';
+    document.getElementById('storyReactionCount').textContent = story.reaction_count || 0;
+
+    document.getElementById('storyUserAvatar').src = story.author_avatar || '';
+    document.getElementById('storyUserName').textContent = story.author_name || 'Unknown';
+    document.getElementById('storyUserTime').textContent = story.time_ago || 'Just now';
+
+    loadStoryComments(story.id);
+    document.getElementById('storyProgressBar').style.width = '0%';
 }
 
-function getGradientBackground(bgColor) {
-    const gradients = {
-        'gradient-purple': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient-pink': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'gradient-blue': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'gradient-green': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'gradient-orange': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'gradient-dark': 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
-    };
-    return gradients[bgColor] || gradients['gradient-purple'];
+// ===== PROGRESS BAR =====
+function startProgress() {
+    if (progressInterval) clearInterval(progressInterval);
+    let progress = 0;
+    const bar = document.getElementById('storyProgressBar');
+
+    progressInterval = setInterval(() => {
+        progress += 0.5;
+        bar.style.width = Math.min(progress, 100) + '%';
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+            setTimeout(() => {
+                if (currentStoryIndex < currentStories.length - 1) {
+                    nextStory();
+                }
+            }, 500);
+        }
+    }, 50);
 }
 
+// ===== NAVIGATION =====
 function prevStory() {
     if (currentStoryIndex > 0) {
         currentStoryIndex--;
-        loadMoment(currentStoryIndex);
+        loadStory(currentStoryIndex);
     }
 }
 
 function nextStory() {
     if (currentStoryIndex < currentStories.length - 1) {
         currentStoryIndex++;
-        loadMoment(currentStoryIndex);
+        loadStory(currentStoryIndex);
     }
 }
 
 function closeStoryViewer() {
     document.getElementById('storyViewerModal').style.display = 'none';
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+    const video = document.getElementById('storyVideo');
+    if (video) video.pause();
+    closeAllStoryDropdowns();
 }
 
-function reactToMoment(storyId, reaction) {
+// ===== THREE DOTS DROPDOWN =====
+function toggleStoryDropdown() {
+    const menu = document.getElementById('storyDropdownMenu');
+    const overlay = document.getElementById('storyDropdownOverlay');
+
+    document.querySelectorAll('.story-dropdown-menu').forEach(m => {
+        if (m !== menu) m.classList.remove('show');
+    });
+
+    menu.classList.toggle('show');
+
+    if (!overlay) {
+        const newOverlay = document.createElement('div');
+        newOverlay.id = 'storyDropdownOverlay';
+        newOverlay.className = 'story-dropdown-overlay';
+        newOverlay.onclick = function() {
+            closeAllStoryDropdowns();
+        };
+        document.body.appendChild(newOverlay);
+    }
+
+    const overlayEl = document.getElementById('storyDropdownOverlay');
+    if (menu.classList.contains('show')) {
+        overlayEl.classList.add('show');
+    } else {
+        overlayEl.classList.remove('show');
+    }
+}
+
+function closeAllStoryDropdowns() {
+    document.querySelectorAll('.story-dropdown-menu').forEach(m => {
+        m.classList.remove('show');
+    });
+    const overlay = document.getElementById('storyDropdownOverlay');
+    if (overlay) overlay.classList.remove('show');
+}
+
+// ===== DROPDOWN ACTIONS =====
+function shareStory() {
+    const story = currentStories[currentStoryIndex];
+    if (!story) return;
+
+    const shareUrl = window.location.origin + '/view_story/' + story.id;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Check out this story on Zetravox',
+            text: story.caption || 'Check out this story!',
+            url: shareUrl
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showToast('Link copied to clipboard!', 'success');
+        }).catch(() => {
+            prompt('Copy this link to share:', shareUrl);
+        });
+    }
+    closeAllStoryDropdowns();
+}
+
+function saveStory() {
+    const story = currentStories[currentStoryIndex];
+    if (!story) return;
+
+    fetch('/save_story/' + story.id, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Story saved!', 'success');
+        } else {
+            showToast('Failed to save story', 'error');
+        }
+    })
+    .catch(() => {
+        showToast('Failed to save story', 'error');
+    });
+    closeAllStoryDropdowns();
+}
+
+function copyStoryLink() {
+    const story = currentStories[currentStoryIndex];
+    if (!story) return;
+
+    const link = window.location.origin + '/view_story/' + story.id;
+    navigator.clipboard.writeText(link).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    }).catch(() => {
+        prompt('Copy this link:', link);
+    });
+    closeAllStoryDropdowns();
+}
+
+function viewUserProfile() {
+    const story = currentStories[currentStoryIndex];
+    if (!story) return;
+
+    const username = story.author_name || 'user';
+    window.location.href = '/user/' + username;
+}
+
+function reportStory() {
+    const story = currentStories[currentStoryIndex];
+    if (!story) return;
+
+    if (confirm('Are you sure you want to report this story?')) {
+        fetch('/report_story/' + story.id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Story reported. We will review it.', 'success');
+            } else {
+                showToast('Failed to report story', 'error');
+            }
+        })
+        .catch(() => {
+            showToast('Failed to report story', 'error');
+        });
+    }
+    closeAllStoryDropdowns();
+}
+
+function showToast(message, type = 'success') {
+    const existing = document.querySelector('.story-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'story-toast ' + type;
+    toast.innerHTML = `
+        <div class="story-toast-icon">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        </div>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ===== REACTIONS =====
+function toggleReactionPicker() {
+    const picker = document.getElementById('storyReactionPicker');
+    picker.classList.toggle('show');
+}
+
+function reactToStory(storyId, reaction) {
     fetch(`/react_story/${storyId}/${reaction}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -454,37 +1119,43 @@ function reactToMoment(storyId, reaction) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('storyReactionCount').innerHTML = data.reaction_count;
+            document.getElementById('storyReactionCount').textContent = data.reaction_count || 0;
+            document.getElementById('storyReactionPicker').classList.remove('show');
         }
-    });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
-function loadMomentComments(storyId) {
+// ===== COMMENTS =====
+function loadStoryComments(storyId) {
     fetch(`/get_story_comments/${storyId}`)
         .then(response => response.json())
         .then(comments => {
-            const container = document.getElementById('storyComments');
+            const container = document.getElementById('storyCommentsList');
             if (!comments || comments.length === 0) {
-                container.innerHTML = '<div class="no-comments">No replies yet. Send a message!</div>';
+                container.innerHTML = '<div class="story-no-comments">No replies yet</div>';
                 return;
             }
             container.innerHTML = comments.map(c => `
-                <div class="story-comment">
+                <div class="story-comment-item">
                     <img src="${c.author_avatar}" class="story-comment-avatar">
                     <div class="story-comment-bubble">
-                        <strong class="story-comment-author">${escapeHtml(c.author_name)}</strong>
-                        <p class="story-comment-text">${escapeHtml(c.message)}</p>
-                        <small class="story-comment-time">${c.time_ago}</small>
+                        <div class="story-comment-author">${escapeHtml(c.author_name)}</div>
+                        <div class="story-comment-text">${escapeHtml(c.message)}</div>
+                        <span class="story-comment-time">${c.time_ago}</span>
                     </div>
                 </div>
             `).join('');
-        });
+            container.scrollTop = container.scrollHeight;
+        })
+        .catch(error => console.error('Error loading comments:', error));
 }
 
-function sendMomentComment(storyId) {
+function sendStoryComment(storyId) {
     const input = document.getElementById('storyCommentInput');
     const message = input.value.trim();
     if (!message) return;
+
     fetch('/send_story_comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -494,23 +1165,75 @@ function sendMomentComment(storyId) {
     .then(data => {
         if (data.success) {
             input.value = '';
-            loadMomentComments(storyId);
+            loadStoryComments(storyId);
         }
-    });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
+// ===== KEYBOARD SHORTCUTS =====
 document.addEventListener('keydown', function(e) {
     const modal = document.getElementById('storyViewerModal');
     if (modal && modal.style.display === 'flex') {
-        if (e.key === 'ArrowLeft') prevStory();
-        if (e.key === 'ArrowRight') nextStory();
-        if (e.key === 'Escape') closeStoryViewer();
+        // Arrow Left - Previous Story
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevStory();
+        }
+        // Arrow Right - Next Story
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            nextStory();
+        }
+        // Escape - Close Viewer and Dropdowns
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeStoryViewer();
+            closeAllStoryDropdowns();
+        }
+        // Space - Pause/Resume video (optional)
+        if (e.key === ' ') {
+            e.preventDefault();
+            const video = document.getElementById('storyVideo');
+            if (video && video.style.display !== 'none') {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        }
+    }
+});
+
+// ===== CLOSE ON CLICK OUTSIDE =====
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('storyViewerModal');
+    if (modal && modal.style.display === 'flex') {
+        if (e.target === modal) {
+            closeStoryViewer();
+        }
+    }
+});
+
+// ===== CLOSE DROPDOWN ON CLICK OUTSIDE =====
+document.addEventListener('click', function(e) {
+    const dropdownContainer = document.querySelector('.story-dropdown-container');
+    const dropdownMenu = document.getElementById('storyDropdownMenu');
+    const overlay = document.getElementById('storyDropdownOverlay');
+
+    if (dropdownContainer && dropdownMenu) {
+        if (!dropdownContainer.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
+        }
     }
 });
 </script>

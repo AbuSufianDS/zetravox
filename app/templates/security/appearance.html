@@ -241,35 +241,35 @@ input:checked + .slider:before {
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item active">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
             </div>
         </div>
@@ -280,7 +280,7 @@ input:checked + .slider:before {
                 <div class="appearance-card-header">
                     <h5>
                         <i class="fas fa-palette" style="color: #667eea;"></i>
-                        Theme Selection
+                        {{ _('Theme Selection') }}
                     </h5>
                 </div>
                 <div class="appearance-card-body">
@@ -289,32 +289,32 @@ input:checked + .slider:before {
                             <div class="theme-icon">
                                 <i class="fas fa-sun" style="color: #f59e0b;"></i>
                             </div>
-                            <div class="theme-title">Light</div>
-                            <div class="theme-desc">Bright and clean interface</div>
+                            <div class="theme-title">{{ _('Light') }}</div>
+                            <div class="theme-desc">{{ _('Bright and clean interface') }}</div>
                         </div>
                         <div class="theme-card" data-theme="dark">
                             <div class="theme-icon">
                                 <i class="fas fa-moon" style="color: #6366f1;"></i>
                             </div>
-                            <div class="theme-title">Dark</div>
-                            <div class="theme-desc">Easy on the eyes, energy saving</div>
+                            <div class="theme-title">{{ _('Dark') }}</div>
+                            <div class="theme-desc">{{ _('Easy on the eyes, energy saving') }}</div>
                         </div>
                         <div class="theme-card" data-theme="system">
                             <div class="theme-icon">
                                 <i class="fas fa-desktop" style="color: #10b981;"></i>
                             </div>
-                            <div class="theme-title">System</div>
-                            <div class="theme-desc">Follow your device settings</div>
+                            <div class="theme-title">{{ _('System') }}</div>
+                            <div class="theme-desc">{{ _('Follow your device settings') }}</div>
                         </div>
                     </div>
 
                     <div class="preview-box mt-4">
-                        <div class="preview-text fw-semibold">Preview</div>
-                        <div class="preview-text mt-2">This is how text will appear in your selected theme.</div>
-                        <div class="preview-text-muted mt-1">Secondary text appears like this.</div>
+                        <div class="preview-text fw-semibold">{{ _('Preview') }}</div>
+                        <div class="preview-text mt-2">{{ _('This is how text will appear in your selected theme.') }}</div>
+                        <div class="preview-text-muted mt-1">{{ _('Secondary text appears like this.') }}</div>
                         <div class="mt-2">
-                            <span class="badge" style="background: #667eea;">Button</span>
-                            <span class="badge ms-2" style="background: var(--border-color);">Tag</span>
+                            <span class="badge" style="background: #667eea;">{{ _('Button') }}</span>
+                            <span class="badge ms-2" style="background: var(--border-color);">{{ _('Tag') }}</span>
                         </div>
                     </div>
                 </div>
@@ -325,28 +325,28 @@ input:checked + .slider:before {
                 <div class="appearance-card-header">
                     <h5>
                         <i class="fas fa-font" style="color: #667eea;"></i>
-                        Typography
+                        {{ _('Typography') }}
                     </h5>
                 </div>
                 <div class="appearance-card-body">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Font Size</label>
+                            <label class="form-label fw-semibold">{{ _('Font Size') }}</label>
                             <select class="form-select-custom" id="fontSize">
-                                <option value="small">Small (14px)</option>
-                                <option value="medium" selected>Medium (16px)</option>
-                                <option value="large">Large (18px)</option>
-                                <option value="x-large">Extra Large (20px)</option>
+                                <option value="small">{{ _('Small') }} (14px)</option>
+                                <option value="medium" selected>{{ _('Medium') }} (16px)</option>
+                                <option value="large">{{ _('Large') }} (18px)</option>
+                                <option value="x-large">{{ _('Extra Large') }} (20px)</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Font Family</label>
+                            <label class="form-label fw-semibold">{{ _('Font Family') }}</label>
                             <select class="form-select-custom" id="fontFamily">
-                                <option value="'Inter', sans-serif">Inter (Default)</option>
-                                <option value="system-ui, -apple-system, sans-serif">System UI</option>
-                                <option value="'Georgia', serif">Georgia (Serif)</option>
+                                <option value="'Inter', sans-serif">Inter ({{ _('Default') }})</option>
+                                <option value="system-ui, -apple-system, sans-serif">{{ _('System UI') }}</option>
+                                <option value="'Georgia', serif">Georgia ({{ _('Serif') }})</option>
                                 <option value="'Arial', sans-serif">Arial</option>
-                                <option value="'Courier New', monospace">Courier New (Monospace)</option>
+                                <option value="'Courier New', monospace">Courier New ({{ _('Monospace') }})</option>
                             </select>
                         </div>
                     </div>
@@ -358,14 +358,14 @@ input:checked + .slider:before {
                 <div class="appearance-card-header">
                     <h5>
                         <i class="fas fa-layer-group" style="color: #667eea;"></i>
-                        Layout Preferences
+                        {{ _('Layout Preferences') }}
                     </h5>
                 </div>
                 <div class="appearance-card-body">
                     <div class="switch-group">
                         <div>
-                            <div class="switch-label">Compact Mode</div>
-                            <div class="switch-desc">Show more content with tighter spacing</div>
+                            <div class="switch-label">{{ _('Compact Mode') }}</div>
+                            <div class="switch-desc">{{ _('Show more content with tighter spacing') }}</div>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="compactMode">
@@ -375,8 +375,8 @@ input:checked + .slider:before {
 
                     <div class="switch-group">
                         <div>
-                            <div class="switch-label">Reduce Animations</div>
-                            <div class="switch-desc">Disable animations for smoother performance</div>
+                            <div class="switch-label">{{ _('Reduce Animations') }}</div>
+                            <div class="switch-desc">{{ _('Disable animations for smoother performance') }}</div>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="reduceAnimations">
@@ -386,8 +386,8 @@ input:checked + .slider:before {
 
                     <div class="switch-group">
                         <div>
-                            <div class="switch-label">Large Headers</div>
-                            <div class="switch-desc">Use larger headers for better readability</div>
+                            <div class="switch-label">{{ _('Large Headers') }}</div>
+                            <div class="switch-desc">{{ _('Use larger headers for better readability') }}</div>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="largeHeaders">
@@ -400,7 +400,7 @@ input:checked + .slider:before {
             <!-- Reset Button -->
             <div class="text-end">
                 <button class="btn-reset" id="resetDefaultsBtn">
-                    <i class="fas fa-undo-alt me-2"></i>Reset to Defaults
+                    <i class="fas fa-undo-alt me-2"></i>{{ _('Reset to Defaults') }}
                 </button>
             </div>
         </div>
@@ -445,7 +445,7 @@ document.querySelectorAll('.theme-card').forEach(card => {
         toast.style.color = 'white';
         toast.style.border = 'none';
         toast.style.borderRadius = '12px';
-        toast.innerHTML = `<i class="fas fa-check-circle me-2"></i>${theme.charAt(0).toUpperCase() + theme.slice(1)} theme applied`;
+        toast.innerHTML = `<i class="fas fa-check-circle me-2"></i>${theme.charAt(0).toUpperCase() + theme.slice(1)} {{ _('theme applied') }}`;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2000);
     });

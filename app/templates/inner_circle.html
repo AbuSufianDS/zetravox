@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block title %}Inner Circle - Zetravox{% endblock %}
+
+{% block content %}
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   INNER CIRCLE PAGE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.ic-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.ic-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.ic-card:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.ic-card-header {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.ic-card-header h4,
+.ic-card-header h5 {
+    margin: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ic-card-header .ic-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--grad-main);
+    color: #fff;
+}
+
+.ic-card-body {
+    padding: 20px 24px;
+}
+
+/* ─── Usage Banner ─── */
+.ic-usage-banner {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    transition: var(--transition);
+}
+
+.ic-usage-banner:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.ic-usage-banner .usage-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ic-usage-banner .usage-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 206, 201, 0.12);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00CEC9;
+    font-size: 16px;
+}
+
+.ic-usage-banner .usage-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.ic-usage-banner .usage-text strong {
+    color: var(--text-primary);
+}
+
+.ic-usage-banner .usage-count {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--clr-primary-light);
+}
+
+.ic-usage-banner .upgrade-btn {
+    padding: 8px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #FDCB6E, #E17055);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #000;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ic-usage-banner .upgrade-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+}
+
+/* ─── Member List ─── */
+.ic-member-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-glass);
+    transition: var(--transition);
+    gap: 12px;
+}
+
+.ic-member-item:last-child {
+    border-bottom: none;
+}
+
+.ic-member-item:hover {
+    background: var(--bg-surface-hover);
+    border-radius: var(--radius-sm);
+}
+
+.ic-member-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ic-member-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-glass);
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.ic-member-item:hover .ic-member-avatar {
+    border-color: var(--clr-primary);
+}
+
+.ic-member-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.ic-member-handle {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.ic-member-role {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 12px;
+    border-radius: var(--radius-full);
+    background: var(--grad-main);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ic-member-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.ic-btn-remove {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: var(--radius-sm);
+    color: #FF6B6B;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ic-btn-remove:hover {
+    background: #FF6B6B;
+    color: #fff;
+    border-color: #FF6B6B;
+}
+
+.ic-btn-add {
+    padding: 6px 18px;
+    background: var(--grad-main);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ic-btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+/* ─── Empty State ─── */
+.ic-empty {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.ic-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.ic-empty-icon i {
+    font-size: 36px;
+    color: var(--clr-primary-light);
+}
+
+.ic-empty h5 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.ic-empty p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* ─── Suggestions Section ─── */
+.ic-suggestion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-glass);
+    transition: var(--transition);
+    gap: 12px;
+}
+
+.ic-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.ic-suggestion-item:hover {
+    background: var(--bg-surface-hover);
+    border-radius: var(--radius-sm);
+}
+
+.ic-suggestion-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(253, 203, 110, 0.15);
+    color: #FDCB6E;
+}
+
+/* ─── Limit Reached Banner ─── */
+.ic-limit-banner {
+    text-align: center;
+    padding: 30px 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    margin-top: 20px;
+}
+
+.ic-limit-banner i {
+    font-size: 32px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 12px;
+}
+
+.ic-limit-banner h5 {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.ic-limit-banner p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.ic-limit-banner .upgrade-btn-large {
+    padding: 10px 32px;
+    background: linear-gradient(135deg, #FDCB6E, #E17055);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.ic-limit-banner .upgrade-btn-large:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(253, 203, 110, 0.4);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .ic-container { padding: 12px; }
+    .ic-card-header { padding: 14px 16px; }
+    .ic-card-body { padding: 16px; }
+    .ic-member-item { flex-wrap: wrap; }
+    .ic-member-actions { width: 100%; justify-content: flex-end; }
+    .ic-usage-banner { flex-direction: column; text-align: center; }
+    .ic-usage-banner .upgrade-btn { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .ic-member-info { gap: 10px; }
+    .ic-member-avatar { width: 36px; height: 36px; }
+    .ic-member-name { font-size: 13px; }
+    .ic-btn-remove, .ic-btn-add { padding: 4px 12px; font-size: 11px; }
+}
+</style>
+
+<div class="ic-container">
+
+    <!-- ─── Usage Banner (For Non-VIP Users - DISPLAY ONLY, NO BLOCK) ─── -->
+    {% if not current_user.is_vip %}
+    <div class="ic-usage-banner">
+        <div class="usage-info">
+            <div class="usage-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <span class="usage-text">
+                    <strong>Free Inner Circle:</strong>
+                    <span class="usage-count">{{ current_user.inner_circle_free_limit_remaining }}</span>
+                    of 5 free members remaining
+                </span>
+                <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 2px;">
+                    <i class="fas fa-info-circle"></i> Upgrade to VIP for unlimited members
+                </span>
+            </div>
+        </div>
+        <a href="{{ url_for('main.vip') }}" class="upgrade-btn">
+            <i class="fas fa-crown"></i> Upgrade to VIP
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- ─── Header Card ─── -->
+    <div class="ic-card">
+        <div class="ic-card-header">
+            <h4>
+                <i class="fas fa-crown" style="color: #FDCB6E;"></i>
+                Inner Circle
+                <span class="ic-badge">{{ members|length }} / 15</span>
+            </h4>
+            <div>
+                <span style="font-size: 12px; color: var(--text-muted);">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Exclusive content for your closest connections
+                </span>
+            </div>
+        </div>
+        <div class="ic-card-body">
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 0;">
+                <i class="fas fa-shield-alt me-2" style="color: var(--clr-primary-light);"></i>
+                Posts marked as <strong>"Inner Circle"</strong> are only visible to members of your Inner Circle.
+                Choose your closest friends and family to share exclusive content with.
+            </p>
+        </div>
+    </div>
+
+    <!-- ─── Members Section ─── -->
+    <div class="ic-card">
+        <div class="ic-card-header">
+            <h5>
+                <i class="fas fa-users"></i>
+                Members
+                <span class="ic-badge">{{ members|length }}</span>
+            </h5>
+            <span style="font-size: 12px; color: var(--text-muted);">
+                {% if members|length == 0 %}
+                    <i class="fas fa-plus-circle me-1"></i> Add your first member
+                {% else %}
+                    <i class="fas fa-check-circle me-1" style="color: #00B894;"></i> {{ members|length }} active members
+                {% endif %}
+            </span>
+        </div>
+        <div class="ic-card-body" style="padding: 0;">
+            {% if members %}
+                <div>
+                    {% for member in members %}
+                    <div class="ic-member-item">
+                        <div class="ic-member-info">
+                            <img src="{{ member.avatar(44) }}" class="ic-member-avatar" alt="{{ member.username }}">
+                            <div>
+                                <div class="ic-member-name">{{ member.username }}</div>
+                                <div class="ic-member-handle">@{{ member.username }}</div>
+                            </div>
+                            <span class="ic-member-role">
+                                <i class="fas fa-star" style="font-size: 8px;"></i> Inner Circle
+                            </span>
+                        </div>
+                        <div class="ic-member-actions">
+                            <form method="POST" action="{{ url_for('main.remove_inner_circle', user_id=member.id) }}"
+                                  onsubmit="return confirm('Remove {{ member.username }} from your Inner Circle?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="ic-btn-remove">
+                                    <i class="fas fa-user-minus"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="ic-empty">
+                    <div class="ic-empty-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h5>No Inner Circle Members Yet</h5>
+                    <p>Add your closest friends to share exclusive content with them.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ─── Suggestions Section ─── -->
+    {% if suggestions %}
+    <div class="ic-card">
+        <div class="ic-card-header">
+            <h5>
+                <i class="fas fa-user-plus"></i>
+                Suggestions
+            </h5>
+            <span style="font-size: 12px; color: var(--text-muted);">
+                <i class="fas fa-lightbulb me-1" style="color: #FDCB6E;"></i>
+                People you might want to add
+            </span>
+        </div>
+        <div class="ic-card-body" style="padding: 0;">
+            {% for user in suggestions %}
+            <div class="ic-suggestion-item">
+                <div class="ic-member-info">
+                    <img src="{{ user.avatar(40) }}" class="ic-member-avatar" alt="{{ user.username }}">
+                    <div>
+                        <div class="ic-member-name">{{ user.username }}</div>
+                        <div class="ic-member-handle">@{{ user.username }}</div>
+                    </div>
+                    <span class="ic-suggestion-badge">
+                        <i class="fas fa-lightbulb"></i> Suggested
+                    </span>
+                </div>
+                <div class="ic-member-actions">
+                    <form method="POST" action="{{ url_for('main.add_inner_circle', user_id=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="ic-btn-add">
+                            <i class="fas fa-user-plus"></i> Add
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

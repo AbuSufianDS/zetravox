@@ -236,35 +236,35 @@ input:checked + .slider:before {
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item active">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
             </div>
         </div>
@@ -274,7 +274,7 @@ input:checked + .slider:before {
                 <div class="notifications-card-header">
                     <h4>
                         <i class="fas fa-bell" style="color: #667eea;"></i>
-                        Notification Preferences
+                        {{ _('Notification Preferences') }}
                     </h4>
                 </div>
                 <div class="notifications-card-body">
@@ -284,14 +284,14 @@ input:checked + .slider:before {
                         <div class="settings-section">
                             <h5>
                                 <i class="fas fa-bell"></i>
-                                Push Notifications
-                                <span class="info-badge">Real-time</span>
+                                {{ _('Push Notifications') }}
+                                <span class="info-badge">{{ _('Real-time') }}</span>
                             </h5>
 
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_push_likes.label.text }}</div>
-                                    <div class="notification-desc">Get notified when someone applauds your post</div>
+                                    <div class="notification-desc">{{ _('Get notified when someone applauds your post') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_push_likes(class="form-check-input") }}
@@ -302,7 +302,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_push_comments.label.text }}</div>
-                                    <div class="notification-desc">Get notified when someone replies to your post</div>
+                                    <div class="notification-desc">{{ _('Get notified when someone replies to your post') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_push_comments(class="form-check-input") }}
@@ -313,7 +313,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_push_follows.label.text }}</div>
-                                    <div class="notification-desc">Get notified when someone follows you</div>
+                                    <div class="notification-desc">{{ _('Get notified when someone follows you') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_push_follows(class="form-check-input") }}
@@ -324,7 +324,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_push_shares.label.text }}</div>
-                                    <div class="notification-desc">Get notified when someone reposts your content</div>
+                                    <div class="notification-desc">{{ _('Get notified when someone reposts your content') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_push_shares(class="form-check-input") }}
@@ -335,7 +335,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_push_friend_requests.label.text }}</div>
-                                    <div class="notification-desc">Get notified when someone sends a connection request</div>
+                                    <div class="notification-desc">{{ _('Get notified when someone sends a connection request') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_push_friend_requests(class="form-check-input") }}
@@ -346,7 +346,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_push_messages.label.text }}</div>
-                                    <div class="notification-desc">Get notified when you receive a new message</div>
+                                    <div class="notification-desc">{{ _('Get notified when you receive a new message') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_push_messages(class="form-check-input") }}
@@ -358,14 +358,14 @@ input:checked + .slider:before {
                         <div class="settings-section">
                             <h5>
                                 <i class="fas fa-envelope"></i>
-                                Email Notifications
-                                <span class="info-badge">Weekly Digest</span>
+                                {{ _('Email Notifications') }}
+                                <span class="info-badge">{{ _('Weekly Digest') }}</span>
                             </h5>
 
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_email_likes.label.text }}</div>
-                                    <div class="notification-desc">Receive email when someone applauds your post</div>
+                                    <div class="notification-desc">{{ _('Receive email when someone applauds your post') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_email_likes(class="form-check-input") }}
@@ -376,7 +376,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_email_comments.label.text }}</div>
-                                    <div class="notification-desc">Receive email when someone replies to your post</div>
+                                    <div class="notification-desc">{{ _('Receive email when someone replies to your post') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_email_comments(class="form-check-input") }}
@@ -387,7 +387,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_email_follows.label.text }}</div>
-                                    <div class="notification-desc">Receive email when someone follows you</div>
+                                    <div class="notification-desc">{{ _('Receive email when someone follows you') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_email_follows(class="form-check-input") }}
@@ -398,7 +398,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_email_shares.label.text }}</div>
-                                    <div class="notification-desc">Receive email when someone reposts your content</div>
+                                    <div class="notification-desc">{{ _('Receive email when someone reposts your content') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_email_shares(class="form-check-input") }}
@@ -409,7 +409,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_email_friend_requests.label.text }}</div>
-                                    <div class="notification-desc">Receive email when someone sends a connection request</div>
+                                    <div class="notification-desc">{{ _('Receive email when someone sends a connection request') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_email_friend_requests(class="form-check-input") }}
@@ -420,7 +420,7 @@ input:checked + .slider:before {
                             <div class="notification-item">
                                 <div class="notification-info">
                                     <div class="notification-title">{{ form.notify_email_messages.label.text }}</div>
-                                    <div class="notification-desc">Receive email when you receive a new message</div>
+                                    <div class="notification-desc">{{ _('Receive email when you receive a new message') }}</div>
                                 </div>
                                 <label class="switch">
                                     {{ form.notify_email_messages(class="form-check-input") }}
@@ -432,7 +432,7 @@ input:checked + .slider:before {
                         <div class="action-buttons">
                             {{ form.submit(class="btn-primary-gradient") }}
                             <button type="button" class="btn-outline-secondary-custom" id="testNotificationBtn">
-                                <i class="fas fa-bell me-1"></i>Send Test Notification
+                                <i class="fas fa-bell me-1"></i>{{ _('Send Test Notification') }}
                             </button>
                         </div>
                     </form>
@@ -448,7 +448,7 @@ document.getElementById('testNotificationBtn')?.addEventListener('click', async 
     const btn = this;
     const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ _('Sending...') }}';
 
     try {
         const response = await fetch('{{ url_for("main.api_test_notification") }}', {
@@ -465,7 +465,7 @@ document.getElementById('testNotificationBtn')?.addEventListener('click', async 
         toast.style.minWidth = '250px';
         toast.style.borderRadius = '12px';
         toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        toast.innerHTML = `<i class="fas fa-${data.success ? 'check-circle' : 'exclamation-circle'} me-2"></i>${data.success ? 'Test notification sent!' : 'Failed to send'}`;
+        toast.innerHTML = `<i class="fas fa-${data.success ? 'check-circle' : 'exclamation-circle'} me-2"></i>${data.success ? '{{ _('Test notification sent!') }}' : '{{ _('Failed to send') }}'}`;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     } catch (error) {

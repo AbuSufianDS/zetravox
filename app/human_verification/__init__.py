@@ -1,0 +1,1 @@
+from app.human_verification.routes import human_verification_bp

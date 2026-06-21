@@ -242,35 +242,35 @@
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item active">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
             </div>
         </div>
@@ -280,10 +280,10 @@
                 <div class="history-card-header">
                     <h5>
                         <i class="fas fa-history" style="color: #667eea;"></i>
-                        Login History
+                        {{ _('Login History') }}
                     </h5>
                     <span class="status-badge status-success" style="background: var(--hover-bg); color: var(--text-secondary);">
-                        <i class="fas fa-chart-line me-1"></i> {{ history.total }} Total Logins
+                        <i class="fas fa-chart-line me-1"></i> {{ history.total }} {{ _('Total Logins') }}
                     </span>
                 </div>
                 <div class="history-card-body">
@@ -292,11 +292,11 @@
                         <table class="history-table">
                             <thead>
                                 <tr>
-                                    <th>Status</th>
-                                    <th>IP Address</th>
-                                    <th>Device</th>
-                                    <th>Location</th>
-                                    <th>Time</th>
+                                    <th>{{ _('Status') }}</th>
+                                    <th>{{ _('IP Address') }}</th>
+                                    <th>{{ _('Device') }}</th>
+                                    <th>{{ _('Location') }}</th>
+                                    <th>{{ _('Time') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -305,17 +305,17 @@
                                     <td>
                                         {% if entry.success %}
                                         <span class="status-badge status-success">
-                                            <i class="fas fa-check-circle"></i> Success
+                                            <i class="fas fa-check-circle"></i> {{ _('Success') }}
                                         </span>
                                         {% else %}
                                         <span class="status-badge status-failed">
-                                            <i class="fas fa-times-circle"></i> Failed
+                                            <i class="fas fa-times-circle"></i> {{ _('Failed') }}
                                         </span>
-                                        <div class="small text-muted mt-1">{{ entry.failure_reason or 'Invalid credentials' }}</div>
+                                        <div class="small text-muted mt-1">{{ entry.failure_reason or _('Invalid credentials') }}</div>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <code class="ip-address">{{ entry.ip_address or 'Unknown' }}</code>
+                                        <code class="ip-address">{{ entry.ip_address or _('Unknown') }}</code>
                                     </td>
                                     <td>
                                         <div class="device-info">
@@ -336,7 +336,7 @@
                                                 {% if entry.user_agent %}
                                                 {{ entry.user_agent[:40] }}{% if entry.user_agent|length > 40 %}...{% endif %}
                                                 {% else %}
-                                                Unknown Device
+                                                {{ _('Unknown Device') }}
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -344,12 +344,12 @@
                                     <td>
                                         <div class="location-info">
                                             <i class="fas fa-map-marker-alt text-muted"></i>
-                                            <span>{{ entry.ip_address or 'Unknown' }}</span>
+                                            <span>{{ entry.ip_address or _('Unknown') }}</span>
                                         </div>
                                     </td>
                                     <td class="timestamp">
                                         <i class="far fa-clock me-1 text-muted"></i>
-                                        {{ entry.timestamp.strftime('%b %d, %Y %H:%M') if entry.timestamp else 'Unknown' }}
+                                        {{ entry.timestamp.strftime('%b %d, %Y %H:%M') if entry.timestamp else _('Unknown') }}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -361,25 +361,25 @@
                     <div class="pagination-custom">
                         {% if history.has_prev %}
                         <a href="{{ url_for('main.login_history', page=history.prev_num) }}" class="page-btn">
-                            <i class="fas fa-chevron-left me-1"></i> Previous
+                            <i class="fas fa-chevron-left me-1"></i> {{ _('Previous') }}
                         </a>
                         {% else %}
                         <span class="page-btn disabled">
-                            <i class="fas fa-chevron-left me-1"></i> Previous
+                            <i class="fas fa-chevron-left me-1"></i> {{ _('Previous') }}
                         </span>
                         {% endif %}
 
                         <span class="page-btn" style="background: #667eea; color: white;">
-                            Page {{ history.page }} of {{ history.pages }}
+                            {{ _('Page') }} {{ history.page }} {{ _('of') }} {{ history.pages }}
                         </span>
 
                         {% if history.has_next %}
                         <a href="{{ url_for('main.login_history', page=history.next_num) }}" class="page-btn">
-                            Next <i class="fas fa-chevron-right ms-1"></i>
+                            {{ _('Next') }} <i class="fas fa-chevron-right ms-1"></i>
                         </a>
                         {% else %}
                         <span class="page-btn disabled">
-                            Next <i class="fas fa-chevron-right ms-1"></i>
+                            {{ _('Next') }} <i class="fas fa-chevron-right ms-1"></i>
                         </span>
                         {% endif %}
                     </div>
@@ -388,8 +388,8 @@
                     {% else %}
                     <div class="empty-state">
                         <i class="fas fa-history"></i>
-                        <h6>No Login History</h6>
-                        <p>Your login activity will appear here once you log in</p>
+                        <h6>{{ _('No Login History') }}</h6>
+                        <p>{{ _('Your login activity will appear here once you log in') }}</p>
                     </div>
                     {% endif %}
                 </div>
@@ -399,8 +399,8 @@
                 <div class="d-flex">
                     <i class="fas fa-shield-alt fa-lg"></i>
                     <div>
-                        <div class="title">Security Tip</div>
-                        <div class="text">If you see any suspicious login activity, change your password immediately and enable two-factor authentication.</div>
+                        <div class="title">{{ _('Security Tip') }}</div>
+                        <div class="text">{{ _('If you see any suspicious login activity, change your password immediately and enable two-factor authentication.') }}</div>
                     </div>
                 </div>
             </div>

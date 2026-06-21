@@ -230,35 +230,35 @@ input:checked + .slider:before {
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item active">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
             </div>
         </div>
@@ -269,7 +269,7 @@ input:checked + .slider:before {
                 <div class="privacy-card-header">
                     <h5>
                         <i class="fas fa-lock" style="color: #667eea;"></i>
-                        Privacy Controls
+                        {{ _('Privacy Controls') }}
                     </h5>
                 </div>
                 <div class="privacy-card-body">
@@ -278,8 +278,8 @@ input:checked + .slider:before {
 
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Private Profile</div>
-                                <div class="switch-desc">Only approved connections can see your posts and profile</div>
+                                <div class="switch-label">{{ _('Private Profile') }}</div>
+                                <div class="switch-desc">{{ _('Only approved connections can see your posts and profile') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="is_private" {% if current_user.is_private %}checked{% endif %}>
@@ -289,8 +289,8 @@ input:checked + .slider:before {
 
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Show Email in Profile</div>
-                                <div class="switch-desc">Allow others to see your email address</div>
+                                <div class="switch-label">{{ _('Show Email in Profile') }}</div>
+                                <div class="switch-desc">{{ _('Allow others to see your email address') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="show_email" {% if current_user.show_email %}checked{% endif %}>
@@ -300,8 +300,8 @@ input:checked + .slider:before {
 
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Show Last Seen</div>
-                                <div class="switch-desc">Let others know when you were last active</div>
+                                <div class="switch-label">{{ _('Show Last Seen') }}</div>
+                                <div class="switch-desc">{{ _('Let others know when you were last active') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="show_last_seen" {% if current_user.show_last_seen %}checked{% endif %}>
@@ -311,8 +311,8 @@ input:checked + .slider:before {
 
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Allow Comments on Posts</div>
-                                <div class="switch-desc">Allow others to reply to your posts</div>
+                                <div class="switch-label">{{ _('Allow Comments on Posts') }}</div>
+                                <div class="switch-desc">{{ _('Allow others to reply to your posts') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="allow_comments" {% if current_user.allow_comments %}checked{% endif %}>
@@ -322,8 +322,8 @@ input:checked + .slider:before {
 
                         <div class="switch-group">
                             <div>
-                                <div class="switch-label">Allow Direct Messages</div>
-                                <div class="switch-desc">Allow others to send you private messages</div>
+                                <div class="switch-label">{{ _('Allow Direct Messages') }}</div>
+                                <div class="switch-desc">{{ _('Allow others to send you private messages') }}</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="allow_messages" {% if current_user.allow_messages %}checked{% endif %}>
@@ -333,7 +333,7 @@ input:checked + .slider:before {
 
                         <div class="text-end mt-4">
                             <button type="submit" class="btn-primary-gradient">
-                                <i class="fas fa-save me-2"></i>Save Privacy Settings
+                                <i class="fas fa-save me-2"></i>{{ _('Save Privacy Settings') }}
                             </button>
                         </div>
                     </form>
@@ -345,17 +345,17 @@ input:checked + .slider:before {
                 <div class="action-card-header">
                     <h5>
                         <i class="fas fa-download" style="color: #10b981;"></i>
-                        Data Export
+                        {{ _('Data Export') }}
                     </h5>
                 </div>
                 <div class="action-card-body">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
-                            <div class="fw-semibold mb-1">Download Your Data</div>
-                            <div class="info-text">Get a copy of all your Zetravox data in JSON format</div>
+                            <div class="fw-semibold mb-1">{{ _('Download Your Data') }}</div>
+                            <div class="info-text">{{ _('Get a copy of all your Zetravox data in JSON format') }}</div>
                         </div>
                         <a href="{{ url_for('main.export_data') }}" class="btn-primary-gradient" style="padding: 10px 24px;">
-                            <i class="fas fa-download me-2"></i>Export Data
+                            <i class="fas fa-download me-2"></i>{{ _('Export Data') }}
                         </a>
                     </div>
                 </div>
@@ -366,21 +366,21 @@ input:checked + .slider:before {
                 <div class="action-card-header">
                     <h5>
                         <i class="fas fa-trash-alt" style="color: #ef4444;"></i>
-                        Account Deletion
+                        {{ _('Account Deletion') }}
                     </h5>
                 </div>
                 <div class="action-card-body">
                     <div class="alert-custom alert-warning-custom mb-4">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Warning:</strong> This action is irreversible. All your data will be permanently deleted.
+                        <strong>{{ _('Warning') }}:</strong> {{ _('This action is irreversible. All your data will be permanently deleted.') }}
                     </div>
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
-                            <div class="fw-semibold mb-1">Delete Your Account</div>
-                            <div class="info-text">Permanently remove your account and all associated data</div>
+                            <div class="fw-semibold mb-1">{{ _('Delete Your Account') }}</div>
+                            <div class="info-text">{{ _('Permanently remove your account and all associated data') }}</div>
                         </div>
                         <button class="btn-outline-danger-custom" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                            <i class="fas fa-trash-alt me-2"></i>Delete Account
+                            <i class="fas fa-trash-alt me-2"></i>{{ _('Delete Account') }}
                         </button>
                     </div>
                 </div>
@@ -394,24 +394,24 @@ input:checked + .slider:before {
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-danger">Delete Account</h5>
+                <h5 class="modal-title text-danger">{{ _('Delete Account') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-3">
                     <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                    <p class="fw-semibold">Are you absolutely sure?</p>
-                    <p class="text-muted small">This action cannot be undone. All your posts, connections, messages, and data will be permanently removed.</p>
+                    <p class="fw-semibold">{{ _('Are you absolutely sure?') }}</p>
+                    <p class="text-muted small">{{ _('This action cannot be undone. All your posts, connections, messages, and data will be permanently removed.') }}</p>
                 </div>
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    Type <strong class="text-danger">DELETE</strong> to confirm
+                    {{ _('Type') }} <strong class="text-danger">DELETE</strong> {{ _('to confirm') }}
                 </div>
                 <input type="text" id="confirmDelete" class="form-control-custom" placeholder="DELETE">
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn-outline-danger-custom" id="confirmDeleteBtn" disabled>Permanently Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                <button type="button" class="btn-outline-danger-custom" id="confirmDeleteBtn" disabled>{{ _('Permanently Delete') }}</button>
             </div>
         </div>
     </div>
@@ -428,7 +428,7 @@ if (confirmInput) {
 }
 
 confirmBtn?.addEventListener('click', function() {
-    if (confirm('This action cannot be undone. Are you sure you want to delete your account?')) {
+    if (confirm('{{ _('This action cannot be undone. Are you sure you want to delete your account?') }}')) {
         fetch('{{ url_for("main.request_deletion") }}', {
             method: 'POST',
             headers: {
@@ -444,7 +444,7 @@ confirmBtn?.addEventListener('click', function() {
             }
         })
         .catch(error => {
-            alert('An error occurred. Please try again later.');
+            alert('{{ _('An error occurred. Please try again later.') }}');
         });
     }
 });

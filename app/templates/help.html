@@ -1,0 +1,754 @@
+{% extends "base.html" %}
+
+{% block title %}Help & Support - Zetravox{% endblock %}
+
+{% block content %}
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   HELP & SUPPORT PAGE - PROFESSIONAL DESIGN
+   ═══════════════════════════════════════════════════════════════ */
+
+.hp-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* ─── Main Card ─── */
+.hp-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+}
+
+[data-theme="light"] .hp-card {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.hp-card:hover {
+    border-color: var(--border-glass-hover);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ─── Header ─── */
+.hp-card-header {
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.06), rgba(162, 155, 254, 0.06));
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+[data-theme="light"] .hp-card-header {
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.04), rgba(162, 155, 254, 0.04));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.hp-card-header .hp-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 24px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25);
+}
+
+[data-theme="light"] .hp-card-header .hp-icon {
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.15);
+}
+
+.hp-card-header .hp-title-group {
+    flex: 1;
+}
+
+.hp-card-header h4 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.hp-card-header p {
+    margin: 2px 0 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* ─── Body ─── */
+.hp-card-body {
+    padding: 28px;
+}
+
+[data-theme="light"] .hp-card-body {
+    background: #FFFFFF;
+}
+
+/* ─── Quick Help Grid ─── */
+.hp-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 600px) {
+    .hp-quick-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.hp-quick-item {
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--bg-surface-hover);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="light"] .hp-quick-item {
+    background: #F5F7FC;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.hp-quick-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.hp-quick-item:hover::before {
+    opacity: 1;
+}
+
+.hp-quick-item:hover {
+    border-color: var(--clr-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.08);
+}
+
+[data-theme="light"] .hp-quick-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.hp-quick-item i {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 6px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: var(--transition);
+}
+
+.hp-quick-item:hover i {
+    transform: scale(1.1);
+}
+
+.hp-quick-item span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ─── Form Section ─── */
+.hp-form-section {
+    padding-top: 8px;
+}
+
+.hp-form-section .hp-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hp-form-section .hp-section-title i {
+    color: var(--clr-primary-light);
+}
+
+.hp-form-group {
+    margin-bottom: 18px;
+}
+
+.hp-form-group label {
+    font-weight: 600;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.hp-form-group label .hp-required {
+    color: #FF6B6B;
+    margin-left: 2px;
+}
+
+.hp-form-group .hp-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+}
+
+[data-theme="light"] .hp-form-group .hp-input {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+.hp-form-group .hp-input:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.08);
+}
+
+.hp-form-group .hp-input::placeholder {
+    color: var(--text-muted);
+}
+
+.hp-form-group textarea.hp-input {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.hp-form-group .hp-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.hp-form-group .hp-error {
+    color: #FF6B6B;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* ─── Submit Button ─── */
+.hp-btn-submit {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+[data-theme="light"] .hp-btn-submit {
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.15);
+}
+
+.hp-btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(108, 92, 231, 0.3);
+}
+
+.hp-btn-submit:active {
+    transform: translateY(0);
+}
+
+.hp-btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ─── Help Requests History ─── */
+.hp-requests {
+    margin-top: 32px;
+}
+
+.hp-requests .hp-requests-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hp-requests .hp-requests-header h5 {
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.hp-requests .hp-requests-header .hp-count {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: var(--radius-full);
+    background: var(--bg-surface-hover);
+    color: var(--text-muted);
+}
+
+[data-theme="light"] .hp-requests .hp-requests-header .hp-count {
+    background: #F5F7FC;
+}
+
+.hp-request-item {
+    padding: 18px 20px;
+    background: var(--bg-surface-hover);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    border-left: 4px solid var(--clr-primary-light);
+    transition: var(--transition);
+}
+
+[data-theme="light"] .hp-request-item {
+    background: #F5F7FC;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.hp-request-item:hover {
+    border-color: var(--border-glass-hover);
+    box-shadow: var(--shadow-sm);
+}
+
+.hp-request-item .hp-req-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.hp-request-item .hp-req-subject {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+.hp-request-item .hp-req-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: var(--radius-full);
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.hp-request-item .hp-req-status.pending {
+    background: rgba(253, 203, 110, 0.15);
+    color: #F59E0B;
+}
+
+.hp-request-item .hp-req-status.in_progress {
+    background: rgba(116, 185, 255, 0.15);
+    color: #3B82F6;
+}
+
+.hp-request-item .hp-req-status.resolved {
+    background: rgba(0, 184, 148, 0.15);
+    color: #00B894;
+}
+
+.hp-request-item .hp-req-status.rejected {
+    background: rgba(255, 107, 107, 0.15);
+    color: #FF6B6B;
+}
+
+[data-theme="light"] .hp-request-item .hp-req-status.pending {
+    background: rgba(253, 203, 110, 0.20);
+}
+[data-theme="light"] .hp-request-item .hp-req-status.in_progress {
+    background: rgba(116, 185, 255, 0.20);
+}
+[data-theme="light"] .hp-request-item .hp-req-status.resolved {
+    background: rgba(0, 184, 148, 0.20);
+}
+[data-theme="light"] .hp-request-item .hp-req-status.rejected {
+    background: rgba(255, 107, 107, 0.20);
+}
+
+.hp-request-item .hp-req-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.hp-request-item .hp-req-time .hp-resolved-badge {
+    color: #00B894;
+    font-weight: 600;
+}
+
+.hp-request-item .hp-req-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+.hp-request-item .hp-req-response {
+    margin-top: 10px;
+    padding: 12px 16px;
+    background: rgba(0, 184, 148, 0.04);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: #00B894;
+    border-left: 3px solid #00B894;
+    line-height: 1.5;
+}
+
+[data-theme="light"] .hp-request-item .hp-req-response {
+    background: rgba(0, 184, 148, 0.06);
+}
+
+.hp-request-item .hp-req-response i {
+    margin-right: 8px;
+}
+
+/* ─── Empty State ─── */
+.hp-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.hp-empty i {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+.hp-empty p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .hp-container {
+        padding: 12px;
+    }
+
+    .hp-card-header {
+        padding: 18px 20px;
+        flex-wrap: wrap;
+    }
+
+    .hp-card-header .hp-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+
+    .hp-card-header h4 {
+        font-size: 19px;
+    }
+
+    .hp-card-body {
+        padding: 20px;
+    }
+
+    .hp-quick-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .hp-quick-item {
+        padding: 12px 8px;
+    }
+
+    .hp-quick-item i {
+        font-size: 20px;
+    }
+
+    .hp-request-item {
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hp-card-header h4 {
+        font-size: 17px;
+    }
+
+    .hp-card-header p {
+        font-size: 12px;
+    }
+
+    .hp-quick-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hp-request-item .hp-req-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .hp-request-item .hp-req-subject {
+        font-size: 14px;
+    }
+}
+
+/* ─── Priority Badge ─── */
+.hp-priority-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.hp-priority-badge.low {
+    background: rgba(107, 114, 128, 0.12);
+    color: #6B7280;
+}
+
+.hp-priority-badge.normal {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3B82F6;
+}
+
+.hp-priority-badge.high {
+    background: rgba(253, 203, 110, 0.15);
+    color: #F59E0B;
+}
+
+.hp-priority-badge.urgent {
+    background: rgba(255, 107, 107, 0.15);
+    color: #FF6B6B;
+}
+
+[data-theme="light"] .hp-priority-badge.low {
+    background: rgba(107, 114, 128, 0.15);
+}
+[data-theme="light"] .hp-priority-badge.normal {
+    background: rgba(59, 130, 246, 0.15);
+}
+[data-theme="light"] .hp-priority-badge.high {
+    background: rgba(253, 203, 110, 0.20);
+}
+[data-theme="light"] .hp-priority-badge.urgent {
+    background: rgba(255, 107, 107, 0.15);
+}
+</style>
+
+<div class="hp-container">
+
+    <!-- ─── Main Card ─── -->
+    <div class="hp-card">
+
+        <!-- ─── Header ─── -->
+        <div class="hp-card-header">
+            <div class="hp-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="hp-title-group">
+                <h4>Help &amp; Support</h4>
+                <p>We're here to help you with any questions or issues</p>
+            </div>
+        </div>
+
+        <!-- ─── Body ─── -->
+        <div class="hp-card-body">
+
+            <!-- Quick Help -->
+            <div class="hp-quick-grid">
+                <a href="#" class="hp-quick-item" onclick="fillHelp('How do I create a post?')">
+                    <i class="fas fa-pen-fancy"></i>
+                    <span>Create Post</span>
+                </a>
+                <a href="#" class="hp-quick-item" onclick="fillHelp('How do I upload a story?')">
+                    <i class="fas fa-images"></i>
+                    <span>Upload Story</span>
+                </a>
+                <a href="#" class="hp-quick-item" onclick="fillHelp('How do I become a VIP member?')">
+                    <i class="fas fa-crown"></i>
+                    <span>VIP Guide</span>
+                </a>
+                <a href="#" class="hp-quick-item" onclick="fillHelp('How do I verify my human badge?')">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Human Badge</span>
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="hp-form-section">
+                <div class="hp-section-title">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit a Help Request
+                </div>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="hp-form-group">
+                        <label for="subject">
+                            Subject <span class="hp-required">*</span>
+                        </label>
+                        {{ form.subject(class="hp-input", id="subject", placeholder="Brief title of your issue") }}
+                        {% for error in form.subject.errors %}
+                            <div class="hp-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="hp-form-group">
+                        <label for="priority">Priority</label>
+                        {{ form.priority(class="hp-input", id="priority") }}
+                        {% for error in form.priority.errors %}
+                            <div class="hp-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="hp-form-group">
+                        <label for="message">
+                            Message <span class="hp-required">*</span>
+                        </label>
+                        {{ form.message(class="hp-input", id="message", rows="5", placeholder="Describe your issue in detail...") }}
+                        <div class="hp-hint" id="hpCharCount">0 / 1000 characters</div>
+                        {% for error in form.message.errors %}
+                            <div class="hp-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="hp-btn-submit" id="hpSubmitBtn">
+                        <i class="fas fa-paper-plane"></i> Send Help Request
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ─── Help Requests History ─── -->
+    {% if help_requests %}
+    <div class="hp-requests">
+        <div class="hp-requests-header">
+            <h5>
+                <i class="fas fa-clock-rotate-left"></i>
+                Your Help Requests
+            </h5>
+            <span class="hp-count">{{ help_requests|length }} total</span>
+        </div>
+
+        {% for req in help_requests %}
+        <div class="hp-request-item">
+            <div class="hp-req-header">
+                <span class="hp-req-subject">{{ req.subject }}</span>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <span class="hp-priority-badge {{ req.priority }}">{{ req.priority|capitalize }}</span>
+                    <span class="hp-req-status {{ req.status }}">{{ req.status|replace('_', ' ')|capitalize }}</span>
+                </div>
+            </div>
+            <div class="hp-req-time">
+                <i class="far fa-calendar-alt"></i>
+                {{ req.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                {% if req.resolved_at %}
+                <span class="hp-resolved-badge">• <i class="fas fa-check-circle"></i> Resolved: {{ req.resolved_at.strftime('%B %d, %Y') }}</span>
+                {% endif %}
+            </div>
+            <div class="hp-req-message">{{ req.message[:180] }}{% if req.message|length > 180 %}...{% endif %}</div>
+            {% if req.admin_response %}
+            <div class="hp-req-response">
+                <i class="fas fa-reply"></i> {{ req.admin_response }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+// ─── Quick Help Fill ──────────────────────────────────────────
+function fillHelp(topic) {
+    const subjectInput = document.querySelector('input[name="subject"]');
+    const messageInput = document.querySelector('textarea[name="message"]');
+
+    if (subjectInput) {
+        subjectInput.value = topic;
+        subjectInput.focus();
+        subjectInput.dispatchEvent(new Event('input'));
+    }
+    if (messageInput) {
+        messageInput.value = 'I need help with: ' + topic + '\n\nPlease describe your issue in detail...';
+        messageInput.dispatchEvent(new Event('input'));
+        updateCharCount();
+    }
+
+    // Scroll to form
+    document.querySelector('.hp-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ─── Character Counter ──────────────────────────────────────
+const messageInput = document.querySelector('textarea[name="message"]');
+const charCount = document.getElementById('hpCharCount');
+
+function updateCharCount() {
+    if (!messageInput || !charCount) return;
+    const count = messageInput.value.length;
+    charCount.textContent = count + ' / 1000 characters';
+    if (count > 1000) {
+        charCount.style.color = '#FF6B6B';
+    } else {
+        charCount.style.color = '';
+    }
+}
+
+if (messageInput) {
+    messageInput.addEventListener('input', updateCharCount);
+}
+
+// ─── Form Submit Loading State ──────────────────────────────
+document.querySelector('form')?.addEventListener('submit', function(e) {
+    const btn = document.getElementById('hpSubmitBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    }
+});
+</script>
+
+{% endblock %}

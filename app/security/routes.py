@@ -6,6 +6,11 @@ from app.security import bp
 from app.security.two_factor_auth import TwoFactorAuth
 from app.models import User, LoginHistory, SecurityEvent, UserSession, DataDeletionRequest, BlockedUser, HiddenPost, NotInterestedPost, InterestedPost
 import pyotp
+import json
+import pyotp
+import base64
+import io
+import qrcode
 
 
 @bp.route('/appearance')
@@ -134,26 +139,52 @@ def revoke_session(session_id):
     return redirect(url_for('security.session_management'))
 
 
-@bp.route('/enable-2fa', methods=['GET', 'POST'])
+@bp.route('/settings/enable-2fa', methods=['GET', 'POST'])
 @login_required
 def enable_2fa():
-    if request.method == 'POST':
-        otp_code = request.form.get('otp_code')
-        if TwoFactorAuth.verify_otp(current_user.otp_secret, otp_code):
-            current_user.enable_2fa()
-            backup_codes = TwoFactorAuth.generate_backup_codes()
-            current_user.backup_codes = ','.join(backup_codes)
-            db.session.commit()
-            flash('Two-factor authentication enabled successfully', 'success')
-            return render_template('security/backup_codes.html', backup_codes=backup_codes)
-        flash('Invalid verification code', 'danger')
+
+    if current_user.two_factor_enabled:
+        flash('2FA is already enabled.', 'info')
+        return redirect(url_for('main.security_settings'))
 
     if not current_user.otp_secret:
-        current_user.otp_secret = TwoFactorAuth.generate_secret()
+        current_user.otp_secret = pyotp.random_base32()
         db.session.commit()
 
-    qr_code = TwoFactorAuth.generate_qr_code(current_user.otp_secret, current_user.email)
-    return render_template('security/enable_2fa.html', qr_code=qr_code, secret=current_user.otp_secret)
+    backup_codes = []
+    if not current_user.backup_codes:
+        import secrets
+        for _ in range(10):
+            code = f"{secrets.token_hex(3).upper()}-{secrets.token_hex(3).upper()}"
+            backup_codes.append(code)
+        current_user.backup_codes = json.dumps(backup_codes)
+        db.session.commit()
+
+    totp = pyotp.TOTP(current_user.otp_secret)
+    provisioning_uri = totp.provisioning_uri(current_user.email, issuer_name="Zetravox")
+
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(provisioning_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    qr_code = base64.b64encode(buffered.getvalue()).decode()
+
+    if request.method == 'POST':
+        otp_code = request.form.get('otp_code')
+        if totp.verify(otp_code):
+            current_user.enable_2fa()
+            flash('Two-factor authentication enabled successfully!', 'success')
+            return redirect(url_for('main.security_settings'))
+        else:
+            flash('Invalid verification code. Please try again.', 'danger')
+
+    return render_template('security/enable_2fa.html',
+                           qr_code=qr_code,
+                           secret=current_user.otp_secret,
+                           backup_codes=json.loads(current_user.backup_codes) if current_user.backup_codes else [])
 
 
 @bp.route('/disable-2fa', methods=['POST'])

@@ -264,39 +264,39 @@
             <div class="settings-sidebar-premium">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item-premium active">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item-premium">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item-premium">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item-premium">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item-premium">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
                 <a href="{{ url_for('main.screen_protection') }}" class="settings-nav-item-premium">
                     <i class="fas fa-mobile-alt"></i>
-                    <span>Screen Protection</span>
+                    <span>{{ _('Screen Protection') }}</span>
                 </a>
             </div>
         </div>
@@ -309,7 +309,7 @@
                     <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-id-card" style="color: #667eea;"></i>
-                            Profile Information
+                            {{ _('Profile Information') }}
                         </h5>
                     </div>
                     <div class="account-card-body-premium">
@@ -319,34 +319,34 @@
                                     <img src="{{ current_user.avatar(120) }}" alt="Profile Picture" id="avatarPreview">
                                 </div>
                                 <label for="profile_pic" class="btn-upload-premium">
-                                    <i class="fas fa-camera"></i> Change Photo
+                                    <i class="fas fa-camera"></i> {{ _('Change Photo') }}
                                 </label>
                                 <input type="file" name="profile_pic" id="profile_pic" accept="image/*" style="display: none;">
                             </div>
                             <div class="profile-fields-premium" style="flex: 1;">
                                 <div class="form-group-premium">
                                     <label class="form-label-premium">
-                                        <i class="fas fa-user"></i> Username
+                                        <i class="fas fa-user"></i> {{ _('Username') }}
                                     </label>
                                     <input type="text" name="username" class="form-control-premium" value="{{ current_user.username }}" required>
                                 </div>
                                 <div class="form-group-premium">
                                     <label class="form-label-premium">
-                                        <i class="fas fa-envelope"></i> Email Address
+                                        <i class="fas fa-envelope"></i> {{ _('Email Address') }}
                                     </label>
                                     <div class="input-group-premium">
                                         <span class="input-group-text-premium"><i class="fas fa-envelope"></i></span>
                                         <input type="email" class="form-control-premium" value="{{ current_user.email }}" disabled>
                                     </div>
                                     <div class="info-badge-premium mt-2">
-                                        <i class="fas fa-lock"></i> Cannot be changed
+                                        <i class="fas fa-lock"></i> {{ _('Cannot be changed') }}
                                     </div>
                                 </div>
                                 <div class="form-group-premium">
                                     <label class="form-label-premium">
-                                        <i class="fas fa-info-circle"></i> About Me
+                                        <i class="fas fa-info-circle"></i> {{ _('About Me') }}
                                     </label>
-                                    <textarea name="about_me" class="form-control-premium" rows="3" placeholder="Tell us about yourself...">{{ current_user.about_me or '' }}</textarea>
+                                    <textarea name="about_me" class="form-control-premium" rows="3" placeholder="{{ _('Tell us about yourself...') }}">{{ current_user.about_me or '' }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -357,22 +357,22 @@
                     <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-briefcase" style="color: #667eea;"></i>
-                            Professional Details
+                            {{ _('Professional Details') }}
                         </h5>
                     </div>
                     <div class="account-card-body-premium">
                         <div class="row-grid-premium">
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-briefcase"></i> Work / Occupation
+                                    <i class="fas fa-briefcase"></i> {{ _('Work / Occupation') }}
                                 </label>
-                                <input type="text" name="work" class="form-control-premium" value="{{ current_user.work or '' }}" placeholder="e.g., Software Engineer at Google">
+                                <input type="text" name="work" class="form-control-premium" value="{{ current_user.work or '' }}" placeholder="{{ _('e.g., Software Engineer at Google') }}">
                             </div>
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-graduation-cap"></i> Education
+                                    <i class="fas fa-graduation-cap"></i> {{ _('Education') }}
                                 </label>
-                                <input type="text" name="education" class="form-control-premium" value="{{ current_user.education or '' }}" placeholder="e.g., MIT, Stanford">
+                                <input type="text" name="education" class="form-control-premium" value="{{ current_user.education or '' }}" placeholder="{{ _('e.g., MIT, Stanford') }}">
                             </div>
                         </div>
                     </div>
@@ -382,32 +382,32 @@
                     <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
-                            Location & Contact
+                            {{ _('Location & Contact') }}
                         </h5>
                     </div>
                     <div class="account-card-body-premium">
                         <div class="row-grid-premium">
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-map-marker-alt"></i> Location
+                                    <i class="fas fa-map-marker-alt"></i> {{ _('Location') }}
                                 </label>
-                                <input type="text" name="location" class="form-control-premium" value="{{ current_user.location or '' }}" placeholder="City, Country">
+                                <input type="text" name="location" class="form-control-premium" value="{{ current_user.location or '' }}" placeholder="{{ _('City, Country') }}">
                             </div>
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-globe"></i> Website
+                                    <i class="fas fa-globe"></i> {{ _('Website') }}
                                 </label>
                                 <input type="url" name="website" class="form-control-premium" value="{{ current_user.website or '' }}" placeholder="https://yourwebsite.com">
                             </div>
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-phone"></i> Phone Number
+                                    <i class="fas fa-phone"></i> {{ _('Phone Number') }}
                                 </label>
                                 <input type="tel" name="phone" class="form-control-premium" value="{{ current_user.phone or '' }}" placeholder="+1 234 567 8900">
                             </div>
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-birthday-cake"></i> Birthday
+                                    <i class="fas fa-birthday-cake"></i> {{ _('Birthday') }}
                                 </label>
                                 <input type="date" name="birthday" class="form-control-premium" value="{{ current_user.birthday or '' }}">
                             </div>
@@ -419,46 +419,46 @@
                     <div class="account-card-header-premium">
                         <h5>
                             <i class="fas fa-heart" style="color: #667eea;"></i>
-                            Personal Info
+                            {{ _('Personal Info') }}
                         </h5>
                     </div>
                     <div class="account-card-body-premium">
                         <div class="row-grid-premium">
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-venus-mars"></i> Gender
+                                    <i class="fas fa-venus-mars"></i> {{ _('Gender') }}
                                 </label>
                                 <select name="gender" class="form-control-premium">
-                                    <option value="">Select</option>
-                                    <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Male</option>
-                                    <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Female</option>
-                                    <option value="non_binary" {% if current_user.gender == 'non_binary' %}selected{% endif %}>Non-binary</option>
-                                    <option value="prefer_not_to_say" {% if current_user.gender == 'prefer_not_to_say' %}selected{% endif %}>Prefer not to say</option>
+                                    <option value="">{{ _('Select') }}</option>
+                                    <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>{{ _('Male') }}</option>
+                                    <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>{{ _('Female') }}</option>
+                                    <option value="non_binary" {% if current_user.gender == 'non_binary' %}selected{% endif %}>{{ _('Non-binary') }}</option>
+                                    <option value="prefer_not_to_say" {% if current_user.gender == 'prefer_not_to_say' %}selected{% endif %}>{{ _('Prefer not to say') }}</option>
                                 </select>
                             </div>
                             <div class="form-group-premium">
                                 <label class="form-label-premium">
-                                    <i class="fas fa-heart"></i> Relationship Status
+                                    <i class="fas fa-heart"></i> {{ _('Relationship Status') }}
                                 </label>
                                 <select name="relationship_status" class="form-control-premium">
-                                    <option value="">Select</option>
-                                    <option value="single" {% if current_user.relationship_status == 'single' %}selected{% endif %}>Single</option>
-                                    <option value="in_relationship" {% if current_user.relationship_status == 'in_relationship' %}selected{% endif %}>In a Relationship</option>
-                                    <option value="engaged" {% if current_user.relationship_status == 'engaged' %}selected{% endif %}>Engaged</option>
-                                    <option value="married" {% if current_user.relationship_status == 'married' %}selected{% endif %}>Married</option>
-                                    <option value="divorced" {% if current_user.relationship_status == 'divorced' %}selected{% endif %}>Divorced</option>
+                                    <option value="">{{ _('Select') }}</option>
+                                    <option value="single" {% if current_user.relationship_status == 'single' %}selected{% endif %}>{{ _('Single') }}</option>
+                                    <option value="in_relationship" {% if current_user.relationship_status == 'in_relationship' %}selected{% endif %}>{{ _('In a Relationship') }}</option>
+                                    <option value="engaged" {% if current_user.relationship_status == 'engaged' %}selected{% endif %}>{{ _('Engaged') }}</option>
+                                    <option value="married" {% if current_user.relationship_status == 'married' %}selected{% endif %}>{{ _('Married') }}</option>
+                                    <option value="divorced" {% if current_user.relationship_status == 'divorced' %}selected{% endif %}>{{ _('Divorced') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group-premium">
                             <label class="form-label-premium">
-                                <i class="fas fa-users"></i> Interested In
+                                <i class="fas fa-users"></i> {{ _('Interested In') }}
                             </label>
                             <select name="interested_in" class="form-control-premium">
-                                <option value="">Select</option>
-                                <option value="men" {% if current_user.interested_in == 'men' %}selected{% endif %}>Men</option>
-                                <option value="women" {% if current_user.interested_in == 'women' %}selected{% endif %}>Women</option>
-                                <option value="everyone" {% if current_user.interested_in == 'everyone' %}selected{% endif %}>Everyone</option>
+                                <option value="">{{ _('Select') }}</option>
+                                <option value="men" {% if current_user.interested_in == 'men' %}selected{% endif %}>{{ _('Men') }}</option>
+                                <option value="women" {% if current_user.interested_in == 'women' %}selected{% endif %}>{{ _('Women') }}</option>
+                                <option value="everyone" {% if current_user.interested_in == 'everyone' %}selected{% endif %}>{{ _('Everyone') }}</option>
                             </select>
                         </div>
                     </div>
@@ -466,7 +466,7 @@
 
                 <div class="text-end mt-4">
                     <button type="submit" class="btn-primary-gradient-premium">
-                        <i class="fas fa-save"></i> Save All Changes
+                        <i class="fas fa-save"></i> {{ _('Save All Changes') }}
                     </button>
                 </div>
             </form>

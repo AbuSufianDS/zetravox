@@ -38,7 +38,8 @@ def login():
                 SecurityEvent.log(user.id, 'login_failed', request.remote_addr,
                                   f'Failed login attempt. {remaining} attempts remaining')
             else:
-                flash('Invalid username or password.', 'danger')
+                from flask_babel import _
+                flash(_('Invalid username or password.'), 'danger')
             return redirect(url_for('auth.login'))
 
         user.reset_login_attempts()

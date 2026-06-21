@@ -246,35 +246,35 @@
             <div class="settings-sidebar">
                 <a href="{{ url_for('main.account_settings') }}" class="settings-nav-item">
                     <i class="fas fa-user-circle"></i>
-                    <span>Account</span>
+                    <span>{{ _('Account') }}</span>
                 </a>
                 <a href="{{ url_for('main.security_settings') }}" class="settings-nav-item">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
+                    <span>{{ _('Security') }}</span>
                 </a>
                 <a href="{{ url_for('main.privacy_settings') }}" class="settings-nav-item">
                     <i class="fas fa-lock"></i>
-                    <span>Privacy</span>
+                    <span>{{ _('Privacy') }}</span>
                 </a>
                 <a href="{{ url_for('main.notification_settings') }}" class="settings-nav-item">
                     <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <span>{{ _('Notifications') }}</span>
                 </a>
                 <a href="{{ url_for('main.session_management') }}" class="settings-nav-item active">
                     <i class="fas fa-desktop"></i>
-                    <span>Sessions</span>
+                    <span>{{ _('Sessions') }}</span>
                 </a>
                 <a href="{{ url_for('main.login_history') }}" class="settings-nav-item">
                     <i class="fas fa-history"></i>
-                    <span>Login History</span>
+                    <span>{{ _('Login History') }}</span>
                 </a>
                 <a href="{{ url_for('main.blocked_users_page') }}" class="settings-nav-item">
                     <i class="fas fa-ban"></i>
-                    <span>Blocked Users</span>
+                    <span>{{ _('Blocked Users') }}</span>
                 </a>
                 <a href="{{ url_for('main.appearance_settings') }}" class="settings-nav-item">
                     <i class="fas fa-palette"></i>
-                    <span>Appearance</span>
+                    <span>{{ _('Appearance') }}</span>
                 </a>
             </div>
         </div>
@@ -284,10 +284,10 @@
                 <div class="sessions-card-header">
                     <h5>
                         <i class="fas fa-desktop" style="color: #667eea;"></i>
-                        Active Sessions
+                        {{ _('Active Sessions') }}
                     </h5>
                     <button class="btn-revoke-all" onclick="revokeAllSessions()">
-                        <i class="fas fa-sign-out-alt me-2"></i>Revoke All Other Sessions
+                        <i class="fas fa-sign-out-alt me-2"></i>{{ _('Revoke All Other Sessions') }}
                     </button>
                 </div>
                 <div class="sessions-card-body">
@@ -308,16 +308,16 @@
                                 </div>
                                 <div class="session-details">
                                     <div class="session-device">
-                                        {{ session.user_agent[:60] if session.user_agent else 'Unknown Device' }}
+                                        {{ session.user_agent[:60] if session.user_agent else _('Unknown Device') }}
                                         {% if session.id == request.cookies.get('session') %}
                                         <span class="current-badge">
-                                            <i class="fas fa-check-circle me-1"></i>Current
+                                            <i class="fas fa-check-circle me-1"></i>{{ _('Current') }}
                                         </span>
                                         {% endif %}
                                     </div>
                                     <div class="session-meta">
                                         <span><i class="fas fa-map-marker-alt"></i> IP: {{ session.ip_address }}</span>
-                                        <span><i class="far fa-clock"></i> Started: {{ session.created_at.strftime('%b %d, %Y at %H:%M') if session.created_at else 'Unknown' }}</span>
+                                        <span><i class="far fa-clock"></i> {{ _('Started') }}: {{ session.created_at.strftime('%b %d, %Y at %H:%M') if session.created_at else _('Unknown') }}</span>
                                         {% if session.user_agent and ('Chrome' in session.user_agent or 'Firefox' in session.user_agent or 'Safari' in session.user_agent) %}
                                         <span class="location-badge">
                                             <i class="fab fa-{% if 'Chrome' in session.user_agent %}chrome{% elif 'Firefox' in session.user_agent %}firefox{% elif 'Safari' in session.user_agent %}safari{% else %}edge{% endif %}"></i>
@@ -331,8 +331,8 @@
                                 {% if session.id != request.cookies.get('session') %}
                                 <form action="{{ url_for('main.revoke_session', session_id=session.id) }}" method="POST" class="d-inline">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn-revoke" onclick="return confirm('Revoke this session? You will be logged out from this device.')">
-                                        <i class="fas fa-trash-alt me-1"></i> Revoke
+                                    <button type="submit" class="btn-revoke" onclick="return confirm('{{ _('Revoke this session? You will be logged out from this device.') }}')">
+                                        <i class="fas fa-trash-alt me-1"></i> {{ _('Revoke') }}
                                     </button>
                                 </form>
                                 {% endif %}
@@ -342,8 +342,8 @@
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-desktop"></i>
-                            <h6>No Active Sessions</h6>
-                            <p>Your account is only active on this device</p>
+                            <h6>{{ _('No Active Sessions') }}</h6>
+                            <p>{{ _('Your account is only active on this device') }}</p>
                         </div>
                     {% endif %}
                 </div>
@@ -353,8 +353,8 @@
                 <div class="d-flex">
                     <i class="fas fa-shield-alt fa-lg"></i>
                     <div>
-                        <div class="title">Security Tip</div>
-                        <div class="text">Regularly review your active sessions. If you see a device you don't recognize, revoke it immediately and change your password.</div>
+                        <div class="title">{{ _('Security Tip') }}</div>
+                        <div class="text">{{ _('Regularly review your active sessions. If you see a device you don\'t recognize, revoke it immediately and change your password.') }}</div>
                     </div>
                 </div>
             </div>
@@ -364,7 +364,7 @@
 
 <script>
 function revokeAllSessions() {
-    if(confirm('This will sign you out from all other devices. You will remain logged in on this device. Continue?')) {
+    if(confirm('{{ _('This will sign you out from all other devices. You will remain logged in on this device. Continue?') }}')) {
         fetch('{{ url_for("main.revoke_all_sessions") }}', {
             method: 'POST',
             headers: {
@@ -376,12 +376,12 @@ function revokeAllSessions() {
             if(response.ok) {
                 location.reload();
             } else {
-                alert('Failed to revoke sessions. Please try again.');
+                alert('{{ _('Failed to revoke sessions. Please try again.') }}');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            alert('{{ _('An error occurred. Please try again.') }}');
         });
     }
 }

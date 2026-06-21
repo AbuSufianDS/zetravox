@@ -17,7 +17,11 @@ from app.services.recommendation_service import recommendation_engine
 from app.services.report_service import report_service
 from app.models import (User, Post, Message, Notification, Like, Comment, SpamReport, UserActivity, Hashtag, PostHashtag, SavedPost, SharedPost, BlockedUser,
                         PostReaction, Story, StoryView, ChatMessage, StoryReaction, StoryComment, FriendRequest, friends, PostMedia, HiddenPost, NotInterestedPost, InterestedPost, SecurityEvent, CommentReaction)
+from app.models import InnerCircleMembership
 lastNotificationTime = 0
+from flask import session
+from app.models import VIPUser, Feedback, HelpRequest
+from app.main.forms import VIPUpgradeForm, FeedbackForm, HelpForm
 
 @bp.route('/settings/notifications', methods=['GET', 'POST'])
 @login_required
@@ -61,6 +65,17 @@ def notification_settings():
 
     return render_template('security/notifications.html', title='Notification Settings', form=form)
 
+def vip_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('Please login first.', 'warning')
+            return redirect(url_for('auth.login'))
+        if not current_user.is_vip:
+            flash('This feature is available for VIP members only. Please upgrade to VIP.', 'warning')
+            return redirect(url_for('main.vip'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @bp.route('/api/notifications')
 @login_required
@@ -331,12 +346,41 @@ def index():
     next_url = url_for('main.index', page=posts.next_num) if posts.has_next else None
     prev_url = url_for('main.index', page=posts.prev_num) if posts.has_prev else None
 
+    grouped_temp = {}
+    for story in stories_data:
+        author = story['author_name']
+        if author not in grouped_temp:
+            grouped_temp[author] = []
+        grouped_temp[author].append(story)
+
+    grouped_stories_data = []
+    for author, stories in grouped_temp.items():
+        grouped_stories_data.append({
+            'author_name': author,
+            'author_avatar': stories[0]['author_avatar'],
+            'story_count': len(stories),
+            'stories': stories
+        })
+
+    print("=== DEBUG: stories_data ===")
+    print(f"Total stories: {len(stories_data)}")
+    for s in stories_data:
+        print(f"  - {s['author_name']}")
+
+    print("=== DEBUG: grouped_stories_data ===")
+    print(f"Total groups: {len(grouped_stories_data)}")
+    for g in grouped_stories_data:
+        print(f"  - {g['author_name']}: {g['story_count']} stories")
+
+
     return render_template('index.html', title='Home', form=form, comment_form=comment_form,
                            story_form=story_form, stories_by_user=stories_by_user,
                            stories_data=stories_data,
+                           grouped_stories_data=grouped_stories_data,
                            posts=posts.items, next_url=next_url, prev_url=prev_url,
                            upcoming_birthdays=upcoming_birthdays,
                            active_contacts=active_contacts)
+
 
 @bp.route('/interested/<int:post_id>')
 @login_required
@@ -2095,13 +2139,6 @@ def change_password():
     flash('Your password has been changed.', 'success')
     return redirect(url_for('main.security_settings'))
 
-
-@bp.route('/settings/enable-2fa')
-@login_required
-def enable_2fa():
-    return render_template('security/enable_2fa.html', title='Enable Two-Factor Authentication')
-
-
 @bp.route('/settings/disable-2fa', methods=['POST'])
 @login_required
 def disable_2fa():
@@ -3125,6 +3162,13 @@ def api_engagement():
 @bp.route('/api/ai/chat', methods=['POST'])
 @login_required
 def ai_chat_api():
+    if not current_user.can_use_ai_chat and not current_user.is_vip:
+        return jsonify({
+            'error': 'You have used all 20 free AI messages. Upgrade to VIP for unlimited access.',
+            'vip_required': True,
+            'remaining': 0
+        }), 403
+
     try:
         data = request.get_json()
         message = data.get('message', '')
@@ -3136,7 +3180,17 @@ def ai_chat_api():
         ai_service = DeepSeekService()
         reply = ai_service.chat(message)
 
-        return jsonify({'success': True, 'reply': reply})
+        if not current_user.is_vip:
+            current_user.increment_ai_chat_usage()
+
+        remaining = current_user.ai_chat_remaining if not current_user.is_vip else '∞'
+
+        return jsonify({
+            'success': True,
+            'reply': reply,
+            'remaining': remaining,
+            'is_vip': current_user.is_vip
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -3145,4 +3199,360 @@ def ai_chat_api():
 @bp.route('/ai-chat')
 @login_required
 def ai_chat():
-    return render_template('ai_chat.html', title='AI Assistant')
+    return render_template('ai_chat.html',
+                           title='AI Assistant',
+                           is_vip=True,
+                           limited=False)
+
+
+@bp.route('/inner-circle')
+@login_required
+def inner_circle():
+
+    memberships = InnerCircleMembership.query.filter_by(
+        user_id=current_user.id,
+        is_active=True
+    ).all()
+    members = [User.query.get(m.member_id) for m in memberships if User.query.get(m.member_id)]
+
+    member_ids = [m.id for m in members]
+    suggestions = User.query.filter(
+        User.id != current_user.id
+    )
+    if member_ids:
+        suggestions = suggestions.filter(~User.id.in_(member_ids))
+    suggestions = suggestions.limit(10).all()
+
+    return render_template('inner_circle.html',
+                           members=members,
+                           suggestions=suggestions)
+
+@bp.route('/inner-circle/add/<int:user_id>', methods=['POST'])
+@login_required
+def add_inner_circle(user_id):
+    from flask_wtf.csrf import validate_csrf
+    try:
+        validate_csrf(request.form.get('csrf_token'))
+    except:
+        flash('CSRF token missing or invalid. Please try again.', 'danger')
+        return redirect(url_for('main.inner_circle'))
+
+    user = User.query.get_or_404(user_id)
+
+    if current_user.id == user_id:
+        flash('You cannot add yourself to inner circle.', 'warning')
+        return redirect(url_for('main.inner_circle'))
+
+    existing = InnerCircleMembership.query.filter_by(
+        user_id=current_user.id,
+        member_id=user_id
+    ).first()
+
+    if existing:
+        flash('User is already in your inner circle.', 'info')
+        return redirect(url_for('main.inner_circle'))
+
+    if not current_user.is_vip:
+        current_count = InnerCircleMembership.query.filter_by(
+            user_id=current_user.id,
+            is_active=True
+        ).count()
+        if current_count >= 5:
+            flash('You have reached the free limit of 5 Inner Circle members. Upgrade to VIP for unlimited members.', 'warning')
+            return redirect(url_for('main.vip'))
+
+    membership = InnerCircleMembership(
+        user_id=current_user.id,
+        member_id=user_id,
+        is_active=True
+    )
+    db.session.add(membership)
+    db.session.commit()
+    flash(f'{user.username} added to your inner circle!', 'success')
+    return redirect(url_for('main.inner_circle'))
+
+@bp.route('/inner-circle/remove/<int:user_id>', methods=['POST'])
+@login_required
+def remove_inner_circle(user_id):
+    from flask_wtf.csrf import validate_csrf
+    try:
+        validate_csrf(request.form.get('csrf_token'))
+    except:
+        flash('CSRF token missing or invalid. Please try again.', 'danger')
+        return redirect(url_for('main.inner_circle'))
+
+    membership = InnerCircleMembership.query.filter_by(
+        user_id=current_user.id,
+        member_id=user_id
+    ).first()
+
+    if membership:
+        db.session.delete(membership)
+        db.session.commit()
+        flash('Member removed from inner circle.', 'success')
+    else:
+        flash('Member not found in inner circle.', 'warning')
+
+    return redirect(url_for('main.inner_circle'))
+
+
+@bp.route('/save_story/<int:story_id>', methods=['POST'])
+@login_required
+def save_story(story_id):
+    story = db.session.get(Story, story_id)
+    if not story:
+        return jsonify({'success': False, 'error': 'Story not found'}), 404
+    return jsonify({'success': True, 'message': 'Story saved'})
+
+
+@bp.route('/report_story/<int:story_id>', methods=['POST'])
+@login_required
+def report_story(story_id):
+    story = db.session.get(Story, story_id)
+    if not story:
+        return jsonify({'success': False, 'error': 'Story not found'}), 404
+    return jsonify({'success': True, 'message': 'Story reported'})
+
+@bp.route('/set-locale/<lang>')
+@login_required
+def set_locale(lang):
+    supported_languages = current_app.config.get('LANGUAGES', ['en'])
+    if lang in supported_languages:
+        session['locale'] = lang
+        flash(f'Language changed to {lang}', 'success')
+    else:
+        flash(f'Language {lang} not supported. Supported: {supported_languages}', 'danger')
+    return redirect(request.referrer or url_for('main.index'))
+
+
+# ========== VIP/PREMIUM ROUTES ==========
+
+@bp.route('/vip')
+@login_required
+def vip():
+    form = VIPUpgradeForm()
+
+    is_vip = current_user.is_vip
+    vip_level = current_user.vip_level if is_vip else 'free'
+    vip_membership = current_user.vip_membership if is_vip else None
+
+    return render_template('vip.html',
+                           title='VIP Membership',
+                           form=form,
+                           is_vip=is_vip,
+                           vip_level=vip_level,
+                           vip_membership=vip_membership)
+
+
+@bp.route('/vip/upgrade', methods=['POST'])
+@login_required
+def vip_upgrade():
+    form = VIPUpgradeForm()
+    if form.validate_on_submit():
+        plan = form.plan.data
+        payment_method = request.form.get('payment_method', 'alipay')
+
+        session['vip_plan'] = plan
+        session['vip_payment_method'] = payment_method
+
+        return redirect(url_for('main.vip_payment'))
+
+    flash('Please select a plan.', 'warning')
+    return redirect(url_for('main.vip'))
+
+
+@bp.route('/vip/payment')
+@login_required
+def vip_payment():
+    plan = session.get('vip_plan', 'premium')
+    payment_method = session.get('vip_payment_method', 'alipay')
+
+    plan_details = {
+        'premium': {'price': '¥18', 'monthly': '¥18', 'yearly': '¥128', 'label': 'Premium'},
+        'elite': {'price': '¥38', 'monthly': '¥38', 'yearly': '¥268', 'label': 'Elite'},
+        'ultimate': {'price': '¥68', 'monthly': '¥68', 'yearly': '¥468', 'label': 'Ultimate'}
+    }
+
+    return render_template('vip_payment.html',
+                           plan=plan,
+                           plan_details=plan_details[plan],
+                           payment_method=payment_method)
+
+
+@bp.route('/vip/payment/verify', methods=['POST'])
+@login_required
+def vip_payment_verify():
+    plan = session.get('vip_plan', 'premium')
+    payment_method = session.get('vip_payment_method', 'alipay')
+    transaction_id = request.form.get('transaction_id', '').strip()
+
+    if not transaction_id:
+        flash('Please enter the transaction ID from your payment app.', 'warning')
+        return redirect(url_for('main.vip_payment'))
+
+    existing = VIPUser.query.filter_by(user_id=current_user.id).first()
+    if existing and existing.is_active:
+        flash('You are already a VIP member!', 'warning')
+        return redirect(url_for('main.vip'))
+
+    from datetime import datetime, timedelta
+
+    if existing:
+        existing.vip_level = plan
+        existing.payment_id = transaction_id
+        existing.payment_method = payment_method
+        existing.is_active = False
+        existing.started_at = datetime.utcnow()
+        db.session.commit()
+    else:
+        vip = VIPUser(
+            user_id=current_user.id,
+            vip_level=plan,
+            started_at=datetime.utcnow(),
+            expires_at=datetime.utcnow() + timedelta(days=30),
+            is_active=False,
+            payment_method=payment_method,
+            payment_id=transaction_id
+        )
+        db.session.add(vip)
+        db.session.commit()
+
+    session.pop('vip_plan', None)
+    session.pop('vip_payment_method', None)
+
+    flash('📩 Payment submitted! Admin will verify and activate your VIP membership within 24 hours.', 'success')
+    return redirect(url_for('main.vip'))
+
+
+@bp.route('/vip/payment/qr/<plan>')
+@login_required
+def vip_payment_qr(plan):
+    plan_details = {
+        'premium': {'price': '18', 'label': 'Premium'},
+        'elite': {'price': '38', 'label': 'Elite'},
+        'ultimate': {'price': '68', 'label': 'Ultimate'}
+    }
+
+    return render_template('vip_payment_qr.html',
+                           plan=plan,
+                           plan_details=plan_details[plan],
+                           payment_method=request.args.get('method', 'alipay'))
+
+
+@bp.route('/vip/cancel')
+@login_required
+def vip_cancel():
+    vip = VIPUser.query.filter_by(user_id=current_user.id, is_active=True).first()
+    if vip:
+        vip.is_active = False
+        db.session.commit()
+        flash('VIP membership cancelled.', 'info')
+    return redirect(url_for('main.vip'))
+
+
+# ========== VIP WEBHOOK (For payment callback) ==========
+
+@bp.route('/vip/webhook', methods=['POST'])
+def vip_webhook():
+    data = request.get_json()
+
+    transaction_id = data.get('transaction_id')
+    user_id = data.get('user_id')
+    plan = data.get('plan')
+    payment_method = data.get('payment_method', 'unknown')
+
+    if not all([transaction_id, user_id, plan]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    from datetime import datetime, timedelta
+    existing = VIPUser.query.filter_by(user_id=user_id).first()
+    if existing:
+        existing.expires_at = existing.expires_at + timedelta(days=30)
+        existing.is_active = True
+        existing.vip_level = plan
+        existing.payment_id = transaction_id
+        db.session.commit()
+    else:
+        vip = VIPUser(
+            user_id=user_id,
+            vip_level=plan,
+            started_at=datetime.utcnow(),
+            expires_at=datetime.utcnow() + timedelta(days=30),
+            is_active=True,
+            payment_method=payment_method,
+            payment_id=transaction_id
+        )
+        db.session.add(vip)
+        db.session.commit()
+
+    user.is_human_verified = True
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'VIP upgraded successfully'})
+
+
+@bp.route('/vip/check-expiry')
+@login_required
+def vip_check_expiry():
+    vip = VIPUser.query.filter_by(user_id=current_user.id, is_active=True).first()
+    if not vip:
+        return jsonify({'is_vip': False})
+
+    from datetime import datetime
+    days_left = (vip.expires_at - datetime.utcnow()).days if vip.expires_at else 0
+
+    return jsonify({
+        'is_vip': True,
+        'level': vip.vip_level,
+        'expires_at': vip.expires_at.isoformat() if vip.expires_at else None,
+        'days_left': max(0, days_left)
+    })
+
+# ========== FEEDBACK ROUTES ==========
+
+@bp.route('/feedback', methods=['GET', 'POST'])
+@login_required
+def feedback():
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        feedback = Feedback(
+            user_id=current_user.id,
+            category=form.category.data,
+            message=form.message.data,
+            rating=int(form.rating.data)
+        )
+        db.session.add(feedback)
+        db.session.commit()
+
+        flash('Thank you for your valuable feedback! 🙏', 'success')
+        return redirect(url_for('main.feedback'))
+
+    return render_template('feedback.html', title='Feedback', form=form)
+
+
+# ========== HELP ROUTES ==========
+
+@bp.route('/help', methods=['GET', 'POST'])
+@login_required
+def help():
+    """Submit help request"""
+    form = HelpForm()
+    if form.validate_on_submit():
+        help_request = HelpRequest(
+            user_id=current_user.id,
+            subject=form.subject.data,
+            message=form.message.data,
+            priority=form.priority.data
+        )
+        db.session.add(help_request)
+        db.session.commit()
+
+        flash('Your help request has been sent! Our team will contact you soon. 📩', 'success')
+        return redirect(url_for('main.help'))
+
+    return render_template('help.html', title='Help & Support', form=form)
+

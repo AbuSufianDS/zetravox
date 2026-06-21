@@ -1,0 +1,332 @@
+# Chinese translations for Zetravox
+# Copyright (C) 2026
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Zetravox\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-20 15:00+0800\n"
+"PO-Revision-Date: 2026-06-20 15:00+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: app/templates/base.html
+msgid "Home"
+msgstr "首页"
+
+#: app/templates/base.html
+msgid "For You"
+msgstr "为你推荐"
+
+#: app/templates/base.html
+msgid "Discover"
+msgstr "发现"
+
+#: app/templates/base.html
+msgid "Explore"
+msgstr "探索"
+
+#: app/templates/base.html
+msgid "Messages"
+msgstr "消息"
+
+#: app/templates/base.html
+msgid "Requests"
+msgstr "好友请求"
+
+#: app/templates/base.html
+msgid "Notifications"
+msgstr "通知"
+
+#: app/templates/base.html
+msgid "Profile"
+msgstr "个人资料"
+
+#: app/templates/base.html
+msgid "Inner Circle"
+msgstr "密友圈"
+
+#: app/templates/base.html
+msgid "Saved"
+msgstr "收藏"
+
+#: app/templates/base.html
+msgid "Edit Profile"
+msgstr "编辑资料"
+
+#: app/templates/base.html
+msgid "Verify Human"
+msgstr "人工验证"
+
+#: app/templates/base.html
+msgid "Settings"
+msgstr "设置"
+
+#: app/templates/base.html
+msgid "Logout"
+msgstr "退出登录"
+
+#: app/templates/base.html
+msgid "Login"
+msgstr "登录"
+
+#: app/templates/base.html
+msgid "Register"
+msgstr "注册"
+
+#: app/templates/base.html
+msgid "Search people, posts, hashtags..."
+msgstr "搜索用户、帖子、话题..."
+
+#: app/templates/index.html
+msgid "Share your thoughts"
+msgstr "分享你的想法"
+
+#: app/templates/index.html
+msgid "No Moments Yet"
+msgstr "暂无动态"
+
+#: app/templates/index.html
+msgid "Share your first moment with your friends!"
+msgstr "和朋友们分享你的第一个动态！"
+
+#: app/templates/index.html
+msgid "Add Story"
+msgstr "添加动态"
+
+#: app/templates/auth/login.html
+msgid "Sign In"
+msgstr "登录"
+
+#: app/templates/auth/login.html
+msgid "Welcome Back"
+msgstr "欢迎回来"
+
+#: app/templates/auth/login.html
+msgid "Sign in to continue your journey"
+msgstr "登录以继续你的旅程"
+
+#: app/templates/auth/login.html
+msgid "Email or Username"
+msgstr "邮箱或用户名"
+
+#: app/templates/auth/login.html
+msgid "Password"
+msgstr "密码"
+
+#: app/templates/auth/login.html
+msgid "Keep me logged in"
+msgstr "保持登录状态"
+
+#: app/templates/auth/login.html
+msgid "Forgot password?"
+msgstr "忘记密码？"
+
+#: app/templates/auth/login.html
+msgid "Don't have an account?"
+msgstr "还没有账号？"
+
+#: app/templates/auth/login.html
+msgid "Create account"
+msgstr "创建账号"
+
+#: app/templates/auth/register.html
+msgid "Create Account"
+msgstr "创建账号"
+
+#: app/templates/auth/register.html
+msgid "Username"
+msgstr "用户名"
+
+#: app/templates/auth/register.html
+msgid "Email"
+msgstr "邮箱"
+
+#: app/templates/auth/register.html
+msgid "Confirm Password"
+msgstr "确认密码"
+
+#: app/templates/auth/register.html
+msgid "Already have an account?"
+msgstr "已有账号？"
+
+#: app/templates/auth/register.html
+msgid "Sign In instead"
+msgstr "去登录"
+
+#: app/templates/auth/forgot_password.html
+msgid "Reset Password"
+msgstr "重置密码"
+
+#: app/templates/auth/forgot_password.html
+msgid "Enter your email address and we'll send you a verification code"
+msgstr "输入你的邮箱地址，我们会发送验证码给你"
+
+#: app/templates/auth/verify_otp.html
+msgid "Verify OTP"
+msgstr "验证验证码"
+
+#: app/templates/auth/verify_otp.html
+msgid "Enter the 6-digit code sent to your email"
+msgstr "输入发送到你邮箱的6位验证码"
+
+#: app/templates/auth/reset_password_new.html
+msgid "Create New Password"
+msgstr "创建新密码"
+
+#: app/templates/auth/reset_password_new.html
+msgid "New Password"
+msgstr "新密码"
+
+#: app/templates/auth/reset_password_new.html
+msgid "Confirm New Password"
+msgstr "确认新密码"
+
+#: app/templates/auth/verify_2fa.html
+msgid "Two-Factor Authentication"
+msgstr "双重验证"
+
+#: app/templates/auth/verify_2fa.html
+msgid "Enter the 6-digit code from your authenticator app"
+msgstr "输入你的验证器应用中的6位数字"
+
+#: app/templates/auth/verify_2fa.html
+msgid "Verify & Sign In"
+msgstr "验证并登录"
+
+#: app/templates/security/security.html
+msgid "Security Settings"
+msgstr "安全设置"
+
+#: app/templates/security/security.html
+msgid "Two-Factor Authentication"
+msgstr "双重验证"
+
+#: app/templates/security/security.html
+msgid "Enable Two-Factor Authentication"
+msgstr "启用双重验证"
+
+#: app/templates/security/security.html
+msgid "Disable Two-Factor Authentication"
+msgstr "禁用双重验证"
+
+#: app/templates/security/enable_2fa.html
+msgid "Two-Factor Authentication Setup"
+msgstr "双重验证设置"
+
+#: app/templates/security/enable_2fa.html
+msgid "Scan this QR code with your authenticator app"
+msgstr "用你的验证器应用扫描此二维码"
+
+#: app/templates/security/enable_2fa.html
+msgid "Verification Code"
+msgstr "验证码"
+
+#: app/templates/security/enable_2fa.html
+msgid "Verify & Enable"
+msgstr "验证并启用"
+
+#: app/templates/security/privacy.html
+msgid "Privacy Settings"
+msgstr "隐私设置"
+
+#: app/templates/security/account.html
+msgid "Account Settings"
+msgstr "账户设置"
+
+#: app/templates/security/sessions.html
+msgid "Active Sessions"
+msgstr "活动会话"
+
+#: app/templates/security/login_history.html
+msgid "Login History"
+msgstr "登录历史"
+
+#: app/templates/security/blocked_users.html
+msgid "Blocked Users"
+msgstr "已屏蔽用户"
+
+#: app/templates/human_verification/request.html
+msgid "Request Human Verification"
+msgstr "申请人工验证"
+
+#: app/templates/human_verification/request.html
+msgid "Submit Verification Request"
+msgstr "提交验证申请"
+
+#: app/templates/human_verification/request.html
+msgid "Verification Video"
+msgstr "验证视频"
+
+#: app/templates/human_verification/request.html
+msgid "Additional Notes"
+msgstr "附加说明"
+
+#: app/templates/inner_circle.html
+msgid "Inner Circle"
+msgstr "密友圈"
+
+#: app/templates/inner_circle.html
+msgid "Your closest friends and family"
+msgstr "你最亲密的朋友和家人"
+
+#: app/templates/inner_circle.html
+msgid "Members"
+msgstr "成员"
+
+#: app/templates/inner_circle.html
+msgid "Suggestions"
+msgstr "推荐"
+
+#: app/templates/inner_circle.html
+msgid "Add"
+msgstr "添加"
+
+#: app/templates/inner_circle.html
+msgid "Remove"
+msgstr "移除"
+
+#: app/templates/ai_chat.html
+msgid "AI Assistant"
+msgstr "AI助手"
+
+#: app/templates/ai_chat.html
+msgid "Ask me anything..."
+msgstr "问我任何问题..."
+
+#: app/templates/chat.html
+msgid "Chat"
+msgstr "聊天"
+
+#: app/templates/chat.html
+msgid "Type a message..."
+msgstr "输入消息..."
+
+#: app/templates/conversations.html
+msgid "Conversations"
+msgstr "对话"
+
+#: app/templates/conversations.html
+msgid "No conversations yet"
+msgstr "暂无对话"
+
+#: app/templates/friends.html
+msgid "Friends"
+msgstr "好友"
+
+#: app/templates/friends.html
+msgid "Connections"
+msgstr "连接"
+
+msgid "Home"
+msgstr "首页"
+
+msgid "Welcome"
+msgstr "欢迎"
+
+msgid "Sign In"
+msgstr "登录"

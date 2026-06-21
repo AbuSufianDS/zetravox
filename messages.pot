@@ -1,0 +1,279 @@
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-06-20 15:18+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/__init__.py:35
+msgid "Please log in to access this page."
+msgstr ""
+
+#: app/translate.py:9
+msgid "Error: the translation service is not configured."
+msgstr ""
+
+#: app/translate.py:20
+msgid "Error: the translation service failed."
+msgstr ""
+
+#: app/auth/email.py:8
+msgid "[zetravox] Reset Your Password"
+msgstr ""
+
+#: app/auth/forms.py:11 app/auth/forms.py:18 app/main/forms.py:15
+msgid "Username"
+msgstr ""
+
+#: app/auth/forms.py:12 app/auth/forms.py:20
+msgid "Password"
+msgstr ""
+
+#: app/auth/forms.py:13
+msgid "Remember Me"
+msgstr ""
+
+#: app/auth/forms.py:14
+msgid "Sign In"
+msgstr ""
+
+#: app/auth/forms.py:19
+msgid "Email"
+msgstr ""
+
+#: app/auth/forms.py:22
+msgid "Repeat Password"
+msgstr ""
+
+#: app/auth/forms.py:24 app/auth/routes.py:130
+msgid "Register"
+msgstr ""
+
+#: app/auth/forms.py:30 app/main/forms.py:73
+msgid "Please use a different username."
+msgstr ""
+
+#: app/auth/forms.py:36
+msgid "Please use a different email address."
+msgstr ""
+
+#: app/auth/routes.py:128
+msgid "Congratulations, you are now a registered user!"
+msgstr ""
+
+#: app/main/forms.py:16
+msgid "About me"
+msgstr ""
+
+#: app/main/forms.py:18
+msgid "Profile Picture"
+msgstr ""
+
+#: app/main/forms.py:19 app/main/forms.py:22
+msgid "Images only!"
+msgstr ""
+
+#: app/main/forms.py:21
+msgid "Cover Photo"
+msgstr ""
+
+#: app/main/forms.py:25
+msgid "Account Privacy"
+msgstr ""
+
+#: app/main/forms.py:30
+msgid "Relationship Status"
+msgstr ""
+
+#: app/main/forms.py:40
+msgid "Work"
+msgstr ""
+
+#: app/main/forms.py:41
+msgid "Education"
+msgstr ""
+
+#: app/main/forms.py:42
+msgid "Location"
+msgstr ""
+
+#: app/main/forms.py:43
+msgid "Website"
+msgstr ""
+
+#: app/main/forms.py:44
+msgid "Birthday"
+msgstr ""
+
+#: app/main/forms.py:47
+msgid "Gender"
+msgstr ""
+
+#: app/main/forms.py:55
+msgid "Interested In"
+msgstr ""
+
+#: app/main/forms.py:62
+msgid "Phone"
+msgstr ""
+
+#: app/main/forms.py:63
+msgid "Save Changes"
+msgstr ""
+
+#: app/main/forms.py:80
+msgid "What's on your mind?"
+msgstr ""
+
+#: app/main/forms.py:82
+msgid "Add Photos/Videos"
+msgstr ""
+
+#: app/main/forms.py:83 app/main/forms.py:131
+msgid "Images and videos only!"
+msgstr ""
+
+#: app/main/forms.py:91
+msgid "Schedule for later"
+msgstr ""
+
+#: app/main/forms.py:92 app/main/forms.py:97
+msgid "Post"
+msgstr ""
+
+#: app/main/forms.py:96
+msgid "Write a comment..."
+msgstr ""
+
+#: app/main/forms.py:101
+msgid "Search"
+msgstr ""
+
+#: app/main/forms.py:112
+msgid "Message"
+msgstr ""
+
+#: app/main/forms.py:114
+msgid "Send"
+msgstr ""
+
+#: app/main/forms.py:118
+msgid "Reason"
+msgstr ""
+
+#: app/main/forms.py:125
+msgid "Additional details"
+msgstr ""
+
+#: app/main/forms.py:126
+msgid "Submit Report"
+msgstr ""
+
+#: app/main/forms.py:130
+msgid "Add to Story"
+msgstr ""
+
+#: app/main/forms.py:133
+msgid "Caption"
+msgstr ""
+
+#: app/main/forms.py:134
+msgid "Share to Story"
+msgstr ""
+
+#: app/main/forms.py:138 app/main/forms.py:154
+msgid "Likes on my posts"
+msgstr ""
+
+#: app/main/forms.py:139 app/main/forms.py:155
+msgid "Comments on my posts"
+msgstr ""
+
+#: app/main/forms.py:140 app/main/forms.py:156
+msgid "New followers"
+msgstr ""
+
+#: app/main/forms.py:141 app/main/forms.py:157
+msgid "Shares of my posts"
+msgstr ""
+
+#: app/main/forms.py:142 app/main/forms.py:158
+msgid "Friend requests"
+msgstr ""
+
+#: app/main/forms.py:143 app/main/forms.py:159
+msgid "New messages"
+msgstr ""
+
+#: app/main/forms.py:145
+msgid "Email me when someone likes my post"
+msgstr ""
+
+#: app/main/forms.py:146
+msgid "Email me when someone comments"
+msgstr ""
+
+#: app/main/forms.py:147
+msgid "Email me when someone follows me"
+msgstr ""
+
+#: app/main/forms.py:148
+msgid "Email me when I receive a message"
+msgstr ""
+
+#: app/main/forms.py:150 app/main/forms.py:168
+msgid "Save Notification Settings"
+msgstr ""
+
+#: app/main/forms.py:161
+msgid "Email when someone likes my post"
+msgstr ""
+
+#: app/main/forms.py:162
+msgid "Email when someone comments"
+msgstr ""
+
+#: app/main/forms.py:163
+msgid "Email when someone follows me"
+msgstr ""
+
+#: app/main/forms.py:164
+msgid "Email when someone shares my post"
+msgstr ""
+
+#: app/main/forms.py:165
+msgid "Email when I get a friend request"
+msgstr ""
+
+#: app/main/forms.py:166
+msgid "Email when I receive a message"
+msgstr ""
+
+#: app/templates/errors/404.html:4
+msgid "Not Found"
+msgstr ""
+
+#: app/templates/errors/404.html:5 app/templates/errors/500.html:6
+msgid "Back"
+msgstr ""
+
+#: app/templates/errors/500.html:4
+msgid "An unexpected error has occurred"
+msgstr ""
+
+#: app/templates/errors/500.html:5
+msgid "The administrator has been notified. Sorry for the inconvenience!"
+msgstr ""
+

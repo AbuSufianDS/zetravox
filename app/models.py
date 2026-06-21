@@ -207,6 +207,23 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     allow_comments = db.Column(db.Boolean, default=True)
     allow_messages = db.Column(db.Boolean, default=True)
     theme_preference = db.Column(db.String(20), default='light')
+    is_human_verified = db.Column(db.Boolean, default=False)
+    verification_status = db.Column(db.String(20), default='unverified')
+    verification_video = db.Column(db.String(500))
+    verification_requested_at = db.Column(db.DateTime)
+    verified_at = db.Column(db.DateTime)
+    verification_notes = db.Column(db.Text)
+    ai_chat_used = db.Column(db.Integer, default=0)
+    inner_circle_free_limit = db.Column(db.Integer, default=5)
+
+    inner_circle_members = db.relationship(
+        'User',
+        secondary='inner_circle_membership',
+        primaryjoin='User.id==InnerCircleMembership.user_id',
+        secondaryjoin='User.id==InnerCircleMembership.member_id',
+        backref='inner_circle_of',
+        lazy='dynamic'
+    )
     def increment_login_attempts(self):
         self.login_attempts += 1
         if self.login_attempts >= 5:
@@ -286,6 +303,41 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
 
+    @property
+    def can_use_ai_chat(self):
+        if self.is_vip:
+            return True
+        return self.ai_chat_used < 20
+
+    @property
+    def ai_chat_remaining(self):
+        if self.is_vip:
+            return '∞'
+        return max(0, 20 - self.ai_chat_used)
+
+    def increment_ai_chat_usage(self):
+        self.ai_chat_used += 1
+        db.session.commit()
+
+    @property
+    def inner_circle_free_limit_remaining(self):
+        if self.is_vip:
+            return '∞'
+        current_count = InnerCircleMembership.query.filter_by(
+            user_id=self.id,
+            is_active=True
+        ).count()
+        return max(0, 5 - current_count)
+
+    @property
+    def can_add_inner_circle_member(self):
+        if self.is_vip:
+            return True
+        current_count = InnerCircleMembership.query.filter_by(
+            user_id=self.id,
+            is_active=True
+        ).count()
+        return current_count < 5
     @property
     def is_online(self):
         if self.last_seen:
@@ -428,6 +480,26 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     def revoke_token(self):
         self.token_expiration = datetime.now(timezone.utc) - timedelta(seconds=1)
 
+    @property
+    def is_vip(self):
+        if hasattr(self, 'vip_membership') and self.vip_membership:
+            return self.vip_membership.is_active
+        return False
+
+    @property
+    def vip_level(self):
+        if hasattr(self, 'vip_membership') and self.vip_membership:
+            return self.vip_membership.vip_level
+        return 'free'
+
+    @property
+    def can_use_ai_chat(self):
+        if self.is_vip:
+            return True
+        from datetime import datetime
+        today = datetime.utcnow().date()
+        return False
+
     @staticmethod
     def check_token(token):
         user = db.session.scalar(sa.select(User).where(User.token == token))
@@ -478,6 +550,14 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         from datetime import datetime, timedelta
         five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
         return [f for f in self.friends if f.last_seen and f.last_seen > five_minutes_ago]
+
+    def is_in_inner_circle(self, user_id):
+        membership = InnerCircleMembership.query.filter_by(
+            user_id=self.id,
+            member_id=user_id,
+            is_active=True
+        ).first()
+        return membership is not None
 
     def get_blocked_users(self):
         blocked_list = BlockedUser.query.filter_by(blocker_id=self.id).all()
@@ -1145,6 +1225,74 @@ class CommentReaction(db.Model):
         db.UniqueConstraint('comment_id', 'user_id', name='unique_user_comment_reaction'),
     )
 
+
+class InnerCircleMembership(db.Model):
+    __tablename__ = 'inner_circle_membership'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    member_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    priority = db.Column(db.Integer, default=0)
+
+    user = db.relationship('User', foreign_keys=[user_id], backref='inner_circle_added')
+    member = db.relationship('User', foreign_keys=[member_id], backref='inner_circle_member_of')
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'member_id', name='unique_inner_circle_membership'),
+    )
+
+
+# ========== VIP/PREMIUM MODELS ==========
+class VIPUser(db.Model):
+    __tablename__ = 'vip_users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    vip_level = db.Column(db.String(20), default='premium')
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+    payment_id = db.Column(db.String(100))
+    payment_method = db.Column(db.String(50))
+    auto_renew = db.Column(db.Boolean, default=True)
+
+    user = db.relationship('User', backref='vip_membership')
+
+
+# ========== FEEDBACK MODEL ==========
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    category = db.Column(db.String(50), default='general')
+    message = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, default=0)
+    status = db.Column(db.String(20), default='pending')
+    admin_response = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship('User', backref='feedbacks')
+
+
+# ========== HELP REQUEST MODEL ==========
+class HelpRequest(db.Model):
+    __tablename__ = 'help_requests'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    priority = db.Column(db.String(20), default='normal')
+    status = db.Column(db.String(20), default='pending')
+    admin_response = db.Column(db.Text)
+    resolved_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='help_requests')
 
 @login.user_loader
 def load_user(id):

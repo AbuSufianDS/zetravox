@@ -1,19 +1,397 @@
-{% if stories_data and stories_data|length > 0 %}
-<div class="d-flex overflow-auto">
-    {% for story in stories_data %}
-        <div class="text-center me-3 moment-circle-item"
-             onclick='openMomentViewer({{ stories_data | tojson | safe }}, {{ loop.index0 }})'>
-            <div class="moment-ring">
-                <img src="{{ story.author_avatar }}"
-                     class="rounded-circle"
-                     style="width: 60px; height: 60px; object-fit: cover; border: 3px solid white;">
-            </div>
-            <small class="text-muted">{{ story.author_name[:10] }}</small>
+{% if grouped_stories_data and grouped_stories_data|length > 0 %}
+<div class="premium-story-container">
+    <div class="premium-story-header">
+        <div class="premium-story-title">
+            <i class="fas fa-circle" style="font-size: 8px; color: #ffd700;"></i>
+            <span>Moments</span>
+            <span class="premium-story-count">{{ stories_data|length if stories_data else 0 }}</span>
         </div>
-    {% endfor %}
+        <button class="premium-story-archive-btn" onclick="viewAllStories()">
+            <i class="fas fa-clock"></i> Archive
+        </button>
+    </div>
+
+    <div class="premium-story-scroll">
+        <!-- Add Story Button - USING DATA ATTRIBUTES -->
+        <div class="premium-story-item premium-story-add" data-bs-toggle="modal" data-bs-target="#momentModal" style="cursor: pointer;">
+            <div class="premium-story-avatar-wrapper">
+                <div class="premium-story-add-ring">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </div>
+            <span class="premium-story-name">Add Story</span>
+        </div>
+
+        <!-- Grouped Stories -->
+        {% for group in grouped_stories_data %}
+        <div class="premium-story-item" onclick='openMomentViewer({{ group.stories | tojson | safe }}, 0)'>
+            <div class="premium-story-avatar-wrapper">
+                <div class="premium-story-ring premium-story-unviewed">
+                    <img src="{{ group.author_avatar }}" class="premium-story-avatar" alt="{{ group.author_name }}">
+                    {% if group.story_count > 1 %}
+                    <div class="premium-story-multiple-badge">
+                        <span>{{ group.story_count }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <span class="premium-story-name">{{ group.author_name[:12] }}</span>
+            <span class="premium-story-time">{{ group.story_count }} story{% if group.story_count > 1 %}s{% endif %}</span>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
 {% else %}
-<div class="text-center text-muted small py-2">
-    No moments to show
+<!-- Empty State -->
+<div class="premium-story-container">
+    <div class="premium-story-header">
+        <div class="premium-story-title">
+            <i class="fas fa-circle" style="font-size: 8px; color: #ffd700;"></i>
+            <span>Moments</span>
+        </div>
+    </div>
+
+    <div class="premium-story-empty">
+        <div class="premium-story-empty-icon">
+            <i class="fas fa-camera"></i>
+        </div>
+        <h5>No Moments Yet</h5>
+        <p>Share your first moment with your friends!</p>
+        <!-- USING DATA ATTRIBUTES -->
+        <button class="premium-story-empty-btn" data-bs-toggle="modal" data-bs-target="#momentModal">
+            <i class="fas fa-plus me-2"></i>Add Story
+        </button>
+    </div>
 </div>
 {% endif %}
+
+<style>
+.premium-story-container {
+    background: var(--bg-card);
+    border-radius: 24px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.premium-story-container:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.premium-story-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.premium-story-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.premium-story-title i {
+    color: #ffd700;
+}
+
+.premium-story-count {
+    background: var(--hover-bg);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.premium-story-archive-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.premium-story-archive-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.premium-story-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 8px 4px 16px 4px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+}
+
+.premium-story-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.premium-story-scroll::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+.premium-story-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+.premium-story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 80px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.premium-story-item:hover {
+    transform: translateY(-4px);
+}
+
+.premium-story-item:hover .premium-story-ring {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+}
+
+.premium-story-avatar-wrapper {
+    position: relative;
+    width: 72px;
+    height: 72px;
+}
+
+.premium-story-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #667eea);
+    background-size: 300% 300%;
+    animation: storyBorderShimmer 3s ease-in-out infinite;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes storyBorderShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.premium-story-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bg-card);
+}
+
+.premium-story-multiple-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3px solid var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.premium-story-add-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--bg-card);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.premium-story-add-ring i {
+    color: white;
+    font-size: 24px;
+    transition: all 0.3s;
+}
+
+.premium-story-add:hover .premium-story-add-ring {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+}
+
+.premium-story-add:hover .premium-story-add-ring i {
+    transform: rotate(90deg);
+}
+
+.premium-story-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.premium-story-time {
+    font-size: 9px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.premium-story-empty {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.premium-story-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.premium-story-empty-icon i {
+    font-size: 32px;
+    color: #667eea;
+}
+
+.premium-story-empty h5 {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.premium-story-empty p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.premium-story-empty-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.premium-story-empty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .premium-story-container {
+        padding: 16px;
+        border-radius: 16px;
+    }
+    .premium-story-avatar-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+    .premium-story-ring {
+        width: 60px;
+        height: 60px;
+    }
+    .premium-story-add-ring {
+        width: 60px;
+        height: 60px;
+    }
+    .premium-story-add-ring i {
+        font-size: 20px;
+    }
+    .premium-story-item {
+        min-width: 65px;
+    }
+    .premium-story-name {
+        font-size: 10px;
+        max-width: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .premium-story-container {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    .premium-story-title {
+        font-size: 14px;
+    }
+    .premium-story-avatar-wrapper {
+        width: 52px;
+        height: 52px;
+    }
+    .premium-story-ring {
+        width: 52px;
+        height: 52px;
+    }
+    .premium-story-add-ring {
+        width: 52px;
+        height: 52px;
+    }
+    .premium-story-add-ring i {
+        font-size: 16px;
+    }
+    .premium-story-item {
+        min-width: 55px;
+    }
+    .premium-story-scroll {
+        gap: 12px;
+    }
+}
+
+[data-theme="dark"] .premium-story-container {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .premium-story-add-ring {
+    border-color: var(--bg-card);
+}
+</style>
+
+<script>
+function openStoryUpload() {
+    const modal = new bootstrap.Modal(document.getElementById('momentModal'));
+    modal.show();
+}
+
+function viewAllStories() {
+    const stories = {{ stories_data | tojson | safe }};
+    if (stories && stories.length > 0) {
+        openMomentViewer(stories[0].id);
+    }
+}
+</script>

@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+
+{% block title %}VIP Payment - Zetravox{% endblock %}
+
+{% block content %}
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   VIP PAYMENT PAGE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.vp-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.vp-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.vp-card:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.vp-card-header {
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(253,203,110,0.08), rgba(225,112,85,0.08));
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.vp-card-header .vp-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #FDCB6E, #E17055);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.vp-card-header h4 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.vp-card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.vp-card-body {
+    padding: 28px;
+}
+
+/* ─── Payment Amount ─── */
+.vp-amount {
+    text-align: center;
+    padding: 20px;
+    background: var(--bg-surface-hover);
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    border: 1px solid var(--border-glass);
+}
+
+.vp-amount .vp-plan {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.vp-amount .vp-price {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FDCB6E, #E17055);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.vp-amount .vp-price span {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    -webkit-text-fill-color: var(--text-secondary);
+}
+
+/* ─── QR Section ─── */
+.vp-qr {
+    background: var(--bg-surface-hover);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.vp-qr-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 12px;
+}
+
+.vp-qr-tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.vp-qr-tab:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.vp-qr-tab.active {
+    background: var(--grad-main);
+    color: #fff;
+}
+
+.vp-qr-tab img {
+    height: 20px;
+    width: auto;
+}
+
+.vp-qr-display {
+    text-align: center;
+}
+
+.vp-qr-image {
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.vp-qr-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+}
+
+.vp-qr-details {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vp-qr-details .vp-amount-label {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.vp-qr-details .vp-merchant {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* ─── Transaction Section ─── */
+.vp-transaction {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-glass);
+}
+
+.vp-transaction .vp-instruction {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.vp-transaction .vp-instruction i {
+    color: var(--clr-primary-light);
+    margin-right: 6px;
+}
+
+.vp-input-group {
+    display: flex;
+    gap: 12px;
+}
+
+.vp-input-group .vp-input {
+    flex: 1;
+    padding: 14px 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+}
+
+.vp-input-group .vp-input:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
+}
+
+.vp-input-group .vp-input::placeholder {
+    color: var(--text-muted);
+}
+
+.vp-btn-verify {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #00B894, #00CEC9);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vp-btn-verify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,184,148,0.35);
+}
+
+.vp-btn-verify:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.vp-note {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 16px;
+}
+
+.vp-note i {
+    margin-right: 4px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .vp-container { padding: 12px; }
+    .vp-card-header { padding: 18px 20px; flex-wrap: wrap; }
+    .vp-card-body { padding: 20px; }
+    .vp-input-group { flex-direction: column; }
+    .vp-btn-verify { width: 100%; justify-content: center; }
+    .vp-qr-image { max-width: 160px; }
+    .vp-qr-tab { font-size: 12px; padding: 8px 12px; }
+    .vp-qr-tab img { height: 18px; }
+    .vp-amount .vp-price { font-size: 32px; }
+}
+
+@media (max-width: 480px) {
+    .vp-card-header h4 { font-size: 17px; }
+    .vp-qr-details { flex-direction: column; text-align: center; }
+}
+</style>
+
+<div class="vp-container">
+    <div class="vp-card">
+
+        <!-- ─── Header ─── -->
+        <div class="vp-card-header">
+            <div class="vp-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div>
+                <h4>Complete Payment</h4>
+                <p>Upgrade to VIP {{ plan_details.label }}</p>
+            </div>
+        </div>
+
+        <!-- ─── Body ─── -->
+        <div class="vp-card-body">
+
+            <!-- Amount -->
+            <div class="vp-amount">
+                <div class="vp-plan">{{ plan_details.label }} Plan</div>
+                <div class="vp-price">{{ plan_details.price }} <span>/ month</span></div>
+            </div>
+
+            <!-- QR Section -->
+            <div class="vp-qr">
+                <div class="vp-qr-tabs">
+                    <button class="vp-qr-tab active" onclick="switchQR('alipay')" id="tabAlipay">
+                        <img src="{{ url_for('static', filename='images/payment/Alipay-logo.png') }}" alt="Alipay">
+                        Alipay
+                    </button>
+                    <button class="vp-qr-tab" onclick="switchQR('wechat')" id="tabWechat">
+                        <img src="{{ url_for('static', filename='images/payment/Wechat-logo.png') }}" alt="WeChat">
+                        WeChat Pay
+                    </button>
+                </div>
+
+                <div class="vp-qr-display">
+                    <!-- Alipay QR -->
+                    <div id="qrAlipay" class="vp-qr-wrapper">
+                        <img src="{{ url_for('static', filename='images/payment/alipay_qr.jpg') }}"
+                             alt="Alipay QR Code"
+                             class="vp-qr-image">
+                        <p class="vp-qr-label">
+                            <i class="fas fa-qrcode me-1"></i>
+                            Scan with Alipay to pay
+                        </p>
+                        <div class="vp-qr-details">
+                            <span class="vp-amount-label">¥{{ plan_details.price }}</span>
+                            <span class="vp-merchant">Zetravox VIP - {{ plan_details.label }}</span>
+                        </div>
+                    </div>
+
+                    <!-- WeChat QR -->
+                    <div id="qrWechat" class="vp-qr-wrapper" style="display: none;">
+                        <img src="{{ url_for('static', filename='images/payment/wechat_qr.png') }}"
+                             alt="WeChat QR Code"
+                             class="vp-qr-image">
+                        <p class="vp-qr-label">
+                            <i class="fas fa-qrcode me-1"></i>
+                            Scan with WeChat Pay
+                        </p>
+                        <div class="vp-qr-details">
+                            <span class="vp-amount-label">¥{{ plan_details.price }}</span>
+                            <span class="vp-merchant">Zetravox VIP - {{ plan_details.label }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction ID -->
+                <div class="vp-transaction">
+                    <p class="vp-instruction">
+                        <i class="fas fa-info-circle"></i>
+                        After payment, enter your transaction ID from WeChat/Alipay
+                    </p>
+                    <form method="POST" action="{{ url_for('main.vip_payment_verify') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="payment_method" id="selected_payment" value="alipay">
+
+                        <div class="vp-input-group">
+                            <input type="text" name="transaction_id" class="vp-input"
+                                   placeholder="Enter payment transaction ID (e.g., 2025010112345678)" required>
+                            <button type="submit" class="vp-btn-verify">
+                                <i class="fas fa-check-circle"></i> Verify Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="vp-note">
+                <i class="fas fa-info-circle"></i>
+                After payment, enter the transaction ID to verify your VIP upgrade
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── QR Code Switching ──────────────────────────────────────
+function switchQR(method) {
+    document.getElementById('qrAlipay').style.display = 'none';
+    document.getElementById('qrWechat').style.display = 'none';
+
+    if (method === 'alipay') {
+        document.getElementById('qrAlipay').style.display = 'block';
+        document.getElementById('selected_payment').value = 'alipay';
+    } else {
+        document.getElementById('qrWechat').style.display = 'block';
+        document.getElementById('selected_payment').value = 'wechat';
+    }
+
+    document.querySelectorAll('.vp-qr-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.getElementById('tab' + method.charAt(0).toUpperCase() + method.slice(1)).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchQR('alipay');
+});
+</script>
+{% endblock %}
