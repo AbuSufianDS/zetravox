@@ -158,8 +158,12 @@ def api_test_notification():
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            abort(403)
+        if not current_user.is_authenticated:
+            flash('Please login first.', 'warning')
+            return redirect(url_for('auth.login'))
+        if not current_user.is_admin:
+            flash('Access denied. Admin privileges required.', 'danger')
+            return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -168,7 +172,6 @@ def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.now(timezone.utc)
         current_user.last_active = datetime.now(timezone.utc)
-        db.session.commit()
         g.search_form = SearchForm()
     g.locale = str(get_locale())
 
