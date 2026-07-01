@@ -69,7 +69,6 @@
 
     ::selection { background: #6C5CE7; color: #fff; }
 
-    /* ─── NAVBAR ─── */
     .gl-navbar {
         position: sticky;
         top: 0;
@@ -93,9 +92,9 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
+        position: relative;
     }
 
-    /* Logo */
     .gl-logo {
         display: flex;
         align-items: center;
@@ -280,7 +279,6 @@
     }
     @media (max-width: 768px) { .gl-btn .tooltip-label { display: none; } }
 
-    /* Language */
     .gl-lang {
         position: relative;
         margin: 0 2px;
@@ -351,7 +349,6 @@
     }
     .gl-theme-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
 
-    /* User */
     .gl-user {
         position: relative;
         cursor: pointer;
@@ -450,7 +447,6 @@
     .gl-drop-user-name { font-weight: 700; font-size: 14px; }
     .gl-drop-user-handle { font-size: 11px; color: var(--text-muted); }
 
-    /* Notifications */
     .gl-notif-dropdown {
         position: absolute;
         top: calc(100% + 12px);
@@ -508,7 +504,6 @@
     .gl-notif-text strong { color: var(--text-primary); font-weight: 600; }
     .gl-notif-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-    /* Admin Dropdown */
     .gl-admin-dropdown {
         position: absolute;
         top: calc(100% + 12px);
@@ -546,7 +541,6 @@
         .gl-dropdown { min-width: 200px; right: -10px; }
     }
 
-    /* ─── ALERTS ─── */
     .gl-alert {
         background: var(--bg-card);
         backdrop-filter: blur(12px);
@@ -587,7 +581,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ─── MAIN ─── */
     .gl-main {
         max-width: 1400px;
         margin: 0 auto;
@@ -604,6 +597,21 @@
         transition: var(--transition);
     }
     .gl-glass:hover { border-color: rgba(108,92,231,0.2); }
+
+    .dot-menu-item:hover {
+        background: var(--bg-hover) !important;
+        transform: translateY(-2px);
+    }
+    .dot-menu-item div {
+        transition: all 0.2s;
+    }
+    .dot-menu-item:hover div {
+        background: var(--gradient-primary) !important;
+        color: white !important;
+    }
+    .dot-menu-item:hover i {
+        color: white !important;
+    }
     </style>
 </head>
 <body>
@@ -661,10 +669,10 @@ function updateThemeIcon() {
                 <span class="tooltip-label">{{ _('Home') }}</span>
             </a>
 
-            <a href="{{ url_for('main.discover') }}" class="gl-btn {% if request.endpoint == 'main.discover' %}active{% endif %}" title="{{ _('Discover') }}">
-                <i class="fas fa-compass"></i>
-                <span class="tooltip-label">{{ _('Discover') }}</span>
-            </a>
+            <button class="gl-btn" onclick="toggleDotMenu()" title="{{ _('Menu') }}">
+                <i class="fas fa-th"></i>
+                <span class="tooltip-label">{{ _('Menu') }}</span>
+            </button>
 
             <a href="{{ url_for('main.inner_circle') }}" class="gl-btn" title="{{ _('Inner Circle') }}">
                 <i class="fas fa-user-shield" style="color: #A29BFE;"></i>
@@ -673,11 +681,12 @@ function updateThemeIcon() {
             </a>
 
             <a href="{{ url_for('main.conversations') }}" class="gl-btn" title="{{ _('Messages') }}">
-                <i class="fas fa-envelope"></i>
+                <i class="fas fa-comment-dots"></i>
                 <span id="unreadMessagesBadge" class="badge-num" style="display:none;">0</span>
                 <span class="tooltip-label">{{ _('Messages') }}</span>
             </a>
 
+            <!-- Friend Requests -->
             <a href="{{ url_for('main.friend_requests_page') }}" class="gl-btn" title="{{ _('Requests') }}">
                 <i class="fas fa-user-plus"></i>
                 {% if current_user.is_authenticated %}
@@ -707,16 +716,6 @@ function updateThemeIcon() {
                     </div>
                 </div>
             </div>
-
-            <a href="{{ url_for('main.help') }}" class="gl-btn" title="{{ _('Help') }}">
-                <i class="fas fa-question-circle"></i>
-                <span class="tooltip-label">{{ _('Help') }}</span>
-            </a>
-
-            <a href="{{ url_for('main.feedback') }}" class="gl-btn" title="{{ _('Feedback') }}">
-                <i class="fas fa-comment-dots"></i>
-                <span class="tooltip-label">{{ _('Feedback') }}</span>
-            </a>
 
             <div class="gl-lang">
                 <button class="gl-lang-btn" onclick="toggleLangMenu()">
@@ -774,6 +773,11 @@ function updateThemeIcon() {
                     <a href="{{ url_for('main.edit_profile') }}" class="gl-drop-item"><i class="fas fa-edit"></i> {{ _('Edit Profile') }}</a>
                     <a href="{{ url_for('human_verification.request_verification') }}" class="gl-drop-item"><i class="fas fa-shield-alt"></i> {{ _('Verify Human') }}</a>
                     <a href="{{ url_for('main.account_settings') }}" class="gl-drop-item"><i class="fas fa-cog"></i> {{ _('Settings') }}</a>
+
+                    <div class="gl-drop-divider"></div>
+                    <a href="{{ url_for('main.feedback') }}" class="gl-drop-item"><i class="fas fa-comment-dots"></i> {{ _('Feedback') }}</a>
+                    <a href="{{ url_for('main.help') }}" class="gl-drop-item"><i class="fas fa-question-circle"></i> {{ _('Help') }}</a>
+
                     <div class="gl-drop-divider"></div>
                     <a href="{{ url_for('auth.logout') }}" class="gl-drop-item drop-danger"><i class="fas fa-sign-out-alt"></i> {{ _('Logout') }}</a>
                 </div>
@@ -789,6 +793,47 @@ function updateThemeIcon() {
             </a>
             {% endif %}
 
+        </div>
+    </div>
+
+    <div id="dotMenu" style="display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: var(--bg-card); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 16px; z-index: 1060; min-width: 280px; border: 1px solid var(--border-color); margin-top: 8px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <a href="{{ url_for('main.discover') }}" class="dot-menu-item" style="display: flex; flex-direction: column; align-items: center; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                <div style="width: 44px; height: 44px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                    <i class="fas fa-compass" style="font-size: 18px;"></i>
+                </div>
+                <span style="font-size: 11px;">Discover</span>
+            </a>
+            <a href="{{ url_for('main.explore') }}" class="dot-menu-item" style="display: flex; flex-direction: column; align-items: center; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                <div style="width: 44px; height: 44px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                    <i class="fas fa-globe" style="font-size: 18px;"></i>
+                </div>
+                <span style="font-size: 11px;">Explore</span>
+            </a>
+            <a href="{{ url_for('main.friends') }}" class="dot-menu-item" style="display: flex; flex-direction: column; align-items: center; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                <div style="width: 44px; height: 44px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                    <i class="fas fa-user-friends" style="font-size: 18px;"></i>
+                </div>
+                <span style="font-size: 11px;">Connections</span>
+            </a>
+            <a href="{{ url_for('main.saved_posts') }}" class="dot-menu-item" style="display: flex; flex-direction: column; align-items: center; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                <div style="width: 44px; height: 44px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                    <i class="fas fa-bookmark" style="font-size: 18px;"></i>
+                </div>
+                <span style="font-size: 11px;">Saved</span>
+            </a>
+            <a href="{{ url_for('main.birthdays') }}" class="dot-menu-item" style="display: flex; flex-direction: column; align-items: center; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                <div style="width: 44px; height: 44px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                    <i class="fas fa-birthday-cake" style="font-size: 18px;"></i>
+                </div>
+                <span style="font-size: 11px;">Birthdays</span>
+            </a>
+            <a href="{{ url_for('main.memories') }}" class="dot-menu-item" style="display: flex; flex-direction: column; align-items: center; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); transition: all 0.2s;">
+                <div style="width: 44px; height: 44px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                    <i class="fas fa-history" style="font-size: 18px;"></i>
+                </div>
+                <span style="font-size: 11px;">Memories</span>
+            </a>
         </div>
     </div>
 </nav>
@@ -818,7 +863,6 @@ function updateThemeIcon() {
 <script>
 updateThemeIcon();
 
-// ─── Language Menu ──────────────────────────────────────────
 function toggleLangMenu() {
     const menu = document.getElementById('langMenu');
     if (menu) {
@@ -829,7 +873,21 @@ function toggleLangMenu() {
     }
 }
 
-// ─── Close dropdowns on outside click ──────────────────────
+function toggleDotMenu() {
+    const menu = document.getElementById('dotMenu');
+    if (menu.style.display === 'none') {
+        menu.style.display = 'block';
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.gl-btn') && !e.target.closest('#dotMenu')) {
+        document.getElementById('dotMenu').style.display = 'none';
+    }
+});
+
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.gl-notif-trigger') && !e.target.closest('.gl-notif-dropdown')) {
         document.querySelectorAll('.gl-notif-dropdown').forEach(d => {
@@ -845,18 +903,13 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ─── Search ──────────────────────────────────────────────────
 document.getElementById('glSearchInput')?.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         window.location.href = `/search?q=${encodeURIComponent(this.value)}`;
     }
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 🎯 KEYBOARD SHORTCUTS - Fully Fixed Professional Version
-// ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
-    // ── Ctrl+K / ⌘K: Focus Search ──
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         const searchInput = document.getElementById('glSearchInput');
@@ -867,17 +920,12 @@ document.addEventListener('keydown', function(e) {
         return;
     }
 
-    // ── Alt+T: Open AI Chat ──
-    // ✅ SAFE - NO browser default conflict!
-    // ✅ Works on Windows, Mac, Linux
-    // ✅ Not used by any major browser
     if (e.altKey && e.key === 't') {
         e.preventDefault();
         window.location.href = '/ai-chat';
         return;
     }
 
-    // ── Escape: Close dropdowns & blur search ──
     if (e.key === 'Escape') {
         const searchInput = document.getElementById('glSearchInput');
         if (searchInput) searchInput.blur();
@@ -886,11 +934,13 @@ document.addEventListener('keydown', function(e) {
             d.style.opacity = '0';
             d.style.visibility = 'hidden';
         });
+
+        // Close dot menu
+        document.getElementById('dotMenu').style.display = 'none';
         return;
     }
 });
 
-// ─── Notifications ──────────────────────────────────────────
 let notifInterval = null;
 
 function updateUnreadCount() {
@@ -1028,7 +1078,6 @@ if (notifInterval) clearInterval(notifInterval);
 notifInterval = setInterval(checkNotifs, 30000);
 checkNotifs();
 
-// ─── Auto-close alerts ──────────────────────────────────────
 setTimeout(function() {
     document.querySelectorAll('.gl-alert').forEach(alert => {
         const bsAlert = bootstrap.Alert.getInstance(alert);
@@ -1036,7 +1085,6 @@ setTimeout(function() {
     });
 }, 8000);
 
-// ─── Global Functions ──────────────────────────────────────
 function applaudPost(postId, reaction) {
     fetch(`/react_post/${postId}/${reaction}`)
         .then(r => r.json())

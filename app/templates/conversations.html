@@ -2,254 +2,399 @@
 
 {% block content %}
 <style>
+
 :root {
-    --msg-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --msg-gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --msg-gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --conv-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --conv-gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --conv-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    --conv-radius: 20px;
+    --conv-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.messages-premium-container {
-    max-width: 900px;
+.conv-container {
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 20px 24px;
 }
 
-.messages-premium-card {
-    background: var(--bg-card);
-    border-radius: 32px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-    border: 1px solid rgba(102,126,234,0.12);
-    transition: all 0.3s ease;
-}
-
-.messages-premium-card:hover {
-    box-shadow: 0 25px 50px rgba(102,126,234,0.15);
-}
-
-.messages-premium-header {
-    background: linear-gradient(135deg, #667eea08, #764ba208);
-    padding: 28px 32px;
-    border-bottom: 1px solid var(--border-color);
-    position: relative;
-    overflow: hidden;
-}
-
-.messages-premium-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.header-content {
+.conv-header {
     display: flex;
     align-items: center;
-    gap: 18px;
-    position: relative;
-    z-index: 1;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.header-icon-wrapper {
-    width: 60px;
-    height: 60px;
-    background: var(--msg-gradient-1);
-    border-radius: 20px;
+.conv-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.conv-header-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--conv-gradient-1);
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: float 3s ease-in-out infinite;
+    font-size: 22px;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.3);
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-.header-icon-wrapper i {
-    font-size: 28px;
-    color: white;
-}
-
-.header-text h2 {
-    font-size: 24px;
+.conv-header-title h1 {
+    font-size: 26px;
     font-weight: 800;
     margin: 0;
-    background: var(--msg-gradient-1);
+    background: var(--conv-gradient-1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-.header-text p {
-    margin: 4px 0 0;
-    color: var(--text-secondary);
+.conv-header-title p {
+    margin: 0;
     font-size: 13px;
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
 }
 
-.header-stats {
-    position: absolute;
-    right: 32px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--hover-bg);
-    padding: 8px 16px;
-    border-radius: 40px;
+.conv-header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.conv-header-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 30px;
     font-size: 13px;
     font-weight: 600;
-    color: #667eea;
-}
-
-/* Search Bar */
-.messages-search-bar {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.search-input-wrapper {
-    position: relative;
-}
-
-.search-input-wrapper i {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.search-input {
-    width: 100%;
-    padding: 12px 16px 12px 44px;
-    background: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 40px;
-    font-size: 14px;
-    transition: all 0.3s;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-}
-
-.conversations-list {
-    max-height: 550px;
-    overflow-y: auto;
-    padding: 8px;
-}
-
-.conversations-list::-webkit-scrollbar {
-    width: 5px;
-}
-
-.conversations-list::-webkit-scrollbar-track {
-    background: var(--hover-bg);
-    border-radius: 10px;
-}
-
-.conversations-list::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 10px;
-}
-
-.conversation-item {
+    cursor: pointer;
+    transition: var(--conv-transition);
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    margin-bottom: 8px;
-    background: var(--bg-card);
-    border-radius: 20px;
+    gap: 8px;
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.conv-header-btn:hover {
+    background: var(--conv-gradient-1);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102,126,234,0.3);
+}
+
+.conv-online-section {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--conv-radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    transition: var(--conv-transition);
+}
+
+.conv-online-section:hover {
+    border-color: rgba(102,126,234,0.2);
+}
+
+.conv-online-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.conv-online-header h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.conv-online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: conv-pulse 2s ease-in-out infinite;
+}
+
+@keyframes conv-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.conv-online-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-hover);
+    padding: 2px 14px;
+    border-radius: 20px;
+}
+
+.conv-online-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.conv-online-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    transition: var(--conv-transition);
     cursor: pointer;
 }
 
-.conversation-item:hover {
-    background: linear-gradient(135deg, #667eea05, #764ba205);
-    border-color: rgba(102,126,234,0.2);
-    transform: translateX(5px);
+.conv-online-item:hover {
+    transform: translateY(-4px);
 }
 
-.conversation-avatar {
+.conv-online-avatar-wrap {
     position: relative;
+    width: 56px;
+    height: 56px;
 }
 
-.avatar-ring {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--msg-gradient-1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px;
-}
-
-.avatar-img {
+.conv-online-avatar {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--bg-card);
+    border: 3px solid #10b981;
+    transition: var(--conv-transition);
 }
 
-.online-indicator {
+.conv-online-item:hover .conv-online-avatar {
+    border-color: #667eea;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+}
+
+.conv-online-indicator {
     position: absolute;
-    bottom: 4px;
-    right: 4px;
+    bottom: 2px;
+    right: 2px;
     width: 14px;
     height: 14px;
     background: #10b981;
     border-radius: 50%;
     border: 2px solid var(--bg-card);
-    animation: pulse 2s infinite;
+    animation: conv-pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.7; }
+.conv-online-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.conversation-info {
+.conv-online-empty {
+    text-align: center;
+    padding: 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.conv-online-empty i {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 8px;
+    opacity: 0.3;
+}
+
+.conv-search-wrap {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.conv-search-wrap i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.conv-search-input {
+    width: 100%;
+    padding: 14px 18px 14px 48px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: var(--conv-transition);
+    font-family: 'Inter', sans-serif;
+}
+
+.conv-search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+}
+
+.conv-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.conv-search-shortcut {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-hover);
+    padding: 2px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    font-family: monospace;
+}
+
+.conv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.conv-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.conv-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.conv-list::-webkit-scrollbar-thumb {
+    background: var(--conv-gradient-1);
+    border-radius: 10px;
+}
+
+.conv-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    text-decoration: none;
+    transition: var(--conv-transition);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.conv-item:hover {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    transform: translateX(4px);
+}
+
+.conv-item.active {
+    background: var(--bg-card);
+    border-color: rgba(102,126,234,0.2);
+    box-shadow: 0 2px 12px rgba(102,126,234,0.06);
+}
+
+.conv-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.conv-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+    transition: var(--conv-transition);
+}
+
+.conv-item:hover .conv-avatar {
+    border-color: #667eea;
+}
+
+.conv-status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+}
+
+.conv-status-dot.online {
+    background: #10b981;
+    animation: conv-pulse 2s ease-in-out infinite;
+}
+
+.conv-status-dot.offline {
+    background: var(--text-muted);
+}
+
+.conv-status-dot.away {
+    background: #f59e0b;
+}
+
+.conv-info {
     flex: 1;
+    min-width: 0;
 }
 
-.conversation-header {
+.conv-info-top {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
-.conversation-name {
+.conv-name {
+    font-size: 15px;
     font-weight: 700;
-    font-size: 16px;
     color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-wrap: wrap;
 }
 
-.verified-badge {
+.conv-name .verified {
     color: #667eea;
     font-size: 12px;
 }
 
-.conversation-time {
+.conv-time {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-left: 12px;
 }
 
-.conversation-preview {
+.conv-preview {
     font-size: 13px;
     color: var(--text-secondary);
     display: flex;
@@ -257,382 +402,518 @@
     gap: 6px;
 }
 
-.preview-icon {
+.conv-preview-icon {
     font-size: 10px;
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
-.preview-text {
+.conv-preview-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 300px;
+    flex: 1;
 }
 
-.unread-badge {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
+.conv-preview .sender {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.conv-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.conv-unread {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 30px;
-    min-width: 28px;
-    text-align: center;
-    animation: bounce 1s infinite;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: conv-bounce 1s ease-in-out infinite;
 }
 
-@keyframes bounce {
+@keyframes conv-bounce {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
 
-.status-sent, .status-delivered, .status-seen {
+.conv-status-icon {
     font-size: 12px;
 }
 
-.status-sent i { color: var(--text-secondary); }
-.status-delivered i { color: #667eea; }
-.status-seen i { color: #10b981; }
+.conv-status-icon.sent { color: var(--text-muted); }
+.conv-status-icon.delivered { color: #667eea; }
+.conv-status-icon.seen { color: #10b981; }
 
-/* Empty State */
-.empty-state-premium {
+.conv-empty {
     text-align: center;
-    padding: 60px 20px;
+    padding: 48px 20px;
 }
 
-.empty-icon-wrapper {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #667eea10, #764ba210);
+.conv-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--bg-card);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 24px;
-    animation: float 3s infinite;
-}
-
-.empty-icon-wrapper i {
-    font-size: 48px;
-    color: #667eea;
-}
-
-.empty-state-premium h4 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.empty-state-premium p {
-    color: var(--text-secondary);
-    margin-bottom: 28px;
-}
-
-.btn-find-people {
-    background: var(--msg-gradient-1);
-    color: white;
-    border: none;
-    padding: 12px 32px;
-    border-radius: 40px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.btn-find-people:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
-    color: white;
-}
-
-.loading-state {
-    text-align: center;
-    padding: 40px;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid var(--border-color);
-    border-top-color: #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
     margin: 0 auto 16px;
+    font-size: 36px;
+    color: #667eea;
+    border: 2px dashed var(--border-color);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.messages-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-
-.footer-action-btn {
-    background: var(--hover-bg);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
+.conv-empty h4 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
     color: var(--text-primary);
 }
 
-.footer-action-btn:hover {
-    background: var(--msg-gradient-1);
-    color: white;
+.conv-empty p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+.conv-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    background: var(--conv-gradient-1);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: var(--conv-transition);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+
+.conv-btn-primary:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    color: #fff;
+}
+
+.conv-footer {
+    display: flex;
+    gap: 12px;
+    padding-top: 16px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.conv-footer-btn {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--conv-transition);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+}
+
+.conv-footer-btn:hover {
+    background: var(--conv-gradient-1);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102,126,234,0.2);
+}
+
+.conv-footer-btn i {
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {
-    .messages-premium-container {
-        padding: 12px;
+    .conv-container {
+        padding: 12px 16px;
     }
 
-    .messages-premium-header {
-        padding: 20px;
+    .conv-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .header-icon-wrapper {
+    .conv-header-actions {
+        width: 100%;
+    }
+
+    .conv-header-btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .conv-online-section {
+        padding: 16px;
+    }
+
+    .conv-online-grid {
+        gap: 12px;
+    }
+
+    .conv-online-avatar-wrap {
         width: 48px;
         height: 48px;
     }
 
-    .header-icon-wrapper i {
-        font-size: 22px;
-    }
-
-    .header-text h2 {
-        font-size: 20px;
-    }
-
-    .header-stats {
-        position: static;
-        transform: none;
-        margin-top: 12px;
-        display: inline-block;
-    }
-
-    .conversation-item {
+    .conv-item {
         padding: 12px 16px;
+        gap: 12px;
     }
 
-    .avatar-ring {
-        width: 50px;
-        height: 50px;
+    .conv-avatar {
+        width: 44px;
+        height: 44px;
     }
 
-    .conversation-name {
+    .conv-name {
         font-size: 14px;
     }
 
-    .preview-text {
-        max-width: 180px;
+    .conv-preview-text {
+        max-width: 160px;
     }
 
-    .empty-icon-wrapper {
-        width: 80px;
-        height: 80px;
+    .conv-search-shortcut {
+        display: none;
     }
 
-    .empty-icon-wrapper i {
-        font-size: 36px;
+    .conv-footer {
+        flex-direction: column;
+    }
+
+    .conv-footer-btn {
+        flex: none;
+        width: 100%;
+    }
+
+    .conv-unread {
+        font-size: 10px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 8px;
     }
 }
 
-/* Dark Mode Adjustments */
-[data-theme="dark"] .conversation-item {
+@media (max-width: 480px) {
+    .conv-header-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+    }
+
+    .conv-header-title h1 {
+        font-size: 20px;
+    }
+
+    .conv-online-avatar-wrap {
+        width: 40px;
+        height: 40px;
+    }
+
+    .conv-online-indicator {
+        width: 10px;
+        height: 10px;
+    }
+
+    .conv-avatar {
+        width: 38px;
+        height: 38px;
+    }
+
+    .conv-preview-text {
+        max-width: 120px;
+    }
+}
+
+[data-theme="dark"] .conv-online-section {
     background: var(--bg-card);
 }
 
-[data-theme="dark"] .search-input {
-    background: var(--hover-bg);
+[data-theme="dark"] .conv-item:hover {
+    background: var(--bg-hover);
+}
+
+[data-theme="dark"] .conv-search-input {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .conv-footer-btn {
+    background: var(--bg-card);
 }
 </style>
 
-<div class="messages-premium-container">
-    <div class="messages-premium-card">
+<div class="conv-container">
 
-        <div class="messages-premium-header">
-            <div class="header-content">
-                <div class="header-icon-wrapper">
-                    <i class="fas fa-comment-dots"></i>
-                </div>
-                <div class="header-text">
-                    <h2>Messages</h2>
-                    <p>Connect and chat with your friends</p>
-                </div>
-                {% if conversations %}
-                <div class="header-stats">
-                    <i class="fas fa-comment me-1"></i>
-                    {{ conversations|length }} Conversations
-                </div>
-                {% endif %}
+    <div class="conv-header">
+        <div class="conv-header-left">
+            <div class="conv-header-icon">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <div class="conv-header-title">
+                <h1>Messages</h1>
+                <p>Connect and chat with your friends</p>
             </div>
         </div>
-
-        <div class="messages-search-bar">
-            <div class="search-input-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" class="search-input" id="searchConversations" placeholder="Search conversations...">
-            </div>
-        </div>
-
-        <div class="conversations-list" id="conversationsList">
-            {% if conversations %}
-                {% for conv in conversations %}
-                <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="conversation-item" data-username="{{ conv.user.username|lower }}">
-                    <div class="conversation-avatar">
-                        <div class="avatar-ring">
-                            <img src="{{ conv.user.avatar(56) }}" class="avatar-img" alt="{{ conv.user.username }}">
-                        </div>
-                        {% if conv.user.is_online %}
-                        <span class="online-indicator"></span>
-                        {% endif %}
-                    </div>
-
-                    <div class="conversation-info">
-                        <div class="conversation-header">
-                            <div class="conversation-name">
-                                {{ conv.user.username }}
-                                {% if conv.user.is_verified %}
-                                <i class="fas fa-check-circle verified-badge"></i>
-                                {% endif %}
-                            </div>
-                            {% if conv.last_message %}
-                            <div class="conversation-time">
-                                {{ moment(conv.last_message.timestamp).fromNow() }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="conversation-preview">
-                            <i class="fas fa-reply preview-icon"></i>
-                            <span class="preview-text">
-                                {% if conv.last_message %}
-                                    {% if conv.last_message.sender_id == current_user.id %}
-                                    You:
-                                    {% endif %}
-                                    {{ conv.last_message.message[:50] }}{% if conv.last_message.message|length > 50 %}...{% endif %}
-                                {% else %}
-                                    No messages yet. Start a conversation!
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="conversation-status">
-                        {% if conv.unread_count > 0 %}
-                        <span class="unread-badge">{{ conv.unread_count }}</span>
-                        {% else %}
-                        <div class="status-seen">
-                            <i class="fas fa-check-double"></i>
-                        </div>
-                        {% endif %}
-                    </div>
-                </a>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state-premium">
-                    <div class="empty-icon-wrapper">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <h4>No Messages Yet</h4>
-                    <p>Start a conversation with your connections</p>
-                    <a href="{{ url_for('main.friends') }}" class="btn-find-people">
-                        <i class="fas fa-user-plus"></i> Find Friends
-                    </a>
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="messages-footer">
-            <a href="{{ url_for('main.friends') }}" class="footer-action-btn">
-                <i class="fas fa-user-friends"></i> Find Friends
+        <div class="conv-header-actions">
+            <a href="{{ url_for('main.friends') }}" class="conv-header-btn">
+                <i class="fas fa-user-plus"></i>
+                <span>Find Friends</span>
             </a>
-            <a href="{{ url_for('main.discover') }}" class="footer-action-btn">
-                <i class="fas fa-compass"></i> Discover People
+            <a href="{{ url_for('main.discover') }}" class="conv-header-btn">
+                <i class="fas fa-compass"></i>
+                <span>Discover</span>
             </a>
         </div>
-
     </div>
+
+    <div class="conv-online-section">
+        <div class="conv-online-header">
+            <h3>
+                <span class="conv-online-dot"></span>
+                Online Now
+            </h3>
+            <span class="conv-online-count">{{ active_contacts|length if active_contacts else 0 }} online</span>
+        </div>
+
+        {% if active_contacts %}
+        <div class="conv-online-grid">
+            {% for contact in active_contacts[:12] %}
+            <a href="{{ url_for('main.chat', username=contact.username) }}" class="conv-online-item" title="{{ contact.username }}">
+                <div class="conv-online-avatar-wrap">
+                    <img src="{{ contact.avatar(56) }}" class="conv-online-avatar" alt="{{ contact.username }}">
+                    <span class="conv-online-indicator"></span>
+                </div>
+                <span class="conv-online-name">{{ contact.username }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="conv-online-empty">
+            <i class="fas fa-user-slash"></i>
+            <span>No friends online right now</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="conv-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="conv-search-input" id="convSearch" placeholder="Search conversations, friends...">
+        <span class="conv-search-shortcut">⌘K</span>
+    </div>
+
+    <div class="conv-list" id="convList">
+        {% if conversations %}
+            {% for conv in conversations %}
+            <a href="{{ url_for('main.chat', username=conv.user.username) }}" class="conv-item" data-username="{{ conv.user.username|lower }}">
+                <div class="conv-avatar-wrap">
+                    <img src="{{ conv.user.avatar(52) }}" class="conv-avatar" alt="{{ conv.user.username }}">
+                    {% if conv.user.is_online %}
+                    <span class="conv-status-dot online"></span>
+                    {% elif conv.user.is_away %}
+                    <span class="conv-status-dot away"></span>
+                    {% else %}
+                    <span class="conv-status-dot offline"></span>
+                    {% endif %}
+                </div>
+
+                <div class="conv-info">
+                    <div class="conv-info-top">
+                        <span class="conv-name">
+                            {{ conv.user.username }}
+                            {% if conv.user.is_verified %}
+                            <i class="fas fa-check-circle verified"></i>
+                            {% endif %}
+                        </span>
+                        {% if conv.last_message %}
+                        <span class="conv-time">{{ moment(conv.last_message.timestamp).fromNow() }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="conv-preview">
+                        <i class="fas fa-reply conv-preview-icon"></i>
+                        <span class="conv-preview-text">
+                            {% if conv.last_message %}
+                                {% if conv.last_message.sender_id == current_user.id %}
+                                <span class="sender">You:</span>
+                                {% endif %}
+                                {{ conv.last_message.message|truncate(45) }}
+                            {% else %}
+                                <span style="color: var(--text-muted);">No messages yet</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="conv-right">
+                    {% if conv.unread_count > 0 %}
+                    <span class="conv-unread">{{ conv.unread_count }}</span>
+                    {% else %}
+                    <span class="conv-status-icon seen">
+                        <i class="fas fa-check-double"></i>
+                    </span>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="conv-empty">
+                <div class="conv-empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h4>No Messages Yet</h4>
+                <p>Start a conversation with your friends</p>
+                <a href="{{ url_for('main.friends') }}" class="conv-btn-primary">
+                    <i class="fas fa-user-plus"></i> Find Friends
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="conv-footer">
+        <a href="{{ url_for('main.friends') }}" class="conv-footer-btn">
+            <i class="fas fa-user-friends"></i> Connections
+        </a>
+        <a href="{{ url_for('main.discover') }}" class="conv-footer-btn">
+            <i class="fas fa-compass"></i> Discover People
+        </a>
+        <a href="{{ url_for('main.inner_circle') }}" class="conv-footer-btn">
+            <i class="fas fa-user-shield"></i> Inner Circle
+        </a>
+    </div>
+
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('convSearch');
+    const convItems = document.querySelectorAll('.conv-item');
+    const convList = document.getElementById('convList');
+    let noResultsEl = null;
 
-const searchInput = document.getElementById('searchConversations');
-const conversations = document.querySelectorAll('.conversation-item');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const term = this.value.toLowerCase().trim();
 
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
+            // Remove any existing no-results message
+            if (noResultsEl) {
+                noResultsEl.remove();
+                noResultsEl = null;
+            }
 
-        conversations.forEach(conv => {
-            const username = conv.dataset.username;
-            if (username && username.includes(searchTerm)) {
-                conv.style.display = 'flex';
-            } else {
-                conv.style.display = 'none';
+            let visibleCount = 0;
+
+            convItems.forEach(item => {
+                const username = item.dataset.username || '';
+                const name = item.querySelector('.conv-name')?.textContent?.toLowerCase() || '';
+                const preview = item.querySelector('.conv-preview-text')?.textContent?.toLowerCase() || '';
+
+                const matches = username.includes(term) || name.includes(term) || preview.includes(term);
+
+                if (matches) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const emptyState = document.querySelector('.conv-empty');
+            if (visibleCount === 0 && !emptyState) {
+                noResultsEl = document.createElement('div');
+                noResultsEl.className = 'conv-empty';
+                noResultsEl.innerHTML = `
+                    <div class="conv-empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4>No Results Found</h4>
+                    <p>No conversations match "<strong>${term}</strong>"</p>
+                `;
+                convList.appendChild(noResultsEl);
+            } else if (visibleCount === 0 && emptyState) {
+                emptyState.style.display = 'block';
+            } else if (visibleCount > 0 && emptyState) {
+                emptyState.style.display = 'none';
             }
         });
+    }
 
-        const visibleConversations = document.querySelectorAll('.conversation-item[style*="display: flex"], .conversation-item:not([style*="display: none"])');
-        const emptyState = document.querySelector('.empty-state-premium');
+    document.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
 
-        if (visibleConversations.length === 0 && !emptyState) {
-            const list = document.getElementById('conversationsList');
-            const noResults = document.createElement('div');
-            noResults.className = 'empty-state-premium';
-            noResults.innerHTML = `
-                <div class="empty-icon-wrapper">
-                    <i class="fas fa-search"></i>
-                </div>
-                <h4>No Results Found</h4>
-                <p>No conversations match "${searchTerm}"</p>
-            `;
-            list.appendChild(noResults);
-        } else if (visibleConversations.length > 0 && emptyState) {
-            emptyState.remove();
+        if (e.key === 'Escape' && searchInput && document.activeElement === searchInput) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.blur();
         }
     });
-}
 
-let refreshInterval;
-function startAutoRefresh() {
-    refreshInterval = setInterval(() => {
-        fetch(window.location.href)
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newConversations = doc.querySelector('.conversations-list');
-                if (newConversations) {
-                    document.querySelector('.conversations-list').innerHTML = newConversations.innerHTML;
-                }
-            })
-            .catch(error => console.error('Auto-refresh error:', error));
-    }, 30000);
-}
+    let refreshInterval;
 
-if ({{ conversations|length }} > 0) {
-    // startAutoRefresh(); // Uncomment if needed
-}
+    function startAutoRefresh() {
+        refreshInterval = setInterval(function() {
+            fetch(window.location.href)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newList = doc.querySelector('.conv-list');
+                    if (newList) {
+                        const currentList = document.getElementById('convList');
+                        if (currentList) {
+                            currentList.innerHTML = newList.innerHTML;
+                            // Re-bind any dynamic elements if needed
+                        }
+                    }
+                })
+                .catch(error => console.error('Auto-refresh error:', error));
+        }, 30000);
+    }
 
-window.addEventListener('beforeunload', () => {
-    if (refreshInterval) clearInterval(refreshInterval);
+    window.addEventListener('beforeunload', function() {
+        if (refreshInterval) clearInterval(refreshInterval);
+    });
+
+    const currentPath = window.location.pathname;
+    convItems.forEach(item => {
+        if (item.href && currentPath.startsWith(item.href)) {
+            item.classList.add('active');
+        }
+    });
 });
 </script>
 

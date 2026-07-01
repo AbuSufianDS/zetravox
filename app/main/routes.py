@@ -3327,8 +3327,6 @@ def set_locale(lang):
     return redirect(request.referrer or url_for('main.index'))
 
 
-# ========== VIP/PREMIUM ROUTES ==========
-
 @bp.route('/vip')
 @login_required
 def vip():
@@ -3452,8 +3450,6 @@ def vip_cancel():
     return redirect(url_for('main.vip'))
 
 
-# ========== VIP WEBHOOK (For payment callback) ==========
-
 @bp.route('/vip/webhook', methods=['POST'])
 def vip_webhook():
     data = request.get_json()
@@ -3514,8 +3510,6 @@ def vip_check_expiry():
         'days_left': max(0, days_left)
     })
 
-# ========== FEEDBACK ROUTES ==========
-
 @bp.route('/feedback', methods=['GET', 'POST'])
 @login_required
 def feedback():
@@ -3536,12 +3530,9 @@ def feedback():
     return render_template('feedback.html', title='Feedback', form=form)
 
 
-# ========== HELP ROUTES ==========
-
 @bp.route('/help', methods=['GET', 'POST'])
 @login_required
 def help():
-    """Submit help request"""
     form = HelpForm()
     if form.validate_on_submit():
         help_request = HelpRequest(

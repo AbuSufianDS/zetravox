@@ -12,7 +12,6 @@
     </div>
 
     <div class="premium-story-scroll">
-        <!-- Add Story Button - USING DATA ATTRIBUTES -->
         <div class="premium-story-item premium-story-add" data-bs-toggle="modal" data-bs-target="#momentModal" style="cursor: pointer;">
             <div class="premium-story-avatar-wrapper">
                 <div class="premium-story-add-ring">
@@ -22,7 +21,6 @@
             <span class="premium-story-name">Add Story</span>
         </div>
 
-        <!-- Grouped Stories -->
         {% for group in grouped_stories_data %}
         <div class="premium-story-item" onclick='openMomentViewer({{ group.stories | tojson | safe }}, 0)'>
             <div class="premium-story-avatar-wrapper">
@@ -43,7 +41,6 @@
 </div>
 
 {% else %}
-<!-- Empty State -->
 <div class="premium-story-container">
     <div class="premium-story-header">
         <div class="premium-story-title">
@@ -58,7 +55,6 @@
         </div>
         <h5>No Moments Yet</h5>
         <p>Share your first moment with your friends!</p>
-        <!-- USING DATA ATTRIBUTES -->
         <button class="premium-story-empty-btn" data-bs-toggle="modal" data-bs-target="#momentModal">
             <i class="fas fa-plus me-2"></i>Add Story
         </button>
@@ -157,6 +153,7 @@
     min-width: 80px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    cursor: pointer;
 }
 
 .premium-story-item:hover {
@@ -391,7 +388,31 @@ function openStoryUpload() {
 function viewAllStories() {
     const stories = {{ stories_data | tojson | safe }};
     if (stories && stories.length > 0) {
-        openMomentViewer(stories[0].id);
+        openMomentViewer(stories, 0);
+    } else {
+        showToast('No stories available', 'info');
     }
+}
+
+// Helper function to show toast if needed
+function showToast(message, type = 'success') {
+    const existing = document.querySelector('.story-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'story-toast ' + type;
+    toast.innerHTML = `
+        <div class="story-toast-icon">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-circle'}"></i>
+        </div>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 </script>

@@ -3,28 +3,23 @@
 {% block content %}
 
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   🎨 INDEX LAYOUT
-   ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Grid Layout ──────────────────────────────────────────── */
 .ix-grid {
     display: grid;
-    grid-template-columns: 260px 1fr 300px;
+    grid-template-columns: 260px 1fr;
     gap: 20px;
     align-items: start;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 992px) {
     .ix-grid { grid-template-columns: 1fr; }
-    .ix-left, .ix-right { display: none; }
+    .ix-left { display: none; }
 }
 
 @media (max-width: 768px) {
     .ix-grid { gap: 16px; }
 }
 
-/* ─── Cards ────────────────────────────────────────────────── */
 .ix-card {
     background: var(--bg-surface);
     backdrop-filter: blur(16px);
@@ -62,7 +57,6 @@
 .ix-card-header .ix-dot.gold { background: #FDCB6E; }
 .ix-card-header .ix-dot.pink { background: #FD79A8; }
 
-/* ─── Profile Card ─────────────────────────────────────────── */
 .ix-profile {
     text-align: center;
     padding: 20px 16px;
@@ -138,7 +132,12 @@
     border-color: #FD79A8;
 }
 
-/* ─── Stats ────────────────────────────────────────────────── */
+.ix-profile-badge.human {
+    background: #10b981;
+    color: #fff;
+    border-color: #10b981;
+}
+
 .ix-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -176,161 +175,27 @@
     margin-top: 2px;
 }
 
-/* ─── Menu Items ───────────────────────────────────────────── */
-.ix-menu-item {
+.ix-feed-header {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 12px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    transition: var(--transition);
-    margin-bottom: 2px;
+    margin-bottom: 16px;
 }
 
-.ix-menu-item:hover {
-    background: var(--bg-surface-hover);
-    color: var(--text-primary);
-    transform: translateX(4px);
-}
-
-.ix-menu-item i {
-    width: 20px;
-    font-size: 15px;
-    color: #A29BFE;
-    text-align: center;
-    transition: var(--transition);
-}
-
-.ix-menu-item:hover i {
-    color: #6C5CE7;
-    transform: scale(1.1);
-}
-
-.ix-menu-item .ix-badge {
-    margin-left: auto;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: var(--radius-full);
-    background: var(--bg-surface-hover);
-    color: var(--text-muted);
-}
-
-.ix-menu-item .ix-badge.gold {
-    background: linear-gradient(135deg, #FDCB6E, #E17055);
-    color: #000;
-}
-
-.ix-menu-item .ix-badge.pink {
-    background: linear-gradient(135deg, #FD79A8, #6C5CE7);
-    color: #fff;
-}
-
-.ix-menu-divider {
-    height: 1px;
-    background: var(--border-glass);
-    margin: 8px 8px;
-}
-
-.ix-menu-section {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--text-muted);
-    padding: 8px 12px 4px;
-}
-
-/* ─── Moments ───────────────────────────────────────────────── */
-.ix-moments {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding: 4px 0;
-    scrollbar-width: none;
-}
-
-.ix-moments::-webkit-scrollbar { display: none; }
-
-.ix-moment {
-    text-align: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: var(--transition);
-}
-
-.ix-moment:hover {
-    transform: translateY(-4px);
-}
-
-.ix-moment-ring {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    padding: 2px;
-    background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-    transition: var(--transition);
-    position: relative;
-}
-
-.ix-moment-ring:hover {
-    box-shadow: 0 4px 15px rgba(108,92,231,0.3);
-}
-
-.ix-moment-ring img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--bg-body);
-}
-
-.ix-moment-ring .ix-moment-add {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 22px;
-    height: 22px;
-    background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 10px;
-    border: 2px solid var(--bg-body);
-}
-
-.ix-moment-name {
-    font-size: 9px;
-    color: var(--text-muted);
-    margin-top: 4px;
-    max-width: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* ─── Compose Card ─────────────────────────────────────────── */
-.ix-compose {
+.ix-compose-compact {
     background: var(--bg-surface);
     backdrop-filter: blur(16px);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-lg);
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 14px 18px;
     cursor: pointer;
     transition: var(--transition);
 }
 
-.ix-compose:hover {
+.ix-compose-compact:hover {
     border-color: rgba(108,92,231,0.3);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(108,92,231,0.1);
+    box-shadow: 0 4px 15px rgba(108,92,231,0.08);
 }
 
 .ix-compose-row {
@@ -340,8 +205,8 @@
 }
 
 .ix-compose-avatar {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #6C5CE7;
@@ -350,7 +215,7 @@
 
 .ix-compose-input {
     flex: 1;
-    padding: 12px 18px;
+    padding: 10px 18px;
     background: var(--bg-surface-hover);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-full);
@@ -359,35 +224,47 @@
     transition: var(--transition);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-}
-
-.ix-compose:hover .ix-compose-input {
-    border-color: rgba(108,92,231,0.3);
 }
 
 .ix-compose-input span {
     color: var(--text-muted);
 }
 
-.ix-compose-ai {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 4px 14px;
-    border-radius: var(--radius-full);
-    background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-    color: #fff;
+.ix-compose-compact:hover .ix-compose-input {
+    border-color: rgba(108,92,231,0.2);
+}
+
+.ix-story-btn {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #FDCB6E, #E17055);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #000;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
     white-space: nowrap;
 }
 
-.ix-compose-actions {
+.ix-story-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+}
+
+.ix-story-btn i {
+    font-size: 14px;
+}
+
+.ix-compose-actions-compact {
     display: flex;
     gap: 8px;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid var(--border-glass);
 }
 
@@ -397,7 +274,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 6px 12px;
     background: var(--bg-surface-hover);
     border: none;
     border-radius: var(--radius-sm);
@@ -420,7 +297,120 @@
 .ix-compose-action.media i { color: #00B894; }
 .ix-compose-action.feeling i { color: #FDCB6E; }
 
-/* ─── Post Card ────────────────────────────────────────────── */
+.ix-stories-row {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    transition: var(--transition);
+}
+
+.ix-stories-row:hover {
+    border-color: var(--border-glass-hover);
+}
+
+.ix-stories-scroll {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+    scrollbar-width: none;
+}
+
+.ix-stories-scroll::-webkit-scrollbar { display: none; }
+
+.ix-story-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.ix-story-add:hover {
+    transform: translateY(-4px);
+}
+
+.ix-story-add-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border-glass);
+    transition: var(--transition);
+}
+
+.ix-story-add-ring i {
+    font-size: 22px;
+    color: #fff;
+}
+
+.ix-story-add:hover .ix-story-add-ring {
+    box-shadow: 0 4px 15px rgba(108,92,231,0.3);
+    border-color: #6C5CE7;
+}
+
+.ix-story-add span {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.ix-story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.ix-story-item:hover {
+    transform: translateY(-4px);
+}
+
+.ix-story-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+    transition: var(--transition);
+    position: relative;
+}
+
+.ix-story-ring:hover {
+    box-shadow: 0 4px 15px rgba(108,92,231,0.3);
+}
+
+.ix-story-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--bg-body);
+}
+
+.ix-story-name {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ix-story-seen .ix-story-ring {
+    background: var(--border-glass);
+}
+
 .ix-post {
     background: var(--bg-surface);
     backdrop-filter: blur(16px);
@@ -572,130 +562,6 @@
     flex: 1;
 }
 
-/* ─── Contacts ─────────────────────────────────────────────── */
-.ix-contact {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: var(--transition);
-    text-decoration: none;
-    color: var(--text-secondary);
-}
-
-.ix-contact:hover {
-    background: var(--bg-surface-hover);
-    color: var(--text-primary);
-    transform: translateX(4px);
-}
-
-.ix-contact-wrap {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.ix-contact-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--border-glass);
-}
-
-.ix-contact:hover .ix-contact-avatar {
-    border-color: #6C5CE7;
-}
-
-.ix-contact-dot {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 2px solid var(--bg-body);
-    animation: pulse-dot 2s ease-in-out infinite;
-}
-
-.ix-contact-dot.online { background: #00B894; }
-.ix-contact-dot.away { background: #FDCB6E; }
-.ix-contact-dot.offline {
-    background: var(--text-muted);
-    animation: none;
-}
-
-@keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-}
-
-.ix-contact-name {
-    font-size: 13px;
-    font-weight: 500;
-    flex: 1;
-}
-
-.ix-contact-msg {
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.ix-contact:hover .ix-contact-msg {
-    color: #A29BFE;
-}
-
-/* ─── Birthday Items ───────────────────────────────────────── */
-.ix-birthday {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    background: var(--bg-surface-hover);
-    margin-bottom: 6px;
-    border-left: 3px solid #FDCB6E;
-    transition: var(--transition);
-}
-
-.ix-birthday:hover {
-    transform: translateX(4px);
-}
-
-.ix-birthday-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba(253, 203, 110, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.ix-birthday-name {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.ix-birthday-when {
-    font-size: 11px;
-    color: var(--text-muted);
-}
-
-.ix-birthday .ix-birthday-today {
-    margin-left: auto;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 12px;
-    border-radius: var(--radius-full);
-    background: linear-gradient(135deg, #FDCB6E, #E17055);
-    color: #000;
-}
-
-/* ─── Empty State ──────────────────────────────────────────── */
 .ix-empty {
     text-align: center;
     padding: 48px 24px;
@@ -720,7 +586,6 @@
     font-size: 14px;
 }
 
-/* ─── Pagination ───────────────────────────────────────────── */
 .ix-pagination {
     display: flex;
     justify-content: center;
@@ -749,7 +614,6 @@
     box-shadow: 0 4px 15px rgba(108,92,231,0.3);
 }
 
-/* ─── AI Float ─────────────────────────────────────────────── */
 .ix-ai-float {
     position: fixed;
     bottom: 28px;
@@ -831,9 +695,36 @@
     .ix-ai-label { display: none; }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   🎨 MODAL STYLES
-   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .ix-profile-avatar { width: 64px; height: 64px; }
+    .ix-profile-name { font-size: 16px; }
+    .ix-stat-number { font-size: 18px; }
+    .ix-compose-ai span { display: none; }
+    .ix-compose-action span { display: none; }
+    .ix-compose-action { flex: none; width: 44px; height: 44px; }
+    .ix-compose-actions-compact { justify-content: space-around; }
+    .ix-post-text { font-size: 13px; }
+    .ix-story-btn span { display: none; }
+    .ix-story-btn { padding: 8px 12px; }
+    .ix-compose-input { font-size: 13px; padding: 8px 14px; }
+    .ix-stories-row { padding: 12px 14px; }
+    .ix-compose-compact { padding: 12px 14px; }
+}
+
+@media (max-width: 480px) {
+    .ix-card { padding: 12px; }
+    .ix-stats { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .ix-stat { padding: 4px; }
+    .ix-stat-number { font-size: 16px; }
+    .ix-post-head { padding: 10px 12px; }
+    .ix-post-body { padding: 0 12px 10px; }
+    .ix-post-foot { flex-wrap: wrap; gap: 2px; }
+    .ix-react-btn { padding: 4px 8px; font-size: 11px; }
+    .ix-react-btn i { font-size: 13px; }
+    .ix-story-ring { width: 50px; height: 50px; }
+    .ix-story-add-ring { width: 50px; height: 50px; }
+    .ix-story-add-ring i { font-size: 18px; }
+}
 
 .ix-modal-content {
     background: var(--bg-modal);
@@ -1081,39 +972,16 @@
 }
 
 @media (max-width: 768px) {
-    .ix-profile-avatar { width: 64px; height: 64px; }
-    .ix-profile-name { font-size: 16px; }
-    .ix-stat-number { font-size: 18px; }
-    .ix-compose-ai span { display: none; }
-    .ix-compose-action span { display: none; }
-    .ix-compose-action { flex: none; width: 44px; height: 44px; }
-    .ix-compose-actions { justify-content: space-around; }
-    .ix-post-text { font-size: 13px; }
     .ix-modal-body { padding: 16px; }
     .ix-modal-footer { flex-direction: column; }
     .ix-publish-btn, .ix-cancel-btn { width: 100%; justify-content: center; }
 }
-
-@media (max-width: 480px) {
-    .ix-card { padding: 12px; }
-    .ix-stats { grid-template-columns: repeat(3, 1fr); gap: 4px; }
-    .ix-stat { padding: 4px; }
-    .ix-stat-number { font-size: 16px; }
-    .ix-post-head { padding: 10px 12px; }
-    .ix-post-body { padding: 0 12px 10px; }
-    .ix-post-foot { flex-wrap: wrap; gap: 2px; }
-    .ix-react-btn { padding: 4px 8px; font-size: 11px; }
-    .ix-react-btn i { font-size: 13px; }
-}
 </style>
 
-<!-- ─── MAIN GRID ─────────────────────────────────────────────── -->
 <div class="ix-grid">
 
-    <!-- ═══ LEFT SIDEBAR ═══ -->
     <aside class="ix-left">
 
-        <!-- ─── Profile Card ─── -->
         <div class="ix-card ix-profile">
             <img src="{{ current_user.avatar(80) }}" class="ix-profile-avatar" alt="{{ current_user.username }}">
             <div class="ix-profile-name">
@@ -1123,7 +991,6 @@
                 {% endif %}
             </div>
             <div class="ix-profile-handle">@{{ current_user.username }}</div>
-
             <div class="ix-profile-badges">
                 {% if current_user.is_vip %}
                 <span class="ix-profile-badge vip"><i class="fas fa-crown"></i> VIP</span>
@@ -1131,163 +998,250 @@
                 {% if current_user.is_admin %}
                 <span class="ix-profile-badge admin"><i class="fas fa-shield-alt"></i> Admin</span>
                 {% endif %}
-                {% if current_user.is_verified %}
-                <span class="ix-profile-badge"><i class="fas fa-check-circle"></i> Verified</span>
+                {% if current_user.is_human_verified %}
+                <span class="ix-profile-badge human">
+                    <i class="fas fa-check-circle"></i> Human
+                </span>
                 {% endif %}
             </div>
-
             <div class="ix-stats">
                 <div class="ix-stat">
                     <div class="ix-stat-number">{{ current_user.get_friend_count() }}</div>
-                    <div class="ix-stat-label">{{ _('Friends') }}</div>
+                    <div class="ix-stat-label">Friends</div>
                 </div>
                 <div class="ix-stat">
                     <div class="ix-stat-number">{{ current_user.posts_count() }}</div>
-                    <div class="ix-stat-label">{{ _('Posts') }}</div>
+                    <div class="ix-stat-label">Posts</div>
                 </div>
                 <div class="ix-stat">
                     <div class="ix-stat-number">{{ current_user.followers_count() }}</div>
-                    <div class="ix-stat-label">{{ _('Followers') }}</div>
+                    <div class="ix-stat-label">Followers</div>
                 </div>
             </div>
         </div>
 
-        <!-- ─── Moments ─── -->
-        <div class="ix-card">
-            <div class="ix-card-header">
-                <span class="ix-dot purple"></span>
-                {{ _('Moments') }}
-            </div>
-            <div class="ix-moments">
-                {% include '_story_circle.html' %}
-            </div>
+        <div class="ix-menu-section">
+            <i class="fas fa-bars"></i> MAIN
         </div>
 
-        <!-- ─── Navigation Menu ─── -->
-        <div class="ix-card">
-            <div class="ix-menu-section">{{ _('Main Menu') }}</div>
+        <a href="{{ url_for('main.index') }}" class="ix-menu-item {% if request.endpoint == 'main.index' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
 
-            <a href="{{ url_for('main.friends') }}" class="ix-menu-item">
-                <i class="fas fa-user-group"></i>
-                {{ _('Connections') }}
-                <span class="ix-badge">{{ current_user.get_friend_count() }}</span>
+        <a href="{{ url_for('main.friends') }}" class="ix-menu-item">
+            <i class="fas fa-user-friends"></i>
+            <span>Connections</span>
+            <span class="ix-badge">{{ current_user.get_friend_count() }}</span>
+        </a>
+
+        <a href="{{ url_for('main.saved_posts') }}" class="ix-menu-item">
+            <i class="fas fa-bookmark"></i>
+            <span>Saved Items</span>
+        </a>
+
+        <a href="{{ url_for('main.feeds') }}" class="ix-menu-item">
+            <i class="fas fa-rss"></i>
+            <span>Your Feed</span>
+        </a>
+
+        <a href="{{ url_for('main.memories') }}" class="ix-menu-item">
+            <i class="fas fa-clock-rotate-left"></i>
+            <span>Memories</span>
+        </a>
+
+        <a href="{{ url_for('main.inner_circle') }}" class="ix-menu-item">
+            <i class="fas fa-user-shield"></i>
+            <span>Inner Circle</span>
+            {% if current_user.is_vip %}
+            <span class="ix-badge gold">VIP</span>
+            {% endif %}
+        </a>
+
+        <a href="{{ url_for('main.vip') }}" class="ix-menu-item">
+            <i class="fas fa-crown" style="color: #FDCB6E;"></i>
+            <span>VIP</span>
+            {% if current_user.is_vip %}
+            <span class="ix-badge gold">★</span>
+            {% endif %}
+        </a>
+
+        <a href="{{ url_for('main.conversations') }}" class="ix-menu-item">
+            <i class="fas fa-comment-dots"></i>
+            <span>Messages</span>
+            <span class="ix-badge" id="sidebarUnreadBadge">0</span>
+        </a>
+
+        <div class="ix-menu-divider"></div>
+
+        <div class="ix-menu-collapsible" onclick="toggleMenu('discoverMenu')">
+            <div class="ix-menu-section" style="cursor: pointer;">
+                <i class="fas fa-compass"></i> DISCOVER
+                <i class="fas fa-chevron-down" id="discoverChevron" style="margin-left: auto; font-size: 12px;"></i>
+            </div>
+        </div>
+        <div id="discoverMenu" class="ix-submenu">
+            <a href="{{ url_for('main.discover') }}" class="ix-menu-item ix-submenu-item {% if request.endpoint == 'main.discover' %}active{% endif %}">
+                <i class="fas fa-compass"></i>
+                <span>Discover</span>
             </a>
-
-            <a href="{{ url_for('main.saved_posts') }}" class="ix-menu-item">
-                <i class="fas fa-bookmark"></i>
-                {{ _('Saved Items') }}
-            </a>
-
-            <a href="{{ url_for('main.feeds') }}" class="ix-menu-item">
-                <i class="fas fa-rss"></i>
-                {{ _('Your Feed') }}
-            </a>
-
-            <a href="{{ url_for('main.memories') }}" class="ix-menu-item">
-                <i class="fas fa-clock-rotate-left"></i>
-                {{ _('Memories') }}
-            </a>
-
-            <div class="ix-menu-divider"></div>
-
-            <div class="ix-menu-section">{{ _('Discover') }}</div>
-
-            <a href="{{ url_for('main.reels') }}" class="ix-menu-item">
+            <a href="{{ url_for('main.reels') }}" class="ix-menu-item ix-submenu-item">
                 <i class="fas fa-clapperboard"></i>
-                {{ _('Reels') }}
-                {% if current_user.is_vip %}
-                <span class="ix-badge gold">VIP</span>
-                {% endif %}
+                <span>Reels</span>
+                <span class="ix-badge gold">New</span>
             </a>
-
-            <a href="{{ url_for('main.events') }}" class="ix-menu-item">
+            <a href="{{ url_for('main.explore') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-globe"></i>
+                <span>Explore</span>
+            </a>
+            <a href="{{ url_for('main.events') }}" class="ix-menu-item ix-submenu-item">
                 <i class="fas fa-calendar-days"></i>
-                {{ _('Events') }}
+                <span>Events</span>
             </a>
-
-            <a href="{{ url_for('main.gaming') }}" class="ix-menu-item">
+            <a href="{{ url_for('main.gaming') }}" class="ix-menu-item ix-submenu-item">
                 <i class="fas fa-gamepad"></i>
-                {{ _('Gaming') }}
-                {% if current_user.is_vip %}
-                <span class="ix-badge gold">VIP</span>
-                {% endif %}
+                <span>Gaming</span>
             </a>
-
-            <a href="{{ url_for('main.birthdays') }}" class="ix-menu-item">
-                <i class="fas fa-cake-candles"></i>
-                {{ _('Birthdays') }}
-                <span class="ix-badge gold">{{ upcoming_birthdays|length }}</span>
+            <a href="{{ url_for('main.birthdays') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-birthday-cake"></i>
+                <span>Birthdays</span>
+                <span class="ix-badge gold">{{ upcoming_birthdays|length if upcoming_birthdays else 0 }}</span>
             </a>
-
-            {% if current_user.is_admin %}
-<div class="ix-menu-divider"></div>
-<div class="ix-menu-section">{{ _('Admin Panel') }}</div>
-
-<a href="{{ url_for('admin.moderation') }}" class="ix-menu-item">
-    <i class="fas fa-flag"></i>
-    {{ _('Moderation') }}
-</a>
-
-<a href="{{ url_for('admin.feedback_dashboard') }}" class="ix-menu-item">
-    <i class="fas fa-comment-dots"></i>
-    {{ _('Feedback') }}
-</a>
-
-<a href="{{ url_for('admin.help_dashboard') }}" class="ix-menu-item">
-    <i class="fas fa-life-ring"></i>
-    {{ _('Help Requests') }}
-</a>
-
-<a href="{{ url_for('admin.vip_verification') }}" class="ix-menu-item">
-    <i class="fas fa-crown"></i>
-    {{ _('VIP Verification') }}
-</a>
-
-<a href="{{ url_for('admin.analytics') }}" class="ix-menu-item">
-    <i class="fas fa-chart-line"></i>
-    {{ _('Analytics') }}
-</a>
-
-<a href="{{ url_for('admin.reports') }}" class="ix-menu-item">
-    <i class="fas fa-chart-bar"></i>
-    {{ _('Reports') }}
-</a>
-{% endif %}
         </div>
+
+        <div class="ix-menu-divider"></div>
+
+        {% if current_user.is_admin %}
+        <div class="ix-menu-collapsible" onclick="toggleMenu('adminMenu')">
+            <div class="ix-menu-section" style="cursor: pointer;">
+                <i class="fas fa-shield-alt"></i> ADMIN PANEL
+                <i class="fas fa-chevron-down" id="adminChevron" style="margin-left: auto; font-size: 12px;"></i>
+            </div>
+        </div>
+        <div id="adminMenu" class="ix-submenu">
+            <a href="{{ url_for('admin.moderation') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-gavel"></i>
+                <span>Moderation</span>
+            </a>
+            <a href="{{ url_for('admin.feedback_dashboard') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-comment-dots"></i>
+                <span>Feedback</span>
+            </a>
+            <a href="{{ url_for('admin.help_dashboard') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-life-ring"></i>
+                <span>Help Requests</span>
+            </a>
+            <a href="{{ url_for('admin.vip_verification') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-crown"></i>
+                <span>VIP Verification</span>
+            </a>
+            <a href="{{ url_for('admin.analytics') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            <a href="{{ url_for('admin.reports') }}" class="ix-menu-item ix-submenu-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+        </div>
+        {% endif %}
+
     </aside>
 
-    <!-- ═══ MAIN FEED ═══ -->
     <main>
 
-        <!-- ─── Compose Card ─── -->
-        <div class="ix-compose" data-bs-toggle="modal" data-bs-target="#createPostModal">
-            <div class="ix-compose-row">
-                <img src="{{ current_user.avatar(44) }}" class="ix-compose-avatar" alt="{{ current_user.username }}">
-                <div class="ix-compose-input">
-                    <span>{{ _("What's on your thoughts?") }}</span>
-                    <div class="ix-compose-ai">
-                        <i class="fa-solid fa-wand-magic-sparkles" style="color: rgb(177, 151, 252);"></i>
-                        <span>{{ _('Write') }}</span>
+        <div class="ix-feed-header">
+
+            <div class="ix-tabs">
+                <button class="ix-tab active" onclick="switchTab('post')" id="tabPost">
+                    <i class="fas fa-pen"></i> <span>Create Post</span>
+                </button>
+                <button class="ix-tab" onclick="switchTab('story')" id="tabStory">
+                    <i class="fas fa-camera"></i> <span>Stories</span>
+                </button>
+            </div>
+
+            <div id="tabPostContent" class="ix-tab-content">
+                <div class="ix-compose-compact" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                    <div class="ix-compose-row">
+                        <img src="{{ current_user.avatar(40) }}" class="ix-compose-avatar" alt="{{ current_user.username }}">
+                        <div class="ix-compose-input">
+                            <span>{{ _("What's on your mind?") }}</span>
+                        </div>
+                    </div>
+                    <div class="ix-compose-actions-compact">
+                        <button class="ix-compose-action live" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fas fa-video"></i>
+                            <span>{{ _('Live') }}</span>
+                        </button>
+                        <button class="ix-compose-action media" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fas fa-image"></i>
+                            <span>{{ _('Photo') }}</span>
+                        </button>
+                        <button class="ix-compose-action feeling" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fas fa-face-smile"></i>
+                            <span>{{ _('Feeling') }}</span>
+                        </button>
+                        <button class="ix-compose-action moment" type="button" data-bs-toggle="modal" data-bs-target="#momentModal">
+                            <i class="fas fa-stopwatch"></i>
+                            <span>{{ _('Moments') }}</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="ix-compose-actions">
-                <button class="ix-compose-action live" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                    <i class="fas fa-video"></i>
-                    <span>{{ _('Live') }}</span>
-                </button>
-                <button class="ix-compose-action media" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                    <i class="fas fa-image"></i>
-                    <span>{{ _('Photo') }}</span>
-                </button>
-                <button class="ix-compose-action feeling" type="button" data-bs-toggle="modal" data-bs-target="#createPostModal">
-                    <i class="fas fa-face-smile"></i>
-                    <span>{{ _('Feeling') }}</span>
-                </button>
+
+            <div id="tabStoryContent" class="ix-tab-content" style="display: none;">
+                <div class="ix-stories-full">
+                    <div class="ix-your-story" onclick="document.getElementById('momentModalTrigger').click();">
+                        <div class="ix-your-story-ring">
+                            <img src="{{ current_user.avatar(70) }}" alt="Your Story">
+                            <div class="ix-your-story-add">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                        </div>
+                        <span>Your Story</span>
+                    </div>
+
+                    <div class="ix-friends-stories">
+                        {% if stories_data %}
+                            {% for story in stories_data %}
+                            <div class="ix-story-full-item" onclick="openStoryViewer({{ story.id }})">
+                                <div class="ix-story-full-ring">
+                                    <img src="{{ story.author_avatar }}" alt="{{ story.author_name }}">
+                                    {% if story.is_viewed %}
+                                    <div class="ix-story-viewed-badge">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <span>{{ story.author_name[:10] }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="ix-no-stories">
+                                <i class="fas fa-camera"></i>
+                                <p>No stories from friends</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="ix-story-highlights">
+                        <div class="ix-highlights-header">
+                            <span><i class="fas fa-star"></i> Highlights</span>
+                        </div>
+                        <div class="ix-highlights-scroll">
+                            <div class="ix-highlight-item" onclick="alert('Create highlight')">
+                                <div class="ix-highlight-ring">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <span>New</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- ─── Posts ─── -->
         {% for post in posts %}
             {% include '_post.html' %}
         {% else %}
@@ -1298,7 +1252,6 @@
         </div>
         {% endfor %}
 
-        <!-- ─── Pagination ─── -->
         {% if next_url or prev_url %}
         <div class="ix-pagination">
             {% if prev_url %}
@@ -1316,78 +1269,14 @@
 
     </main>
 
-    <!-- ═══ RIGHT SIDEBAR ═══ -->
-    <aside class="ix-right">
-
-        <!-- ─── Online Contacts ─── -->
-        <div class="ix-card">
-            <div class="ix-card-header">
-                <span class="ix-dot green"></span>
-                {{ _('Online') }} · {{ active_contacts|length }}
-            </div>
-
-            {% if active_contacts %}
-                {% for contact in active_contacts[:8] %}
-                <a href="{{ url_for('main.chat', username=contact.username) }}" class="ix-contact">
-                    <div class="ix-contact-wrap">
-                        <img src="{{ contact.avatar(36) }}" class="ix-contact-avatar" alt="{{ contact.username }}">
-                        <span class="ix-contact-dot online"></span>
-                    </div>
-                    <span class="ix-contact-name">{{ contact.username }}</span>
-                    <i class="fas fa-comment-dots ix-contact-msg"></i>
-                </a>
-                {% endfor %}
-            {% else %}
-            <div class="text-center text-muted py-3">
-                <i class="fas fa-user-group fa-2x mb-2 opacity-25"></i>
-                <p class="small">{{ _('No friends online right now') }}</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- ─── Birthdays ─── -->
-        {% if upcoming_birthdays %}
-        <div class="ix-card">
-            <div class="ix-card-header">
-                <span class="ix-dot gold"></span>
-                🎂 {{ _('Celebrations') }}
-            </div>
-
-            {% for b in upcoming_birthdays[:3] %}
-            <div class="ix-birthday">
-                <div class="ix-birthday-icon">🎂</div>
-                <div>
-                    <div class="ix-birthday-name">{{ b.user.username }}</div>
-                    <div class="ix-birthday-when">
-                        {% if b.days_until == 0 %}
-                            {{ _('Celebrating today!') }}
-                        {% else %}
-                            {{ _('In') }} {{ b.days_until }} {{ _('days') }}
-                        {% endif %}
-                    </div>
-                </div>
-                {% if b.days_until == 0 %}
-                <span class="ix-birthday-today">{{ _('Today') }}</span>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-    </aside>
 </div>
 
-<!-- ─── AI FLOAT BUTTON ─── -->
 <div class="ix-ai-float">
     <button class="ix-ai-orb" onclick="location.href='/ai-chat'" aria-label="{{ _('AI Assistant') }}">
         <i class="fas fa-microchip"></i>
     </button>
     <div class="ix-ai-label">{{ _('AI Assistant') }}</div>
 </div>
-
-<!-- ═══════════════════════════════════════════════════════════════
-   🎨 CREATE POST MODAL
-   ═══════════════════════════════════════════════════════════════ -->
 
 <div class="modal fade" id="createPostModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1406,7 +1295,6 @@
 
                 <div class="ix-modal-body">
 
-                    <!-- User Info -->
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--bg-surface);border-radius:var(--radius-md);">
                         <img src="{{ current_user.avatar(44) }}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #6C5CE7;">
                         <div>
@@ -1420,15 +1308,12 @@
                         </div>
                     </div>
 
-                    <!-- Post Content -->
                     {{ form.post(class="ix-post-input", placeholder=_("What's on your mind?"), rows="4", id="ixPostText") }}
 
-                    <!-- Media Preview -->
                     <div id="ixMediaPreview" style="display:none;margin-top:12px;">
                         <div class="ix-media-preview" id="ixMediaGrid"></div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="ix-modal-actions">
                         <button type="button" class="ix-modal-action" onclick="document.getElementById('ixFileInput').click()">
                             <i class="fas fa-image" style="color:#00B894;"></i>
@@ -1444,7 +1329,6 @@
                         </button>
                     </div>
 
-                    <!-- Schedule -->
                     <div style="margin-top:12px;">
                         <button type="button" class="ix-schedule-toggle" onclick="toggleSchedule()">
                             <i class="fas fa-clock"></i>
@@ -1470,9 +1354,7 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-   🎬 MOMENT MODAL
-   ═══════════════════════════════════════════════════════════════ -->
+<button id="momentModalTrigger" style="display:none;" data-bs-toggle="modal" data-bs-target="#momentModal"></button>
 
 <div class="modal fade" id="momentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1517,12 +1399,63 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-   📜 SCRIPTS
-   ═══════════════════════════════════════════════════════════════ -->
-
 <script>
-// ─── Media Upload ──────────────────────────────────────────────
+function switchTab(tab) {
+    document.querySelectorAll('.ix-tab-content').forEach(el => {
+        el.style.display = 'none';
+    });
+
+    document.querySelectorAll('.ix-tab').forEach(el => {
+        el.classList.remove('active');
+    });
+
+    if (tab === 'post') {
+        document.getElementById('tabPostContent').style.display = 'block';
+        document.getElementById('tabPost').classList.add('active');
+    } else {
+        document.getElementById('tabStoryContent').style.display = 'block';
+        document.getElementById('tabStory').classList.add('active');
+    }
+}
+
+function toggleMenu(menuId) {
+    const menu = document.getElementById(menuId);
+    const chevron = document.getElementById(menuId.replace('Menu', 'Chevron'));
+
+    if (menu.classList.contains('open')) {
+        menu.classList.remove('open');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+    } else {
+        menu.classList.add('open');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const adminLinks = document.querySelectorAll('#adminMenu .ix-submenu-item');
+    let adminActive = false;
+    const discoverLinks = document.querySelectorAll('#discoverMenu .ix-submenu-item');
+    let discoverActive = false;
+
+    adminLinks.forEach(link => {
+        if (link.classList.contains('active')) adminActive = true;
+    });
+
+    discoverLinks.forEach(link => {
+        if (link.classList.contains('active')) discoverActive = true;
+    });
+
+    if (adminActive) {
+        document.getElementById('adminMenu')?.classList.add('open');
+        document.getElementById('adminChevron')?.style.setProperty('transform', 'rotate(180deg)');
+    }
+
+    if (discoverActive) {
+        document.getElementById('discoverMenu')?.classList.add('open');
+        document.getElementById('discoverChevron')?.style.setProperty('transform', 'rotate(180deg)');
+    }
+});
+
 document.getElementById('ixFileInput')?.addEventListener('change', function(e) {
     const files = Array.from(e.target.files);
     const preview = document.getElementById('ixMediaPreview');
@@ -1558,8 +1491,6 @@ function checkEmptyPreview() {
         document.getElementById('ixFileInput').value = '';
     }
 }
-
-// ─── Emoji & Feeling ──────────────────────────────────────────
 function insertEmoji() {
     const ta = document.getElementById('ixPostText');
     if (!ta) return;
@@ -1582,7 +1513,6 @@ function addFeelingText() {
     ta.dispatchEvent(new Event('input'));
 }
 
-// ─── Schedule Toggle ──────────────────────────────────────────
 function toggleSchedule() {
     const wrap = document.getElementById('scheduleWrap');
     const chevron = document.getElementById('scheduleChevron');
@@ -1597,15 +1527,12 @@ function toggleSchedule() {
     }
 }
 
-// ─── Auto-resize Textarea ─────────────────────────────────────
 document.getElementById('ixPostText')?.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 200) + 'px';
 });
 
-// ─── Keyboard Shortcuts ──────────────────────────────────────
 document.addEventListener('keydown', function(e) {
-    // Ctrl+Enter to submit post
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         const modal = document.querySelector('#createPostModal .ix-publish-btn');
         if (modal && document.querySelector('#createPostModal').classList.contains('show')) {
@@ -1614,7 +1541,6 @@ document.addEventListener('keydown', function(e) {
         }
     }
 
-    // Escape to close modals
     if (e.key === 'Escape') {
         const openModal = document.querySelector('.modal.show');
         if (openModal) {
@@ -1624,7 +1550,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// ─── Open Create Post with keybinding ────────────────────────
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
@@ -1633,6 +1558,43 @@ document.addEventListener('keydown', function(e) {
         setTimeout(() => document.getElementById('ixPostText')?.focus(), 300);
     }
 });
+
+function updateSidebarUnread() {
+    fetch('/unread-messages-count')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('sidebarUnreadBadge');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.textContent = '0';
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(e => console.error(e));
+}
+
+updateSidebarUnread();
+setInterval(updateSidebarUnread, 30000);
+
+function openStoryViewer(storyId) {
+    fetch(`/story-data/${storyId}`)
+        .then(response => response.json())
+        .then(story => {
+            if (story && story.id) {
+                openMomentViewer([story], 0);
+            } else {
+                showToast('Story not found', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading story:', error);
+            showToast('Could not load story', 'error');
+        });
+}
 </script>
 
 {% endblock %}

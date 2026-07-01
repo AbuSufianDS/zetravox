@@ -1,26 +1,21 @@
-<!-- ========== PROFESSIONAL STORY VIEWER ========== -->
 <div id="storyViewerModal" class="story-viewer-modal" style="display: none;">
     <div class="story-viewer-overlay">
         <div class="story-viewer-container">
 
-            <!-- Close Button -->
             <button class="story-close-btn" onclick="closeStoryViewer()">
                 <i class="fas fa-times"></i>
             </button>
 
-            <!-- Main Content -->
             <div class="story-viewer-content">
 
-                <!-- Media Area -->
                 <div class="story-viewer-main" id="storyViewerMain">
-                    <img id="storyImage" class="story-media" style="display: none;">
-                    <video id="storyVideo" class="story-media" controls style="display: none;"></video>
+                    <img id="storyImage" class="story-media" style="display: none;" alt="Story image">
+                    <video id="storyVideo" class="story-media" style="display: none;" controls></video>
 
-                    <!-- Text Story -->
                     <div id="storyTextContent" class="story-text-container" style="display: none;">
                         <div class="story-text-content">
                             <div class="story-text-author">
-                                <img id="storyTextAvatar" class="story-text-avatar">
+                                <img id="storyTextAvatar" class="story-text-avatar" alt="Author">
                                 <div>
                                     <div id="storyTextAuthor" class="story-text-name"></div>
                                     <div id="storyTextTime" class="story-text-time"></div>
@@ -30,14 +25,12 @@
                         </div>
                     </div>
 
-                    <!-- Progress Bar -->
                     <div class="story-progress-container">
                         <div class="story-progress-bar" id="storyProgressBar"></div>
                     </div>
 
-                    <!-- User Info Overlay -->
                     <div class="story-user-overlay">
-                        <img id="storyUserAvatar" class="story-user-avatar">
+                        <img id="storyUserAvatar" class="story-user-avatar" alt="User">
                         <div>
                             <div id="storyUserName" class="story-user-name"></div>
                             <div id="storyUserTime" class="story-user-time"></div>
@@ -45,18 +38,16 @@
                     </div>
                 </div>
 
-                <!-- Sidebar -->
                 <div class="story-viewer-sidebar">
                     <div class="story-sidebar-header">
                         <div class="story-sidebar-user">
-                            <img id="storySidebarAvatar" class="story-sidebar-avatar">
+                            <img id="storySidebarAvatar" class="story-sidebar-avatar" alt="User">
                             <div>
                                 <div id="storySidebarName" class="story-sidebar-name"></div>
                                 <div id="storySidebarTime" class="story-sidebar-time"></div>
                             </div>
                         </div>
 
-                        <!-- Three Dots with Dropdown -->
                         <div class="story-dropdown-container">
                             <button class="story-sidebar-more" onclick="toggleStoryDropdown()">
                                 <i class="fas fa-ellipsis-h"></i>
@@ -115,7 +106,6 @@
                     </div>
                 </div>
 
-                <!-- Navigation -->
                 <button class="story-nav-btn story-nav-prev" onclick="prevStory()">
                     <i class="fas fa-chevron-left"></i>
                 </button>
@@ -129,7 +119,6 @@
 </div>
 
 <style>
-/* ========== PROFESSIONAL STORY VIEWER STYLES ========== */
 
 .story-viewer-modal {
     position: fixed;
@@ -345,7 +334,7 @@
     color: var(--text-secondary, #65676b);
 }
 
-/* ===== THREE DOTS DROPDOWN ===== */
+/* Three Dots Dropdown */
 .story-dropdown-container {
     position: relative;
 }
@@ -390,14 +379,8 @@
 }
 
 @keyframes storyDropdownFade {
-    from {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .story-dropdown-item {
@@ -432,20 +415,6 @@
     height: 1px;
     background: var(--border-color, #e4e6eb);
     margin: 4px 0;
-}
-
-.story-dropdown-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 99;
-    display: none;
-}
-
-.story-dropdown-overlay.show {
-    display: block;
 }
 
 .story-sidebar-caption {
@@ -672,7 +641,7 @@
     right: -60px;
 }
 
-/* ===== TOAST NOTIFICATION ===== */
+/* Toast Notification */
 .story-toast {
     position: fixed;
     bottom: 30px;
@@ -700,24 +669,13 @@
     transform: translateX(-50%) translateY(0);
 }
 
-.story-toast.success .story-toast-icon {
-    color: #10b981;
-}
+.story-toast.success .story-toast-icon { color: #10b981; }
+.story-toast.error .story-toast-icon { color: #ef4444; }
+.story-toast.info .story-toast-icon { color: #667eea; }
 
-.story-toast.error .story-toast-icon {
-    color: #ef4444;
-}
+.story-toast-icon { font-size: 20px; }
+.story-toast span { font-size: 14px; color: var(--text-primary, #1a1a2e); }
 
-.story-toast-icon {
-    font-size: 20px;
-}
-
-.story-toast span {
-    font-size: 14px;
-    color: var(--text-primary, #1a1a2e);
-}
-
-/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .story-viewer-container {
         width: 100%;
@@ -725,37 +683,26 @@
         max-height: 100vh;
         border-radius: 0;
     }
-
     .story-viewer-content {
         border-radius: 0;
         flex-direction: column;
     }
-
     .story-viewer-main {
         flex: 1;
         min-height: 50vh;
     }
-
     .story-viewer-sidebar {
         width: 100%;
         height: 45vh;
         border-top: 1px solid var(--border-color, #e4e6eb);
     }
-
     .story-nav-btn {
         width: 36px;
         height: 36px;
         font-size: 14px;
     }
-
-    .story-nav-prev {
-        left: 10px;
-    }
-
-    .story-nav-next {
-        right: 10px;
-    }
-
+    .story-nav-prev { left: 10px; }
+    .story-nav-next { right: 10px; }
     .story-close-btn {
         top: 10px;
         right: 16px;
@@ -764,86 +711,103 @@
         border-radius: 50%;
         padding: 8px 12px;
     }
-
     .story-user-overlay {
         top: 20px;
         left: 16px;
     }
-
     .story-user-avatar {
         width: 36px;
         height: 36px;
     }
-
-    .story-user-name {
-        font-size: 13px;
-    }
-
-    .story-text-body {
-        font-size: 18px;
-    }
+    .story-user-name { font-size: 13px; }
+    .story-text-body { font-size: 18px; }
 }
 
 @media (max-width: 480px) {
-    .story-viewer-sidebar {
-        height: 40vh;
-    }
-
-    .story-user-overlay {
-        top: 16px;
-        left: 12px;
-    }
-
-    .story-user-avatar {
-        width: 32px;
-        height: 32px;
-    }
-
-    .story-user-name {
-        font-size: 12px;
-    }
+    .story-viewer-sidebar { height: 40vh; }
+    .story-user-overlay { top: 16px; left: 12px; }
+    .story-user-avatar { width: 32px; height: 32px; }
+    .story-user-name { font-size: 12px; }
 }
 </style>
 
 <script>
-// ========== STORY VIEWER JAVASCRIPT ==========
 
 let currentStoryIndex = 0;
 let currentStories = [];
 let currentStoryId = null;
 let progressInterval = null;
 
-// ===== OPEN VIEWER =====
 function openMomentViewer(stories, index) {
+    // If stories is a number (single story ID), fetch it
     if (typeof stories === 'number') {
-        fetch(`/story-data/${stories}`)
+        fetch('/story-data/' + stories)
             .then(response => response.json())
             .then(story => {
+                if (story && story.error) {
+                    showToast(story.error, 'error');
+                    return;
+                }
                 currentStories = [story];
                 currentStoryIndex = 0;
                 currentStoryId = story.id;
-                document.getElementById('storyViewerModal').style.display = 'flex';
-                loadStory(currentStoryIndex);
+                const modal = document.getElementById('storyViewerModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    loadStory(currentStoryIndex);
+                }
             })
             .catch(error => {
                 console.error('Error loading story:', error);
-                alert('Could not load story');
+                showToast('Could not load story', 'error');
             });
         return;
     }
 
-    if (!stories || stories.length === 0) return;
+    // If stories is an array, use it directly
+    if (!stories || stories.length === 0) {
+        showToast('No stories to view', 'info');
+        return;
+    }
+
     currentStories = stories;
     currentStoryIndex = index || 0;
     currentStoryId = currentStories[currentStoryIndex].id;
-    document.getElementById('storyViewerModal').style.display = 'flex';
-    loadStory(currentStoryIndex);
+
+    const modal = document.getElementById('storyViewerModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        loadStory(currentStoryIndex);
+    }
 }
 
-// ===== LOAD STORY =====
+function closeStoryViewer() {
+    const modal = document.getElementById('storyViewerModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+    const video = document.getElementById('storyVideo');
+    if (video) {
+        video.pause();
+        video.currentTime = 0;
+    }
+    closeAllStoryDropdowns();
+}
+
 function loadStory(index) {
     const story = currentStories[index];
-    if (!story) return;
+    if (!story) {
+        closeStoryViewer();
+        return;
+    }
+
     currentStoryId = story.id;
 
     if (progressInterval) {
@@ -854,7 +818,6 @@ function loadStory(index) {
     const imgEl = document.getElementById('storyImage');
     const videoEl = document.getElementById('storyVideo');
     const textEl = document.getElementById('storyTextContent');
-    const mainEl = document.getElementById('storyViewerMain');
 
     imgEl.style.display = 'none';
     videoEl.style.display = 'none';
@@ -870,13 +833,24 @@ function loadStory(index) {
     if (mediaType === 'image' && mediaUrl) {
         imgEl.src = mediaUrl;
         imgEl.style.display = 'block';
-        startProgress();
+        imgEl.onload = function() { startProgress(); };
+        imgEl.onerror = function() {
+            showToast('Error loading image', 'error');
+            setTimeout(nextStory, 2000);
+        };
+        if (imgEl.complete && imgEl.naturalHeight !== 0) {
+            startProgress();
+        }
     } else if (mediaType === 'video' && mediaUrl) {
         videoEl.src = mediaUrl;
         videoEl.style.display = 'block';
         videoEl.load();
         videoEl.onplay = function() { startProgress(); };
         videoEl.onended = function() { nextStory(); };
+        videoEl.onerror = function() {
+            showToast('Error loading video', 'error');
+            setTimeout(nextStory, 2000);
+        };
     } else {
         textEl.style.display = 'flex';
         textEl.style.background = story.bg_color || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -901,7 +875,6 @@ function loadStory(index) {
     document.getElementById('storyProgressBar').style.width = '0%';
 }
 
-// ===== PROGRESS BAR =====
 function startProgress() {
     if (progressInterval) clearInterval(progressInterval);
     let progress = 0;
@@ -916,13 +889,14 @@ function startProgress() {
             setTimeout(() => {
                 if (currentStoryIndex < currentStories.length - 1) {
                     nextStory();
+                } else {
+                    closeStoryViewer();
                 }
             }, 500);
         }
     }, 50);
 }
 
-// ===== NAVIGATION =====
 function prevStory() {
     if (currentStoryIndex > 0) {
         currentStoryIndex--;
@@ -934,58 +908,22 @@ function nextStory() {
     if (currentStoryIndex < currentStories.length - 1) {
         currentStoryIndex++;
         loadStory(currentStoryIndex);
+    } else {
+        closeStoryViewer();
     }
 }
 
-function closeStoryViewer() {
-    document.getElementById('storyViewerModal').style.display = 'none';
-    if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-    }
-    const video = document.getElementById('storyVideo');
-    if (video) video.pause();
-    closeAllStoryDropdowns();
-}
-
-// ===== THREE DOTS DROPDOWN =====
 function toggleStoryDropdown() {
     const menu = document.getElementById('storyDropdownMenu');
-    const overlay = document.getElementById('storyDropdownOverlay');
-
-    document.querySelectorAll('.story-dropdown-menu').forEach(m => {
-        if (m !== menu) m.classList.remove('show');
-    });
-
     menu.classList.toggle('show');
-
-    if (!overlay) {
-        const newOverlay = document.createElement('div');
-        newOverlay.id = 'storyDropdownOverlay';
-        newOverlay.className = 'story-dropdown-overlay';
-        newOverlay.onclick = function() {
-            closeAllStoryDropdowns();
-        };
-        document.body.appendChild(newOverlay);
-    }
-
-    const overlayEl = document.getElementById('storyDropdownOverlay');
-    if (menu.classList.contains('show')) {
-        overlayEl.classList.add('show');
-    } else {
-        overlayEl.classList.remove('show');
-    }
 }
 
 function closeAllStoryDropdowns() {
     document.querySelectorAll('.story-dropdown-menu').forEach(m => {
         m.classList.remove('show');
     });
-    const overlay = document.getElementById('storyDropdownOverlay');
-    if (overlay) overlay.classList.remove('show');
 }
 
-// ===== DROPDOWN ACTIONS =====
 function shareStory() {
     const story = currentStories[currentStoryIndex];
     if (!story) return;
@@ -1027,9 +965,7 @@ function saveStory() {
             showToast('Failed to save story', 'error');
         }
     })
-    .catch(() => {
-        showToast('Failed to save story', 'error');
-    });
+    .catch(() => showToast('Failed to save story', 'error'));
     closeAllStoryDropdowns();
 }
 
@@ -1074,61 +1010,41 @@ function reportStory() {
                 showToast('Failed to report story', 'error');
             }
         })
-        .catch(() => {
-            showToast('Failed to report story', 'error');
-        });
+        .catch(() => showToast('Failed to report story', 'error'));
     }
     closeAllStoryDropdowns();
 }
 
-function showToast(message, type = 'success') {
-    const existing = document.querySelector('.story-toast');
-    if (existing) existing.remove();
-
-    const toast = document.createElement('div');
-    toast.className = 'story-toast ' + type;
-    toast.innerHTML = `
-        <div class="story-toast-icon">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        </div>
-        <span>${message}</span>
-    `;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// ===== REACTIONS =====
 function toggleReactionPicker() {
     const picker = document.getElementById('storyReactionPicker');
     picker.classList.toggle('show');
 }
 
 function reactToStory(storyId, reaction) {
-    fetch(`/react_story/${storyId}/${reaction}`, {
+    if (!storyId) return;
+
+    fetch('/react_story/' + storyId + '/' + reaction, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             document.getElementById('storyReactionCount').textContent = data.reaction_count || 0;
             document.getElementById('storyReactionPicker').classList.remove('show');
+            showToast('Reacted with ' + reaction, 'success');
         }
     })
     .catch(error => console.error('Error:', error));
 }
 
-// ===== COMMENTS =====
 function loadStoryComments(storyId) {
-    fetch(`/get_story_comments/${storyId}`)
+    if (!storyId) return;
+
+    fetch('/get_story_comments/' + storyId)
         .then(response => response.json())
         .then(comments => {
             const container = document.getElementById('storyCommentsList');
@@ -1138,11 +1054,11 @@ function loadStoryComments(storyId) {
             }
             container.innerHTML = comments.map(c => `
                 <div class="story-comment-item">
-                    <img src="${c.author_avatar}" class="story-comment-avatar">
+                    <img src="${c.author_avatar || ''}" class="story-comment-avatar" alt="${c.author_name || 'User'}">
                     <div class="story-comment-bubble">
-                        <div class="story-comment-author">${escapeHtml(c.author_name)}</div>
-                        <div class="story-comment-text">${escapeHtml(c.message)}</div>
-                        <span class="story-comment-time">${c.time_ago}</span>
+                        <div class="story-comment-author">${escapeHtml(c.author_name || 'Unknown')}</div>
+                        <div class="story-comment-text">${escapeHtml(c.message || '')}</div>
+                        <span class="story-comment-time">${c.time_ago || 'Just now'}</span>
                     </div>
                 </div>
             `).join('');
@@ -1152,23 +1068,41 @@ function loadStoryComments(storyId) {
 }
 
 function sendStoryComment(storyId) {
+    if (!storyId) return;
+
     const input = document.getElementById('storyCommentInput');
     const message = input.value.trim();
-    if (!message) return;
+    if (!message) {
+        showToast('Please write a reply', 'info');
+        return;
+    }
+
+    input.disabled = true;
 
     fetch('/send_story_comment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
+        },
         body: JSON.stringify({ story_id: storyId, message: message })
     })
     .then(response => response.json())
     .then(data => {
+        input.disabled = false;
         if (data.success) {
             input.value = '';
             loadStoryComments(storyId);
+            showToast('Reply sent!', 'success');
+        } else {
+            showToast('Failed to send reply', 'error');
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        input.disabled = false;
+        console.error('Error:', error);
+        showToast('Failed to send reply', 'error');
+    });
 }
 
 function escapeHtml(text) {
@@ -1178,28 +1112,68 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ===== KEYBOARD SHORTCUTS =====
+function showToast(message, type = 'success') {
+    const existing = document.querySelector('.story-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'story-toast ' + type;
+    const iconMap = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'info': 'fa-info-circle'
+    };
+    toast.innerHTML = `
+        <div class="story-toast-icon">
+            <i class="fas ${iconMap[type] || 'fa-check-circle'}"></i>
+        </div>
+        <span>${escapeHtml(message)}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('storyViewerModal');
+    if (modal && modal.style.display === 'flex') {
+        if (e.target === modal) {
+            closeStoryViewer();
+        }
+        const dropdownContainer = document.querySelector('.story-dropdown-container');
+        const dropdownMenu = document.getElementById('storyDropdownMenu');
+        if (dropdownContainer && dropdownMenu && !dropdownContainer.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+        }
+        // Close reaction picker when clicking outside
+        const picker = document.getElementById('storyReactionPicker');
+        const reactBtn = document.querySelector('.story-react-btn');
+        if (picker && reactBtn && !reactBtn.contains(e.target) && !picker.contains(e.target)) {
+            picker.classList.remove('show');
+        }
+    }
+});
+
 document.addEventListener('keydown', function(e) {
     const modal = document.getElementById('storyViewerModal');
     if (modal && modal.style.display === 'flex') {
-        // Arrow Left - Previous Story
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
             prevStory();
         }
-        // Arrow Right - Next Story
         if (e.key === 'ArrowRight') {
             e.preventDefault();
             nextStory();
         }
-        // Escape - Close Viewer and Dropdowns
         if (e.key === 'Escape') {
             e.preventDefault();
             closeStoryViewer();
-            closeAllStoryDropdowns();
         }
-        // Space - Pause/Resume video (optional)
-        if (e.key === ' ') {
+        if (e.key === ' ' && e.target === document.body) {
             e.preventDefault();
             const video = document.getElementById('storyVideo');
             if (video && video.style.display !== 'none') {
@@ -1209,30 +1183,6 @@ document.addEventListener('keydown', function(e) {
                     video.pause();
                 }
             }
-        }
-    }
-});
-
-// ===== CLOSE ON CLICK OUTSIDE =====
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('storyViewerModal');
-    if (modal && modal.style.display === 'flex') {
-        if (e.target === modal) {
-            closeStoryViewer();
-        }
-    }
-});
-
-// ===== CLOSE DROPDOWN ON CLICK OUTSIDE =====
-document.addEventListener('click', function(e) {
-    const dropdownContainer = document.querySelector('.story-dropdown-container');
-    const dropdownMenu = document.getElementById('storyDropdownMenu');
-    const overlay = document.getElementById('storyDropdownOverlay');
-
-    if (dropdownContainer && dropdownMenu) {
-        if (!dropdownContainer.contains(e.target)) {
-            dropdownMenu.classList.remove('show');
-            if (overlay) overlay.classList.remove('show');
         }
     }
 });
