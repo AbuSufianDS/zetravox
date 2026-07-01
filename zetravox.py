@@ -62,9 +62,9 @@ def create_admin_user():
             print(f"Admin creation skipped: {e}")
 
 
-if os.environ.get('RENDER') or os.environ.get('FLASK_ENV') == 'production':
-    run_migrations()
-else:
+#if os.environ.get('RENDER') or os.environ.get('FLASK_ENV') == 'production':
+ #   run_migrations()
+#else:
     with app.app_context():
         db.create_all()
         print("Database tables created")
